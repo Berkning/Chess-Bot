@@ -1,0 +1,658 @@
+fileFormatVersion: 2
+guid: 8aca63957f12e4b46b1671e229aaf244
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2785105395918243276
+    second: Chess_symbols.svg_0
+  - first:
+      213: 6510911706973151080
+    second: Chess_symbols.svg_1
+  - first:
+      213: 1754859459841206169
+    second: Chess_symbols.svg_2
+  - first:
+      213: -3238689664917244401
+    second: Chess_symbols.svg_3
+  - first:
+      213: 584712942926322036
+    second: Chess_symbols.svg_4
+  - first:
+      213: -7342899814730097200
+    second: Chess_symbols.svg_5
+  - first:
+      213: -498392936809561590
+    second: Chess_symbols.svg_6
+  - first:
+      213: 7729748938552707823
+    second: Chess_symbols.svg_7
+  - first:
+      213: 1787792329178762791
+    second: Chess_symbols.svg_8
+  - first:
+      213: 4739663757816209821
+    second: Chess_symbols.svg_9
+  - first:
+      213: -1566720380225172856
+    second: Chess_symbols.svg_10
+  - first:
+      213: 5787065769073880951
+    second: Chess_symbols.svg_11
+  - first:
+      213: -5932273841121425337
+    second: Chess_symbols.svg_12
+  - first:
+      213: -4707460823472412718
+    second: Chess_symbols.svg_13
+  - first:
+      213: 1816203988150517671
+    second: Chess_symbols.svg_14
+  - first:
+      213: -734424137327328223
+    second: Chess_symbols.svg_15
+  - first:
+      213: -5924824974409127103
+    second: Chess_symbols.svg_16
+  - first:
+      213: 7381135233488871514
+    second: Chess_symbols.svg_17
+  - first:
+      213: -8499869088881020009
+    second: Chess_symbols.svg_18
+  - first:
+      213: 340705444808796975
+    second: Chess_symbols.svg_19
+  - first:
+      213: 3147030906052933887
+    second: Chess_symbols.svg_20
+  - first:
+      213: -5011893723404706354
+    second: Chess_symbols.svg_21
+  - first:
+      213: -6755776940324591243
+    second: Chess_symbols.svg_22
+  - first:
+      213: -1685649128295199568
+    second: Chess_symbols.svg_23
+  - first:
+      213: 3966291691037760788
+    second: Chess_symbols.svg_24
+  - first:
+      213: -1240615754131484984
+    second: Chess_symbols.svg_25
+  - first:
+      213: 4111389631841924121
+    second: Chess_symbols.svg_26
+  - first:
+      213: -1204760765863573200
+    second: Chess_symbols.svg_27
+  - first:
+      213: -6856668572896328827
+    second: Chess_symbols.svg_28
+  - first:
+      213: -1157947374879733365
+    second: Chess_symbols.svg_29
+  - first:
+      213: 5796369472281176997
+    second: Chess_symbols.svg_30
+  - first:
+      213: 7701984665309784554
+    second: Chess_symbols.svg_31
+  - first:
+      213: 5319713877056018215
+    second: Chess_symbols.svg_32
+  - first:
+      213: -6675477199594905874
+    second: Chess_symbols.svg_33
+  - first:
+      213: -309871654671721521
+    second: Chess_symbols.svg_34
+  - first:
+      213: -556067236488216232
+    second: Chess_symbols.svg_35
+  - first:
+      213: -1964876747640445614
+    second: Chess_symbols.svg_36
+  - first:
+      213: 4746859783543937895
+    second: Chess_symbols.svg_37
+  - first:
+      213: 1178871416152390772
+    second: Chess_symbols.svg_38
+  - first:
+      213: 8350355746892058532
+    second: Chess_symbols.svg_39
+  - first:
+      213: 8494321406744294760
+    second: Chess_symbols.svg_40
+  - first:
+      213: -1675616102920435283
+    second: Chess_symbols.svg_41
+  - first:
+      213: 134146174583114313
+    second: Chess_symbols.svg_42
+  - first:
+      213: 9112681942750917432
+    second: Chess_symbols.svg_43
+  - first:
+      213: 1300687236313906014
+    second: Chess_symbols.svg_44
+  - first:
+      213: -6669480234054249816
+    second: Chess_symbols.svg_45
+  - first:
+      213: -5983703912575290488
+    second: Chess_symbols.svg_46
+  - first:
+      213: 6066211623186004443
+    second: Chess_symbols.svg_47
+  - first:
+      213: -4325881037115976105
+    second: Chess_symbols.svg_48
+  - first:
+      213: -1256475805676476565
+    second: Chess_symbols.svg_49
+  - first:
+      213: -2235039449068320328
+    second: Chess_symbols.svg_50
+  - first:
+      213: -4786625121570914915
+    second: Chess_symbols.svg_51
+  - first:
+      213: -6959897961174373994
+    second: Chess_symbols.svg_52
+  - first:
+      213: 4247765646153123158
+    second: Chess_symbols.svg_53
+  - first:
+      213: -8045496806714905169
+    second: Chess_symbols.svg_54
+  - first:
+      213: -7498990223676512991
+    second: Chess_symbols.svg_55
+  - first:
+      213: 5510606220068605429
+    second: Chess_symbols.svg_56
+  - first:
+      213: 5981705609388883682
+    second: Chess_symbols.svg_57
+  - first:
+      213: 8509564069472082970
+    second: Chess_symbols.svg_58
+  - first:
+      213: 613772624291692429
+    second: Chess_symbols.svg_59
+  - first:
+      213: -411672470845031764
+    second: Chess_symbols.svg_60
+  - first:
+      213: -3868603592142277955
+    second: Chess_symbols.svg_61
+  - first:
+      213: 5479783762750277990
+    second: Chess_symbols.svg_62
+  - first:
+      213: -8952158690949675282
+    second: Chess_symbols.svg_63
+  - first:
+      213: -4116191960642647094
+    second: Chess_symbols.svg_64
+  - first:
+      213: 5408071837190638867
+    second: Chess_symbols.svg_65
+  - first:
+      213: -4696745814968195776
+    second: Chess_symbols.svg_66
+  - first:
+      213: -4522345416566544308
+    second: Chess_symbols.svg_67
+  - first:
+      213: -2350911484665050080
+    second: Chess_symbols.svg_68
+  - first:
+      213: 1479217171794202130
+    second: Chess_symbols.svg_69
+  - first:
+      213: 4749385343325869643
+    second: Chess_symbols.svg_70
+  - first:
+      213: -3624683273032036937
+    second: Chess_symbols.svg_71
+  - first:
+      213: 2337730246722706486
+    second: Chess_symbols.svg_72
+  - first:
+      213: 77004794478155322
+    second: Chess_symbols.svg_73
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 24
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Chess_symbols.svg_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 712
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7488d9d3f545cada0800000000000000
+      internalID: -5932273841121425337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_13
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 712
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d7ebde725dbbaeb0800000000000000
+      internalID: -4707460823472412718
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_14
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 712
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7affb5197e3743910800000000000000
+      internalID: 1816203988150517671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_15
+      rect:
+        serializedVersion: 2
+        x: 420
+        y: 712
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 124c124632dcec5f0800000000000000
+      internalID: -734424137327328223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_16
+      rect:
+        serializedVersion: 2
+        x: 560
+        y: 712
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14b2bfba31bc6cda0800000000000000
+      internalID: -5924824974409127103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_17
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 712
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a50693f436f0f6660800000000000000
+      internalID: 7381135233488871514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 600
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7937cef09166a0a80800000000000000
+      internalID: -8499869088881020009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_19
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 600
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2baed20ccd6ab400800000000000000
+      internalID: 340705444808796975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_20
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 600
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff8f5747fef7cab20800000000000000
+      internalID: 3147030906052933887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_21
+      rect:
+        serializedVersion: 2
+        x: 420
+        y: 600
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecdd374763d227ab0800000000000000
+      internalID: -5011893723404706354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_22
+      rect:
+        serializedVersion: 2
+        x: 560
+        y: 600
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5796d2a9aa8ae32a0800000000000000
+      internalID: -6755776940324591243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chess_symbols.svg_23
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 600
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bc840c7c0f5b98e0800000000000000
+      internalID: -1685649128295199568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: f0caf646aec697143877d0274430ed7a
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":100.0,"y":100.0},"gridSpriteOffset":{"x":0.0,"y":68.0},"gridSpritePadding":{"x":40.0,"y":12.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      Chess_symbols.svg_0: 2785105395918243276
+      Chess_symbols.svg_1: 6510911706973151080
+      Chess_symbols.svg_10: -1566720380225172856
+      Chess_symbols.svg_11: 5787065769073880951
+      Chess_symbols.svg_12: -5932273841121425337
+      Chess_symbols.svg_13: -4707460823472412718
+      Chess_symbols.svg_14: 1816203988150517671
+      Chess_symbols.svg_15: -734424137327328223
+      Chess_symbols.svg_16: -5924824974409127103
+      Chess_symbols.svg_17: 7381135233488871514
+      Chess_symbols.svg_18: -8499869088881020009
+      Chess_symbols.svg_19: 340705444808796975
+      Chess_symbols.svg_2: 1754859459841206169
+      Chess_symbols.svg_20: 3147030906052933887
+      Chess_symbols.svg_21: -5011893723404706354
+      Chess_symbols.svg_22: -6755776940324591243
+      Chess_symbols.svg_23: -1685649128295199568
+      Chess_symbols.svg_24: 3966291691037760788
+      Chess_symbols.svg_25: -1240615754131484984
+      Chess_symbols.svg_26: 4111389631841924121
+      Chess_symbols.svg_27: -1204760765863573200
+      Chess_symbols.svg_28: -6856668572896328827
+      Chess_symbols.svg_29: -1157947374879733365
+      Chess_symbols.svg_3: -3238689664917244401
+      Chess_symbols.svg_30: 5796369472281176997
+      Chess_symbols.svg_31: 7701984665309784554
+      Chess_symbols.svg_32: 5319713877056018215
+      Chess_symbols.svg_33: -6675477199594905874
+      Chess_symbols.svg_34: -309871654671721521
+      Chess_symbols.svg_35: -556067236488216232
+      Chess_symbols.svg_36: -1964876747640445614
+      Chess_symbols.svg_37: 4746859783543937895
+      Chess_symbols.svg_38: 1178871416152390772
+      Chess_symbols.svg_39: 8350355746892058532
+      Chess_symbols.svg_4: 584712942926322036
+      Chess_symbols.svg_40: 8494321406744294760
+      Chess_symbols.svg_41: -1675616102920435283
+      Chess_symbols.svg_42: 134146174583114313
+      Chess_symbols.svg_43: 9112681942750917432
+      Chess_symbols.svg_44: 1300687236313906014
+      Chess_symbols.svg_45: -6669480234054249816
+      Chess_symbols.svg_46: -5983703912575290488
+      Chess_symbols.svg_47: 6066211623186004443
+      Chess_symbols.svg_48: -4325881037115976105
+      Chess_symbols.svg_49: -1256475805676476565
+      Chess_symbols.svg_5: -7342899814730097200
+      Chess_symbols.svg_50: -2235039449068320328
+      Chess_symbols.svg_51: -4786625121570914915
+      Chess_symbols.svg_52: -6959897961174373994
+      Chess_symbols.svg_6: -498392936809561590
+      Chess_symbols.svg_7: 7729748938552707823
+      Chess_symbols.svg_8: 1787792329178762791
+      Chess_symbols.svg_9: 4739663757816209821
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
