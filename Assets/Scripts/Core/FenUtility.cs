@@ -6,7 +6,9 @@ public static class FenUtility
 
     public static void LoadPositionFromFen(string fen)
     {
-        Board.ClearBoard();
+        if (fen == "startpos") fen = StartPosFen;
+
+        Board.ResetBoard();
 
         string[] parts = fen.Split(' ');
 

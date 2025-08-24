@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
@@ -17,7 +19,7 @@ public class LichessComms : MonoBehaviour
 
         RunClient(token);
 
-        CommandReciever(token);
+        StartCoroutine(CommandReciever(token));
     }
 
     void OnDisable()
@@ -27,8 +29,9 @@ public class LichessComms : MonoBehaviour
 
     public struct EngineCommand
     {
-        public enum CommandType { LoadFen, PlayMove, Stop, Debug };
+        public enum CommandType { LoadFen, PlayMove, Stop, Debug, RandomMove };
 
+        public TaskCompletionSource<string> completionSource;
         public CommandType command;
 
         public object data;
@@ -37,59 +40,73 @@ public class LichessComms : MonoBehaviour
         {
             command = _command;
             data = null;
+            completionSource = new TaskCompletionSource<string>();
         }
 
         public EngineCommand(CommandType _command, string s)
         {
             command = _command;
             data = s;
+            completionSource = new TaskCompletionSource<string>();
         }
 
         public EngineCommand(ushort moveData)
         {
             command = CommandType.PlayMove;
             data = moveData;
+            completionSource = new TaskCompletionSource<string>();
         }
-
     }
 
     //Main Thread
-    private async Task CommandReciever(CancellationToken token)
+    private IEnumerator CommandReciever(CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
             if (commandQueue.TryDequeue(out EngineCommand command))
             {
-                RunCommand(command);
+                Debug.Log("Command recieved on main thread");
+                string result = RunCommand(command);
+                command.completionSource.SetResult(result);
             }
 
-            await Task.Yield();
+            yield return null;
         }
 
         Debug.Log("Command Reciever Cancelled");
     }
 
-    private void RunCommand(EngineCommand command)
+    private string RunCommand(EngineCommand command)
     {
+        string commandResult = "";
+
         switch (command.command)
         {
             case EngineCommand.CommandType.LoadFen:
+                FenUtility.LoadPositionFromFen((string)command.data);
                 break;
             case EngineCommand.CommandType.PlayMove:
+                Board.MakeMove(BoardHelper.GetMoveFromUCIName((string)command.data));
                 break;
             case EngineCommand.CommandType.Stop:
                 break;
             case EngineCommand.CommandType.Debug:
                 Debug.Log(command.data);
                 break;
+            case EngineCommand.CommandType.RandomMove:
+                Move move = RandomBot.GetBestMove();
+                commandResult = BoardHelper.GetMoveNameUCI(move);
+                break;
         }
+
+        return commandResult;
     }
 
 
-
-
-
     //Background Thread
+    private bool isNewGame = true;
+    private List<string> playedMoves = new List<string>();
+
     private async Awaitable RunClient(CancellationToken token)
     {
         await Awaitable.BackgroundThreadAsync();
@@ -142,13 +159,19 @@ public class LichessComms : MonoBehaviour
 
         switch (args[0])
         {
+            case "ucinewgame":
+                isNewGame = true;
+                playedMoves.Clear();
+                return "Ready for new game";
             case "position":
-                commandQueue.Enqueue(CreatePositionCommand(args));
-                return "Position Loaded"; //TODO:
+                InterpretPositionCommand(args); //TODO: wait for position to load
+                isNewGame = false;
+                return "Position Loading";
             case "go":
-                commandQueue.Enqueue(CreateGoCommand(args));
-                await Task.Delay(1000);
-                return "bestmove a1a1"; //TODO: only return after done searching
+                EngineCommand goCommand = CreateGoCommand(args);
+                commandQueue.Enqueue(goCommand);
+                string moveResponse = await goCommand.completionSource.Task;
+                return "bestmove " + moveResponse; //TODO: only return after done searching
             case "stop":
                 commandQueue.Enqueue(new EngineCommand(EngineCommand.CommandType.Stop));
                 return "bestmove a1a1"; //TODO: only return after search is cancelled and has returned
@@ -161,14 +184,52 @@ public class LichessComms : MonoBehaviour
         }
     }
 
-    private EngineCommand CreatePositionCommand(string[] args)
+    private void InterpretPositionCommand(string[] args) //TODO: Add support for giving both a new position and some moves to play in that position from the start
     {
-        return new EngineCommand(EngineCommand.CommandType.LoadFen);
+        if (isNewGame)
+        {
+            string fen = "";
+
+            if (args[1] == "fen")
+            {
+                //Construct fen from args
+                for (int i = 2; i < args.Length; i++)
+                {
+                    fen += args[i] + ' ';
+                }
+            }
+            else fen = args[1]; //Prob startpos
+
+            commandQueue.Enqueue(new EngineCommand(EngineCommand.CommandType.LoadFen, fen));
+        }
+        else
+        {
+            //Move command
+            int moveStartIndex = args[1] == "startpos" ? 2 : 3;
+
+            for (int i = moveStartIndex; i < args.Length; i++)
+            {
+                int playedMovesIndex = i - moveStartIndex;
+
+                //If move has already been played we skip to the next one
+                if (playedMoves.Count > playedMovesIndex && playedMoves[i - moveStartIndex] == args[i]) continue;
+
+
+                commandQueue.Enqueue(CreateMoveCommand(args[i]));
+                playedMoves.Add(args[i]);
+            }
+        }
+    }
+
+    private EngineCommand CreateMoveCommand(string moveString)
+    {
+        return new EngineCommand(EngineCommand.CommandType.PlayMove, moveString);
     }
 
     private EngineCommand CreateGoCommand(string[] args)
     {
-        return new EngineCommand(EngineCommand.CommandType.PlayMove);
+        return new EngineCommand(EngineCommand.CommandType.RandomMove);
+        //return new EngineCommand(EngineCommand.CommandType.Debug, "Go Command Not Implemented");
     }
 
 

@@ -120,7 +120,7 @@ public static class Board
 
 
 
-    public static void ClearBoard()
+    public static void ResetBoard()
     {
         Array.Clear(Squares, 0, 64);
 
@@ -128,6 +128,8 @@ public static class Board
         {
             pieceList.Clear();
         }
+
+        gameStateHistory.Clear();
     }
 
     public static void SaveGameState()
