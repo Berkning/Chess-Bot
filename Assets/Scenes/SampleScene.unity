@@ -369,11 +369,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 'r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1 '
+  customFen: 3r4/1p6/p1bP1k2/4Rp1p/5P2/3B4/PP4P1/3K4 b - -
   runPerft: 0
   perftDepth: 5
   compareToFish: 0
   stockFishCompare: 
+  doSearch: 0
+  depth: 4
+  useMoveOrdering: 0
 --- !u!4 &692186463
 Transform:
   m_ObjectHideFlags: 0
@@ -434,6 +437,105 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardGraphics: {fileID: 964651851}
+--- !u!1 &865560316
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 865560318}
+  - component: {fileID: 865560317}
+  - component: {fileID: 865560320}
+  - component: {fileID: 865560319}
+  - component: {fileID: 865560321}
+  m_Layer: 0
+  m_Name: EngineVSEngine
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &865560317
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 865560316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d645c3899288bb43a35cb20c1044a36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  filePath: F:\Unity Projects\ChessBot\Assets\Scripts\EngineVEngine\Positions.txt
+  maxIndex: 239190
+  test: 0
+--- !u!4 &865560318
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 865560316}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &865560319
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 865560316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5531e9f01e1133142aef5de427b64e2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  engineManager: {fileID: 865560320}
+--- !u!114 &865560320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 865560316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38015fc910ef3074892bb07e656acf2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gamesToPlay: 10
+  uciManager: {fileID: 865560319}
+  resultManager: {fileID: 865560321}
+  engine1Path: F:\Unity Projects\Lichess Bot\lichess-bot-master\engines\LichessEngine\Release\net6.0\LichessBot.exe
+  engine2Path: F:\Unity Projects\Lichess Bot\lichess-bot-master\engines\LichessEngine\Release\net6.0\LichessBot.exe
+  debugMessage: isready
+  send: 0
+  target: 0
+  moveDelay: 0
+--- !u!114 &865560321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 865560316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a57a7562ef4dd744f8e69f0d55dbdb85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Engine1Wins: 0
+  DrawCount: 0
+  Engine2Wins: 0
 --- !u!1 &964651850
 GameObject:
   m_ObjectHideFlags: 0
@@ -515,7 +617,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1193717066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -553,3 +655,4 @@ SceneRoots:
   - {fileID: 964651852}
   - {fileID: 786088176}
   - {fileID: 692186463}
+  - {fileID: 865560318}

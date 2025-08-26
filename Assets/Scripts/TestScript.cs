@@ -8,6 +8,10 @@ public class TestScript : MonoBehaviour
     [SerializeField, Range(1, 8)] private int perftDepth;
     [Space, SerializeField] private bool compareToFish;
     [SerializeField] private string stockFishCompare;
+    [Space, Header("Search & Eval")]
+    [SerializeField] private bool doSearch;
+    [SerializeField] private int depth;
+    [SerializeField] private bool useMoveOrdering;
 
     void Awake()
     {
@@ -74,5 +78,15 @@ public class TestScript : MonoBehaviour
 
         Debug.Log("file: " + epFile);
         Debug.Log("square: " + epSquare);*/
+
+        if (doSearch)
+        {
+            doSearch = false;
+            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+            Debug.Log(Search.StartSearch(depth, useMoveOrdering));
+            stopwatch.Stop();
+            Debug.Log("Search Took: " + stopwatch.ElapsedMilliseconds + "ms");
+        }
     }
 }
