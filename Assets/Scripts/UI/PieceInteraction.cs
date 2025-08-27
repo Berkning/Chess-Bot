@@ -28,7 +28,7 @@ public class PieceInteraction : MonoBehaviour
                         boardGraphics.HighlightSquare(selectedSquare);
                         boardGraphics.HighlightLegalMoves(selectedSquare);
 
-                        List<Move> moves = MoveGenerator.GenerateMoves();
+                        Span<Move> moves = MoveGenerator.GenerateMovesSlow();
                         //Debug.Log(moves.Count + " moves found");
 
                         foreach (Move move in moves)

@@ -52,7 +52,7 @@ namespace EngVEng
 
             Board.MakeMove(BoardHelper.GetMoveFromUCIName(move));
 
-            if (MoveGenerator.GenerateMoves().Count < 1)
+            if (MoveGenerator.GenerateMovesSlow().Length < 1) //TODO: kind of trash that we are just generating all moves in the current position just to check this, and then regenerating them in the search, but idk if its practical to avoid
             {
                 //Either checkmate or stalemate
                 if (MoveGenerator.inCheck)

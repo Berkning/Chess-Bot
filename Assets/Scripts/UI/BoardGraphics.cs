@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO.Compression;
 using UnityEngine;
@@ -128,8 +129,8 @@ public class BoardGraphics : MonoBehaviour
 
     public void HighlightLegalMoves(int startSquare)
     {
-        //Obv insanely inefficient
-        List<Move> moves = MoveGenerator.GenerateMoves();
+        //Obv insanely inefficient to regenerate moves instead of using existing ones
+        Span<Move> moves = MoveGenerator.GenerateMovesSlow();
 
         foreach (Move move in moves)
         {

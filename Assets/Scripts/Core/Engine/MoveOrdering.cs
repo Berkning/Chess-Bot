@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,9 +6,9 @@ public static class MoveOrdering
 {
     private static int[] moveScores = new int[218];
 
-    public static List<Move> OrderMoves(List<Move> moves)
+    public static void OrderMoves(ref Span<Move> moves, int moveCount)
     {
-        for (int i = 0; i < moves.Count; i++)
+        for (int i = 0; i < moveCount; i++)
         {
             int moveScore = 0;
             int movedPieceType = Piece.Type(Board.Squares[moves[i].startSquare]);
@@ -53,12 +54,12 @@ public static class MoveOrdering
             moveScores[i] = moveScore;
         }
 
-        return SortMoves(moves);
+        SortMoves(ref moves, moveCount);
     }
 
-    private static List<Move> SortMoves(List<Move> moves)
+    private static void SortMoves(ref Span<Move> moves, int moveCount)
     {
-        for (int i = 0; i < moves.Count - 1; i++)
+        for (int i = 0; i < moveCount - 1; i++)
         {
             for (int j = i + 1; j > 0; j--)
             {
@@ -70,7 +71,5 @@ public static class MoveOrdering
                 }
             }
         }
-
-        return moves;
     }
 }

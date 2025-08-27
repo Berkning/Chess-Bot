@@ -7,7 +7,7 @@ using UnityEngine;
 public static class MoveGenerator
 {
     public enum PromotionMode { All, KnightAndQueen };
-    public static PromotionMode promotionMode = PromotionMode.All;
+    public static PromotionMode promotionMode = PromotionMode.KnightAndQueen;
 
 
     public static ulong oponnentPawnAttackMap;
@@ -181,13 +181,21 @@ public static class MoveGenerator
 
 
 
-    private static List<Move> moves;
+    //public static Move[] moves = new Move[218];
+    private static int moveCount = 0;
 
     #region MoveGeneration
 
-    public static List<Move> GenerateMoves()
+    public static Span<Move> GenerateMovesSlow()
     {
-        moves = new List<Move>();
+        Span<Move> moves = new Move[256];
+        GenerateMoves(ref moves);
+        return moves;
+    }
+
+    public static int GenerateMoves(ref Span<Move> moves) //Returns move count
+    {
+        moveCount = 0;
 
         if (Board.colorToMove == Piece.White)
         {
@@ -211,37 +219,37 @@ public static class MoveGenerator
 
         GenerateAttackMaps();
 
-        GenerateKingMoves();
+        GenerateKingMoves(ref moves);
 
-        if (inDoubleCheck) return moves; //Only king moves valid when in double check
+        if (inDoubleCheck) return moveCount; //Only king moves valid when in double check
 
         for (int i = 0; i < Board.pawnList[Board.friendlyColorBit].Count; i++)
         {
-            GeneratePawnMoves(Board.pawnList[Board.friendlyColorBit][i]);
+            GeneratePawnMoves(ref moves, Board.pawnList[Board.friendlyColorBit][i]);
         }
 
         for (int i = 0; i < Board.knightList[Board.friendlyColorBit].Count; i++)
         {
-            GenerateKnightMoves(Board.knightList[Board.friendlyColorBit][i]);
+            GenerateKnightMoves(ref moves, Board.knightList[Board.friendlyColorBit][i]);
         }
 
         for (int i = 0; i < Board.bishopList[Board.friendlyColorBit].Count; i++)
         {
-            GenerateSlidingMoves(Board.bishopList[Board.friendlyColorBit][i], Piece.Bishop);
+            GenerateSlidingMoves(ref moves, Board.bishopList[Board.friendlyColorBit][i], Piece.Bishop);
         }
 
         for (int i = 0; i < Board.rookList[Board.friendlyColorBit].Count; i++)
         {
-            GenerateSlidingMoves(Board.rookList[Board.friendlyColorBit][i], Piece.Rook);
+            GenerateSlidingMoves(ref moves, Board.rookList[Board.friendlyColorBit][i], Piece.Rook);
         }
 
         for (int i = 0; i < Board.queenList[Board.friendlyColorBit].Count; i++)
         {
-            GenerateSlidingMoves(Board.queenList[Board.friendlyColorBit][i], Piece.Queen);
+            GenerateSlidingMoves(ref moves, Board.queenList[Board.friendlyColorBit][i], Piece.Queen);
         }
 
-
-        return moves;
+        moves = moves.Slice(0, moveCount);
+        return moveCount;
     }
 
     /*private static List<Move> TempGenPseudoLegalMoves()
@@ -279,7 +287,7 @@ public static class MoveGenerator
         return moves;
     }*/
 
-    private static void GenerateSlidingMoves(int startSquare, int piece)
+    private static void GenerateSlidingMoves(ref Span<Move> moves, int startSquare, int piece)
     {
         //Debug.Log(BoardHelper.SquareNameFromIndex(startSquare));
         //Debug.Log("Sliding Piece: " + Convert.ToString(piece, 2));
@@ -323,7 +331,7 @@ public static class MoveGenerator
                 if (!inCheck || preventsCheck) //If were not in check, or if this move prevents the check
                 {
                     //TODO: think about implementing quiet moves    if (isCapture || genQuiets)
-                    moves.Add(new Move(startSquare, targetSquare));
+                    moves[moveCount++] = new Move(startSquare, targetSquare);
                 }
 
                 if (isCapture || preventsCheck) break; //If we hit an enemy piece we cant move further in this direction, if we can block the check on this square, we def wont be able to on any following squares
@@ -331,7 +339,7 @@ public static class MoveGenerator
         }
     }
 
-    private static void GenerateKingMoves()
+    private static void GenerateKingMoves(ref Span<Move> moves)
     {
         for (int i = 0; i < PrecomputedData.KingMoves[friendlyKingSquare].Length; i++)
         {
@@ -342,7 +350,7 @@ public static class MoveGenerator
 
             if (!SquareIsAttacked(targetSquare))
             {
-                moves.Add(new Move(friendlyKingSquare, targetSquare));
+                moves[moveCount++] = new Move(friendlyKingSquare, targetSquare);
 
                 bool isCapture = pieceOnTarget != Piece.None;
 
@@ -359,7 +367,7 @@ public static class MoveGenerator
                         {
                             if (!SquareIsAttacked(castleKingsideSquare))
                             {
-                                moves.Add(new Move(friendlyKingSquare, castleKingsideSquare, Move.Flag.Castling));
+                                moves[moveCount++] = new Move(friendlyKingSquare, castleKingsideSquare, Move.Flag.Castling);
                             }
                         }
                     }
@@ -372,7 +380,7 @@ public static class MoveGenerator
                         {
                             if (!SquareIsAttacked(castleQueensideSquare))
                             {
-                                moves.Add(new Move(friendlyKingSquare, castleQueensideSquare, Move.Flag.Castling));
+                                moves[moveCount++] = new Move(friendlyKingSquare, castleQueensideSquare, Move.Flag.Castling);
                             }
                         }
                     }
@@ -381,7 +389,7 @@ public static class MoveGenerator
         }
     }
 
-    private static void GeneratePawnMoves(int startSquare)
+    private static void GeneratePawnMoves(ref Span<Move> moves, int startSquare)
     {
         int moveDir = Board.friendlyColor == Piece.White ? PrecomputedData.Up : PrecomputedData.Down;
 
@@ -399,8 +407,8 @@ public static class MoveGenerator
             {
                 if (!inCheck || SquareIsInCheckRay(targetSquare))
                 {
-                    if (oneStepFromPromotion) AddPromotionMoves(startSquare, targetSquare);
-                    else moves.Add(new Move(startSquare, targetSquare));
+                    if (oneStepFromPromotion) AddPromotionMoves(ref moves, startSquare, targetSquare);
+                    else moves[moveCount++] = new Move(startSquare, targetSquare);
                 }
 
 
@@ -409,7 +417,7 @@ public static class MoveGenerator
                 {
                     int squareTwoForward = targetSquare + moveDir; //One additional move up/down
 
-                    if (Piece.IsNone(Board.Squares[squareTwoForward]) && (!inCheck || SquareIsInCheckRay(squareTwoForward))) moves.Add(new Move(startSquare, squareTwoForward, Move.Flag.PawnTwoForward)); //If no pieces on target square, add move
+                    if (Piece.IsNone(Board.Squares[squareTwoForward]) && (!inCheck || SquareIsInCheckRay(squareTwoForward))) moves[moveCount++] = new Move(startSquare, squareTwoForward, Move.Flag.PawnTwoForward); //If no pieces on target square, add move
                 }
             }
         }
@@ -430,12 +438,12 @@ public static class MoveGenerator
 
             int targetPiece = Board.Squares[targetSquare];
 
-            if (Piece.Color(targetPiece) == Board.enemyColor) //moves.Add(new Move(startSquare, targetSquare)); //If enemy piece on attack square
+            if (Piece.Color(targetPiece) == Board.enemyColor) //AddMove(new Move(startSquare, targetSquare)); //If enemy piece on attack square
             {
                 if (inCheck && !SquareIsInCheckRay(targetSquare)) continue; //Skip direction if were in check and this move doesn't block it
 
-                if (oneStepFromPromotion) AddPromotionMoves(startSquare, targetSquare);
-                else moves.Add(new Move(startSquare, targetSquare));
+                if (oneStepFromPromotion) AddPromotionMoves(ref moves, startSquare, targetSquare);
+                else moves[moveCount++] = new Move(startSquare, targetSquare);
             }
 
             //En passant
@@ -449,12 +457,12 @@ public static class MoveGenerator
                 int epStartRank = Board.friendlyColor == Piece.White ? 4 : 3;
 
 
-                if (!InCheckAfterEnPassant(startSquare, epStartRank, capturedPawnSquare)) moves.Add(new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture));
+                if (!InCheckAfterEnPassant(startSquare, epStartRank, capturedPawnSquare)) moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture);
             }
         }
     }
 
-    private static void GenerateKnightMoves(int startSquare)
+    private static void GenerateKnightMoves(ref Span<Move> moves, int startSquare)
     {
         for (int i = 0; i < PrecomputedData.KnightMoves[startSquare].Length; i++)
         {
@@ -466,20 +474,20 @@ public static class MoveGenerator
             if (Piece.Color(pieceOnTarget) == Board.friendlyColor) continue;
 
 
-            if (!inCheck || SquareIsInCheckRay(targetSquare)) moves.Add(new Move(startSquare, targetSquare));
+            if (!inCheck || SquareIsInCheckRay(targetSquare)) moves[moveCount++] = new Move(startSquare, targetSquare);
         }
     }
 
 
-    private static void AddPromotionMoves(int startSquare, int targetSquare)
+    private static void AddPromotionMoves(ref Span<Move> moves, int startSquare, int targetSquare)
     {
-        moves.Add(new Move(startSquare, targetSquare, Move.Flag.PromoteToQueen));
-        moves.Add(new Move(startSquare, targetSquare, Move.Flag.PromoteToKnight));
+        moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.PromoteToQueen);
+        moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.PromoteToKnight);
 
         if (promotionMode == PromotionMode.KnightAndQueen) return;
 
-        moves.Add(new Move(startSquare, targetSquare, Move.Flag.PromoteToRook));
-        moves.Add(new Move(startSquare, targetSquare, Move.Flag.PromoteToBishop));
+        moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.PromoteToRook);
+        moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.PromoteToBishop);
     }
 
 

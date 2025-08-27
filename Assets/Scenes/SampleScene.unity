@@ -375,8 +375,8 @@ MonoBehaviour:
   compareToFish: 0
   stockFishCompare: 
   doSearch: 0
-  depth: 4
-  useMoveOrdering: 0
+  depth: 9
+  useMoveOrdering: 1
 --- !u!4 &692186463
 Transform:
   m_ObjectHideFlags: 0

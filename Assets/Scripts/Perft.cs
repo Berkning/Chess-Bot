@@ -10,21 +10,22 @@ public static class Perft
 
     public static string RunDetailed(int depth)
     {
-        List<Move> movesInCurrentPosition = MoveGenerator.GenerateMoves();
+        Span<Move> moves = stackalloc Move[256];
+        int moveCountInCurrentPosition = MoveGenerator.GenerateMoves(ref moves);
 
         string results = "";
 
         long totalCount = 0;
-        foreach (Move move in movesInCurrentPosition)
+        for (int i = 0; i < moveCountInCurrentPosition; i++)
         {
 
             ulong before = Board.currentGameState;
-            Debug.Log("Trying to play " + BoardHelper.NameMove(move));
-            Board.MakeMove(move);
+            //Debug.Log("Trying to play " + BoardHelper.NameMove(move));
+            Board.MakeMove(moves[i]);
             long result = RunSpecifiedDepth(depth - 1);
-            Debug.Log(BoardHelper.NameMove(move) + ": " + result);
-            results += BoardHelper.NameMove(move) + ": " + result + "\n";
-            Board.UnMakeMove(move);
+            Debug.Log(BoardHelper.NameMove(moves[i]) + ": " + result);
+            results += BoardHelper.NameMove(moves[i]) + ": " + result + "\n";
+            Board.UnMakeMove(moves[i]);
             ulong after = Board.currentGameState;
 
             Debug.Assert(before == after, "State mismatch - Before: " + before + " After:" + after);
@@ -86,15 +87,17 @@ public static class Perft
             return 1L;
         }
 
-        List<Move> moves = MoveGenerator.GenerateMoves();
+        Span<Move> moves = stackalloc Move[256];
+
+        int moveCount = MoveGenerator.GenerateMoves(ref moves);
 
         long numPositions = 0L;
 
-        foreach (Move move in moves)
+        for (int i = 0; i < moveCount; i++)
         {
-            Board.MakeMove(move);
+            Board.MakeMove(moves[i]);
             numPositions += RunSpecifiedDepth(depth - 1);
-            Board.UnMakeMove(move);
+            Board.UnMakeMove(moves[i]);
         }
 
         return numPositions;

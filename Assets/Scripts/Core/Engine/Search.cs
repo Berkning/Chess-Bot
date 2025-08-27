@@ -28,24 +28,26 @@ public static class Search
             return Evaluation.Evaluate();
         }
 
-        List<Move> moves = MoveGenerator.GenerateMoves();
+        Span<Move> moves = stackalloc Move[256];
 
-        if (test) moves = MoveOrdering.OrderMoves(moves);
+        int moveCount = MoveGenerator.GenerateMoves(ref moves);
+
+        if (test) MoveOrdering.OrderMoves(ref moves, moveCount);
 
 
 
-        if (moves.Count == 0)
+        if (moveCount == 0)
         {
             if (MoveGenerator.inCheck) return immediateMateScore; //Checkmate
 
             return 0; //Stalemate
         }
 
-        foreach (Move move in moves)
+        for (int i = 0; i < moveCount; i++)
         {
-            Board.MakeMove(move);
+            Board.MakeMove(moves[i]);
             int evaluation = -AlphaBeta(depth - 1, -beta, -alpha, test);
-            Board.UnMakeMove(move);
+            Board.UnMakeMove(moves[i]);
             if (evaluation >= beta)
             {
                 //Move was good opponent will avoid this position
