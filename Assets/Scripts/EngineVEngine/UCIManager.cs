@@ -39,12 +39,32 @@ namespace EngVEng
             switch (args[0])
             {
                 case "bestmove":
+                    if (args[1] == "a1a1")
+                    {
+                        Debug.LogError("Invalid null move");
+                        ResetGame();
+                        return;
+                    }
                     RecieveBestMove(sender, args[1]);
                     break;
                 default:
                     break; //Ignore
             }
         }
+
+
+        private bool CheckForRepetition(string repeatedMove)
+        {
+            int matchesFound = 0;
+
+            for (int i = 0; i < playedMoves.Count; i++)
+            {
+                if (playedMoves[i] == repeatedMove) matchesFound++;
+            }
+
+            return matchesFound > 6;
+        }
+
 
         private void RecieveBestMove(int sender, string move)
         {
@@ -68,11 +88,20 @@ namespace EngVEng
 
                 return;
             }
-            else if (playedMoves.Count > 350)
+            else if (playedMoves.Count > 100)
             {
                 Debug.Log("Draw bc exceeded max moves");
                 engineManager.Draw();
                 return;
+            }
+            else if (playedMoves.Contains(move))
+            {
+                if (CheckForRepetition(move))
+                {
+                    Debug.Log("Draw By Repetition");
+                    engineManager.Draw();
+                    return;
+                }
             }
 
             int otherEngine = GetOtherEngineIndex(sender);

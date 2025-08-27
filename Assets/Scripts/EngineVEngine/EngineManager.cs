@@ -19,6 +19,7 @@ namespace EngVEng
         [SerializeField] private bool send;
         [SerializeField, Range(0, 2)] private int target;
         [SerializeField] private float moveDelay = 1f;
+        [Space, SerializeField] private bool logAll;
 
         Process engine1Process;
         StreamWriter engine1Input;
@@ -152,7 +153,7 @@ namespace EngVEng
 
                     if (!isErrorOutput)
                     {
-                        UnityEngine.Debug.Log("Engine" + id + " says " + line);
+                        if (logAll) UnityEngine.Debug.Log("Engine" + id + " says " + line);
 
                         if (id == 1) engine1ResponseQueue.Enqueue(line);
                         else engine2ResponseQueue.Enqueue(line);
@@ -177,7 +178,7 @@ namespace EngVEng
 
         public void TellEngine(int id, string message)
         {
-            UnityEngine.Debug.Log("Telling engine" + id + " " + message);
+            if (logAll) UnityEngine.Debug.Log("Telling engine" + id + " " + message);
 
             if (id == 1)
             {

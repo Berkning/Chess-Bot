@@ -356,7 +356,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &692186462
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -369,13 +369,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 3r4/1p6/p1bP1k2/4Rp1p/5P2/3B4/PP4P1/3K4 b - -
+  customFen: 8/3r3k/NP1p4/p2QP1P1/1BB3Pp/1R4n1/6K1/5R2 w - - 5 82
   runPerft: 0
   perftDepth: 5
   compareToFish: 0
   stockFishCompare: 
   doSearch: 0
-  depth: 9
+  depth: 6
   useMoveOrdering: 1
 --- !u!4 &692186463
 Transform:
@@ -456,7 +456,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &865560317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -512,11 +512,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38015fc910ef3074892bb07e656acf2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gamesToPlay: 10
+  gamesToPlay: 1000
   uciManager: {fileID: 865560319}
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\lichess-bot-master\engines\LichessEngine\Release\net6.0\LichessBot.exe
-  engine2Path: F:\Unity Projects\Lichess Bot\lichess-bot-master\engines\LichessEngine\Release\net6.0\LichessBot.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V1\LichessBot.exe
+  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V1\LichessBot.exe
   debugMessage: isready
   send: 0
   target: 0
