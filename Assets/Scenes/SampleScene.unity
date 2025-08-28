@@ -200,7 +200,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.64705884, g: 0.64705884, b: 0.64705884, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -356,7 +356,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &692186462
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -369,13 +369,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 8/3r3k/NP1p4/p2QP1P1/1BB3Pp/1R4n1/6K1/5R2 w - - 5 82
+  customFen: 
   runPerft: 0
   perftDepth: 5
   compareToFish: 0
   stockFishCompare: 
   doSearch: 0
-  depth: 6
+  depth: 5
   useMoveOrdering: 1
 --- !u!4 &692186463
 Transform:
@@ -456,7 +456,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &865560317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -515,12 +515,13 @@ MonoBehaviour:
   gamesToPlay: 1000
   uciManager: {fileID: 865560319}
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V1\LichessBot.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V1_MateFix\LichessBot.exe
   engine2Path: F:\Unity Projects\Lichess Bot\Builds\V1\LichessBot.exe
   debugMessage: isready
   send: 0
   target: 0
   moveDelay: 0
+  logAll: 0
 --- !u!114 &865560321
 MonoBehaviour:
   m_ObjectHideFlags: 0

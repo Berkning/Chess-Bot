@@ -26,6 +26,7 @@ public class TestScript : MonoBehaviour
             if (compareToFish) CompareToStockfish(result);
         }
 
+        Debug.Log("11: " + BoardHelper.FlipIndex(11));
 
         return;
         for (int i = 0; i < 64; i++)

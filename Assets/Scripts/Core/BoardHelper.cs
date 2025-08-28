@@ -147,6 +147,12 @@ public static class BoardHelper
         return index / 8;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int FlipIndex(int i)
+    {
+        return CoordToIndex(IndexToFile(i), 7 - IndexToRank(i));
+    }
+
     public static int IndexFromString(string s)
     {
         return CoordToIndex(FileFromString(s), RankFromString(s));
