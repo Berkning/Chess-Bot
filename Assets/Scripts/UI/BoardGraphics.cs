@@ -14,6 +14,8 @@ public class BoardGraphics : MonoBehaviour
     [SerializeField] private Color falseColor;
 
     [SerializeField] private Sprite[] pieceSprites;
+    [SerializeField] private Material pieceMat;
+    [SerializeField] private float pieceScale = 2;
     [SerializeField] private float pieceDepth;
     [SerializeField] private bool whiteIsBottom = true;
 
@@ -63,7 +65,8 @@ public class BoardGraphics : MonoBehaviour
                 SpriteRenderer pieceRenderer = new GameObject("Piece").AddComponent<SpriteRenderer>();
                 pieceRenderer.transform.parent = square;
                 pieceRenderer.transform.position = PositionFromCoord(file, rank, pieceDepth);
-                pieceRenderer.transform.localScale = Vector3.one * 100f / (2000f / 6f);
+                pieceRenderer.transform.localScale = Vector3.one * 100f / (2000f / 6f) * pieceScale;
+                pieceRenderer.sharedMaterial = pieceMat;
                 squarePieceRenderers[BoardHelper.CoordToIndex(file, rank)] = pieceRenderer;
             }
         }
@@ -157,7 +160,7 @@ public class BoardGraphics : MonoBehaviour
         {
             for (int file = 0; file < 8; file++)
             {
-                bool isLight = (file + rank) % 2 == 0;
+                bool isLight = (file + rank) % 2 == 1;
 
                 squareRenderers[BoardHelper.CoordToIndex(file, rank)].sharedMaterial.color = isLight ? lightColor : darkColor;
             }
