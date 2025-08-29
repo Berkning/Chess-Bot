@@ -33,14 +33,18 @@ public static class MoveGenerator
     {
         GenerateSlidingAttackMap();
 
-        /*TODO: if (board.queens[opponentColourIndex].Count == 0) {
-            startDirIndex = (board.rooks[opponentColourIndex].Count > 0) ? 0 : 4;
-            endDirIndex = (board.bishops[opponentColourIndex].Count > 0) ? 8 : 4;
-        }*/
+        int startDirIndex = 0;
+        int endDirIndex = 8;
+
+        if (Board.queenList[Board.opponentColorBit].Count == 0)
+        {
+            startDirIndex = (Board.rookList[Board.opponentColorBit].Count > 0) ? 0 : 4;
+            endDirIndex = (Board.bishopList[Board.opponentColorBit].Count > 0) ? 8 : 4;
+        }
 
 
         //loop over all possible attack directions from friendly king
-        for (int directionIndex = 0; directionIndex < 8; directionIndex++)
+        for (int directionIndex = startDirIndex; directionIndex < endDirIndex; directionIndex++)
         {
             bool isDiagonal = directionIndex > 3;
             bool friendlyPieceAlongRay = false;
@@ -193,7 +197,7 @@ public static class MoveGenerator
         return moves;
     }
 
-    public static int GenerateMoves(ref Span<Move> moves) //Returns move count
+    public static int GenerateMoves(ref Span<Move> moves, bool genOnlyCaptures = false) //Returns move count
     {
         moveCount = 0;
 
@@ -219,33 +223,33 @@ public static class MoveGenerator
 
         GenerateAttackMaps();
 
-        GenerateKingMoves(ref moves);
+        GenerateKingMoves(ref moves, genOnlyCaptures);
 
         if (inDoubleCheck) return moveCount; //Only king moves valid when in double check
 
         for (int i = 0; i < Board.pawnList[Board.friendlyColorBit].Count; i++)
         {
-            GeneratePawnMoves(ref moves, Board.pawnList[Board.friendlyColorBit][i]);
+            GeneratePawnMoves(ref moves, Board.pawnList[Board.friendlyColorBit][i], genOnlyCaptures);
         }
 
         for (int i = 0; i < Board.knightList[Board.friendlyColorBit].Count; i++)
         {
-            GenerateKnightMoves(ref moves, Board.knightList[Board.friendlyColorBit][i]);
+            GenerateKnightMoves(ref moves, Board.knightList[Board.friendlyColorBit][i], genOnlyCaptures);
         }
 
         for (int i = 0; i < Board.bishopList[Board.friendlyColorBit].Count; i++)
         {
-            GenerateSlidingMoves(ref moves, Board.bishopList[Board.friendlyColorBit][i], Piece.Bishop);
+            GenerateSlidingMoves(ref moves, Board.bishopList[Board.friendlyColorBit][i], Piece.Bishop, genOnlyCaptures);
         }
 
         for (int i = 0; i < Board.rookList[Board.friendlyColorBit].Count; i++)
         {
-            GenerateSlidingMoves(ref moves, Board.rookList[Board.friendlyColorBit][i], Piece.Rook);
+            GenerateSlidingMoves(ref moves, Board.rookList[Board.friendlyColorBit][i], Piece.Rook, genOnlyCaptures);
         }
 
         for (int i = 0; i < Board.queenList[Board.friendlyColorBit].Count; i++)
         {
-            GenerateSlidingMoves(ref moves, Board.queenList[Board.friendlyColorBit][i], Piece.Queen);
+            GenerateSlidingMoves(ref moves, Board.queenList[Board.friendlyColorBit][i], Piece.Queen, genOnlyCaptures);
         }
 
         moves = moves.Slice(0, moveCount);
@@ -287,7 +291,7 @@ public static class MoveGenerator
         return moves;
     }*/
 
-    private static void GenerateSlidingMoves(ref Span<Move> moves, int startSquare, int piece)
+    private static void GenerateSlidingMoves(ref Span<Move> moves, int startSquare, int piece, bool genOnlyCaptures)
     {
         //Debug.Log(BoardHelper.SquareNameFromIndex(startSquare));
         //Debug.Log("Sliding Piece: " + Convert.ToString(piece, 2));
@@ -328,7 +332,7 @@ public static class MoveGenerator
                 bool isCapture = pieceOnTarget != Piece.None;
                 bool preventsCheck = SquareIsInCheckRay(targetSquare);
 
-                if (!inCheck || preventsCheck) //If were not in check, or if this move prevents the check
+                if ((!inCheck || preventsCheck) && (isCapture || !genOnlyCaptures)) //If were not in check, or if this move prevents the check
                 {
                     //TODO: think about implementing quiet moves    if (isCapture || genQuiets)
                     moves[moveCount++] = new Move(startSquare, targetSquare);
@@ -339,7 +343,7 @@ public static class MoveGenerator
         }
     }
 
-    private static void GenerateKingMoves(ref Span<Move> moves)
+    private static void GenerateKingMoves(ref Span<Move> moves, bool genOnlyCaptures)
     {
         for (int i = 0; i < PrecomputedData.KingMoves[friendlyKingSquare].Length; i++)
         {
@@ -350,12 +354,19 @@ public static class MoveGenerator
 
             if (!SquareIsAttacked(targetSquare))
             {
-                moves[moveCount++] = new Move(friendlyKingSquare, targetSquare);
-
                 bool isCapture = pieceOnTarget != Piece.None;
 
+                if (isCapture) //if it's a capture we can just add the move, and skip the rest of the code below, because castling won't be possible
+                {
+                    moves[moveCount++] = new Move(friendlyKingSquare, targetSquare);
+                    continue;
+                }
+                else if (genOnlyCaptures) continue;
+
+                moves[moveCount++] = new Move(friendlyKingSquare, targetSquare);
+
                 //Castling
-                if (!inCheck && !isCapture)
+                if (!inCheck) //Should also check for not capture, but we have done that above
                 {
                     //Short
                     if ((targetSquare == BoardHelper.f1 || targetSquare == BoardHelper.f8) && ShortCastleAllowed())
@@ -389,35 +400,39 @@ public static class MoveGenerator
         }
     }
 
-    private static void GeneratePawnMoves(ref Span<Move> moves, int startSquare)
+    private static void GeneratePawnMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
     {
         int moveDir = Board.friendlyColor == Piece.White ? PrecomputedData.Up : PrecomputedData.Down;
+        int targetSquare = startSquare + moveDir;//One move up/down
 
-        int targetSquare = startSquare + moveDir; //One move up/down
         int rank = BoardHelper.IndexToRank(startSquare);
-
-        int startRank = Board.friendlyColor == Piece.White ? 1 : 6;
-
         bool oneStepFromPromotion = rank == (Board.friendlyColor == Piece.White ? 6 : 1);
 
-
-        if (Piece.IsNone(Board.Squares[targetSquare]))
+        if (!genOnlyCaptures) //Only run this code if were not generating captures only
         {
-            if (!IsPinned(startSquare) || IsMovingAlongRay(friendlyKingSquare, startSquare, moveDir))
+
+            int startRank = Board.friendlyColor == Piece.White ? 1 : 6;
+
+
+
+            if (Piece.IsNone(Board.Squares[targetSquare]))
             {
-                if (!inCheck || SquareIsInCheckRay(targetSquare))
+                if (!IsPinned(startSquare) || IsMovingAlongRay(friendlyKingSquare, startSquare, moveDir))
                 {
-                    if (oneStepFromPromotion) AddPromotionMoves(ref moves, startSquare, targetSquare);
-                    else moves[moveCount++] = new Move(startSquare, targetSquare);
-                }
+                    if (!inCheck || SquareIsInCheckRay(targetSquare))
+                    {
+                        if (oneStepFromPromotion) AddPromotionMoves(ref moves, startSquare, targetSquare);
+                        else moves[moveCount++] = new Move(startSquare, targetSquare);
+                    }
 
 
 
-                if (rank == startRank) //If on start rank
-                {
-                    int squareTwoForward = targetSquare + moveDir; //One additional move up/down
+                    if (rank == startRank) //If on start rank
+                    {
+                        int squareTwoForward = targetSquare + moveDir; //One additional move up/down
 
-                    if (Piece.IsNone(Board.Squares[squareTwoForward]) && (!inCheck || SquareIsInCheckRay(squareTwoForward))) moves[moveCount++] = new Move(startSquare, squareTwoForward, Move.Flag.PawnTwoForward); //If no pieces on target square, add move
+                        if (Piece.IsNone(Board.Squares[squareTwoForward]) && (!inCheck || SquareIsInCheckRay(squareTwoForward))) moves[moveCount++] = new Move(startSquare, squareTwoForward, Move.Flag.PawnTwoForward); //If no pieces on target square, add move
+                    }
                 }
             }
         }
@@ -462,7 +477,7 @@ public static class MoveGenerator
         }
     }
 
-    private static void GenerateKnightMoves(ref Span<Move> moves, int startSquare)
+    private static void GenerateKnightMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
     {
         for (int i = 0; i < PrecomputedData.KnightMoves[startSquare].Length; i++)
         {
@@ -473,8 +488,9 @@ public static class MoveGenerator
 
             if (Piece.Color(pieceOnTarget) == Board.friendlyColor) continue;
 
+            bool isCapture = !Piece.IsNone(pieceOnTarget);
 
-            if (!inCheck || SquareIsInCheckRay(targetSquare)) moves[moveCount++] = new Move(startSquare, targetSquare);
+            if ((isCapture || !genOnlyCaptures) && (!inCheck || SquareIsInCheckRay(targetSquare))) moves[moveCount++] = new Move(startSquare, targetSquare);
         }
     }
 

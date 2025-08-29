@@ -327,7 +327,7 @@ public static class Board
         }
         else if (move.IsPromotion())
         {
-            switch (move.flag)
+            /*switch (move.flag)
             {
                 case Move.Flag.PromoteToQueen:
                     //queenList[friendlyColorBit].RemovePieceAtSquare(move.targetSquare);
@@ -341,7 +341,7 @@ public static class Board
                 case Move.Flag.PromoteToRook:
                     //rookList[friendlyColorBit].RemovePieceAtSquare(move.targetSquare);
                     break;
-            }
+            }*/
 
             RemovePiece(move.targetSquare);
 
