@@ -256,41 +256,6 @@ public static class MoveGenerator
         return moveCount;
     }
 
-    /*private static List<Move> TempGenPseudoLegalMoves()
-    {
-        moves = new List<Move>();
-        int colorToMoveBit = Piece.ColorBit(Board.colorToMove);
-
-        for (int i = 0; i < Board.pawnList[colorToMoveBit].Count; i++)
-        {
-            GeneratePawnMoves(Board.pawnList[colorToMoveBit][i]);
-        }
-
-        for (int i = 0; i < Board.knightList[colorToMoveBit].Count; i++)
-        {
-            GenerateKnightMoves(Board.knightList[colorToMoveBit][i]);
-        }
-
-        for (int i = 0; i < Board.bishopList[colorToMoveBit].Count; i++)
-        {
-            GenerateSlidingMoves(Board.bishopList[colorToMoveBit][i], Piece.Bishop);
-        }
-
-        for (int i = 0; i < Board.rookList[colorToMoveBit].Count; i++)
-        {
-            GenerateSlidingMoves(Board.rookList[colorToMoveBit][i], Piece.Rook);
-        }
-
-        for (int i = 0; i < Board.queenList[colorToMoveBit].Count; i++)
-        {
-            GenerateSlidingMoves(Board.queenList[colorToMoveBit][i], Piece.Queen);
-        }
-
-        GenerateKingMoves();
-
-        return moves;
-    }*/
-
     private static void GenerateSlidingMoves(ref Span<Move> moves, int startSquare, int piece, bool genOnlyCaptures)
     {
         //Debug.Log(BoardHelper.SquareNameFromIndex(startSquare));
