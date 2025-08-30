@@ -36,6 +36,10 @@ public static class Board
     public static int opponentColorBit;
     public static int friendlyColorBit;
 
+    //Zobrist
+    public static ulong currentZobrist;
+
+
 
 
 
@@ -50,7 +54,7 @@ public static class Board
 
         int type = Piece.Type(piece);
 
-        if (type == Piece.King)
+        if (type == Piece.King) //No need to do zobrist stuff here bc only adding king when loading fen
         {
             int color = Piece.Color(piece);
             if (color == Piece.White) whiteKingSquare = square;
@@ -60,14 +64,23 @@ public static class Board
         }
         else if (type == Piece.None) return; //TODO: prob remove somehow, bc performance
 
-        GetPieceList(Piece.Type(piece), Piece.ColorBit(piece)).AddPieceAtSquare(square);
+        int colorBit = Piece.ColorBit(piece);
+
+        currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, square]; //Add piece to zobrist
+
+        GetPieceList(type, colorBit).AddPieceAtSquare(square);
     }
 
     public static void MovePiece(int startSquare, int targetSquare) //WARNING: Target square has to be empty!!!!
     {
         int piece = Squares[startSquare];
+        int type = Piece.Type(piece);
+        int colorBit = Piece.ColorBit(piece);
 
-        GetPieceList(Piece.Type(piece), Piece.ColorBit(piece)).MovePiece(startSquare, targetSquare);
+        GetPieceList(type, colorBit).MovePiece(startSquare, targetSquare);
+
+        currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, startSquare]; //Remove piece from zobrist on startSquare
+        currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, targetSquare]; //Add piece to zobrist on targetSquare
 
         Squares[targetSquare] = piece;
         Squares[startSquare] = Piece.None;
@@ -78,7 +91,12 @@ public static class Board
         int piece = Squares[square];
         Squares[square] = Piece.None;
 
-        GetPieceList(Piece.Type(piece), Piece.ColorBit(piece)).RemovePieceAtSquare(square);
+        int type = Piece.Type(piece);
+        int colorBit = Piece.ColorBit(piece);
+
+        currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, square]; //Remove piece from zobrist
+
+        GetPieceList(type, colorBit).RemovePieceAtSquare(square);
     }
 
 
@@ -96,6 +114,8 @@ public static class Board
     {
         Squares = new int[64];
         gameStateHistory.Push(currentGameState);
+
+        currentZobrist = 0;
 
         pawnList = new PieceList[2] { new PieceList(8), new PieceList(8) };
         knightList = new PieceList[2] { new PieceList(10), new PieceList(10) };
@@ -145,9 +165,14 @@ public static class Board
 
         uint prevGameState = currentGameState;
         uint prevCastleRights = (prevGameState & castleRightsMask) >> 9;
+        int prevEpFile = (int)((prevGameState & epFileMask) >> 5) - 1;
+
+        currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Remove previous castling rights
+
         currentGameState = 0;
 
         SetColorToMove(Piece.OppositeColor(colorToMove));
+        currentZobrist ^= Zobrist.sideToMove; //Toggle side to move
 
         int movedPieceType = Piece.Type(Squares[move.startSquare]);
 
@@ -157,6 +182,7 @@ public static class Board
         {
             int file = BoardHelper.IndexToFile(move.targetSquare) + 1;
             currentGameState |= (ushort)(file << 5);
+            currentZobrist ^= Zobrist.epArray[file - 1]; //Add new ep file to zobrist
         }
         else if (move.flag == Move.Flag.Castling)
         {
@@ -189,12 +215,11 @@ public static class Board
         //Add captured piece to gamestate - depends on whether the captured piece is on the square we landed on, or if ep
         if (move.flag == Move.Flag.EnPassantCapture)
         {
-            int epFile = (int)((prevGameState & epFileMask) >> 5) - 1;
             int capturedPawnColor = colorToMove; //The color of the captured pawn is the color whos turn it is to move now
 
             int capturedPawnRank = capturedPawnColor == Piece.White ? 3 : 4;
 
-            int capturedPawnIndex = BoardHelper.CoordToIndex(epFile, capturedPawnRank);
+            int capturedPawnIndex = BoardHelper.CoordToIndex(prevEpFile, capturedPawnRank);
 
             currentGameState |= (ushort)Squares[capturedPawnIndex]; //Add captured pawn as the captured piece in the gamestate
             RemovePiece(capturedPawnIndex);
@@ -227,8 +252,6 @@ public static class Board
             }
         }
 
-        currentGameState |= prevCastleRights << 9;
-
 
         //Move the piece
         if (movedPieceType == Piece.King)
@@ -240,12 +263,16 @@ public static class Board
             if (pieceColor == Piece.White)
             {
                 whiteKingSquare = move.targetSquare;
-                currentGameState &= ~(0b0101U << 9); //Turn off white castling bc king moved
+                prevCastleRights &= ~0b0101U; //Turn off white castling bc king moved
+                currentZobrist ^= Zobrist.piecesArray[0, 0, move.startSquare]; //Remove white king from prev square in zobrist
+                currentZobrist ^= Zobrist.piecesArray[0, 0, move.targetSquare]; //Place white king on new square in zobrist
             }
             else
             {
                 blackKingSquare = move.targetSquare;
-                currentGameState &= ~(0b1010U << 9); //Turn off black castling bc king moved
+                prevCastleRights &= ~0b1010U; //Turn off black castling bc king moved
+                currentZobrist ^= Zobrist.piecesArray[0, 1, move.startSquare]; //Remove black king from prev square in zobrist
+                currentZobrist ^= Zobrist.piecesArray[0, 1, move.targetSquare]; //Place black king on new square in zobrist
             }
         }
         else if (movedPieceType == Piece.Rook)
@@ -256,12 +283,12 @@ public static class Board
                 if (move.startSquare == BoardHelper.h1) //White shortcastle rook
                 {
                     //Debug.Log("WShort Disabled");
-                    currentGameState &= ~(1U << 9);
+                    prevCastleRights &= ~0b0001U;
                 }
                 else if (move.startSquare == BoardHelper.a1) //White longcastle rook
                 {
                     //Debug.Log("WLong Disabled");
-                    currentGameState &= ~(1U << 11);
+                    prevCastleRights &= ~0b0100U;
                 }
             }
             else //Means black played the move
@@ -269,12 +296,12 @@ public static class Board
                 if (move.startSquare == BoardHelper.h8) //Black shortcastle rook
                 {
                     //Debug.Log("BShort Disabled");
-                    currentGameState &= ~(1U << 10);
+                    prevCastleRights &= ~0b0010U;
                 }
                 else if (move.startSquare == BoardHelper.a8) //Black longcastle rook
                 {
                     //Debug.Log("BLong Disabled");
-                    currentGameState &= ~(1U << 12);
+                    prevCastleRights &= ~0b1000U;
                 }
             }
 
@@ -307,9 +334,22 @@ public static class Board
         }
         else { MovePiece(move.startSquare, move.targetSquare); }
 
+
+
+
+        currentGameState |= prevCastleRights << 9;
+
+        currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Add new castling rights
+        if (prevEpFile != -1) currentZobrist ^= Zobrist.epArray[prevEpFile]; //Remove old ep file
+
         gameStateHistory.Push(currentGameState);
         //Debug.Log(Convert.ToString(currentGameState, 2));
     }
+
+
+
+
+
 
     public static void UnMakeMove(Move move)
     {
@@ -322,8 +362,18 @@ public static class Board
             Squares[move.startSquare] = Squares[move.targetSquare];
 
             int pieceColor = Piece.Color(Squares[move.startSquare]);
-            if (pieceColor == Piece.White) whiteKingSquare = move.startSquare;
-            else blackKingSquare = move.startSquare;
+            if (pieceColor == Piece.White)
+            {
+                whiteKingSquare = move.startSquare;
+                currentZobrist ^= Zobrist.piecesArray[0, 0, move.targetSquare];
+                currentZobrist ^= Zobrist.piecesArray[0, 0, move.startSquare];
+            }
+            else
+            {
+                blackKingSquare = move.startSquare;
+                currentZobrist ^= Zobrist.piecesArray[0, 1, move.targetSquare];
+                currentZobrist ^= Zobrist.piecesArray[0, 1, move.startSquare];
+            }
         }
         else if (move.IsPromotion())
         {
@@ -391,8 +441,25 @@ public static class Board
         }
 
 
+
+        uint prevCastleRights = (currentGameState & castleRightsMask) >> 9;
+        int prevEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
+
+        currentZobrist ^= Zobrist.sideToMove;
+        if (prevEpFile != -1) currentZobrist ^= Zobrist.epArray[prevEpFile];
+
+        currentZobrist ^= Zobrist.castlingArray[prevCastleRights];
+
         gameStateHistory.Pop();
+
         currentGameState = gameStateHistory.Peek();
+
+        uint newCastleRights = (currentGameState & castleRightsMask) >> 9;
+        int newEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
+
+        if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
+
+        currentZobrist ^= Zobrist.castlingArray[newCastleRights];
     }
 }
 

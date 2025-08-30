@@ -173,6 +173,12 @@ public class TestScript : MonoBehaviour
         {
             hashPosition = false;
             Debug.Log(string.Format("0x{0:X}", Zobrist.Hash()));
+            Debug.Log("Internal Hash: " + string.Format("0x{0:X}", Board.currentZobrist));
+
+            ulong difference = Zobrist.Hash() ^ Board.currentZobrist;
+            Debug.Log("Difference: " + string.Format("0x{0:X}", difference));
+            if (difference == 0) Debug.Log("Hash Matches Internal State");
+            else Debug.Log("Hashes don't align!!!");
         }
     }
 }

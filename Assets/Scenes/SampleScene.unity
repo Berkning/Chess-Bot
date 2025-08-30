@@ -579,9 +579,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: rnbq1bnr/ppp1pkpp/8/3pPp2/8/8/PPPPKPPP/RNBQ1BNR w - - 0 4
+  customFen: 
   runPerft: 0
-  perftDepth: 1
+  perftDepth: 5
   compareToFish: 0
   stockFishCompare: 'a2a3: 1373 b2b3: 1368 c2c3: 1440 g2g3: 1308 h2h3: 1371 a2a4:
     1433 b2b4: 1398 g2g4: 1337 h2h4: 1402 d7c8q: 1459 d7c8r: 1296 d7c8b: 1668 d7c8n:

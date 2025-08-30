@@ -17,6 +17,8 @@ public static class FenUtility
         LoadCastleRights(parts[2]);
         LoadEnPassantFile(parts[3]);
 
+        Board.currentZobrist = Zobrist.Hash();
+
         Board.SaveGameState();
 
         //TODO: Move counters
