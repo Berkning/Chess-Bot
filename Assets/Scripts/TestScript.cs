@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TestScript : MonoBehaviour
@@ -12,6 +14,12 @@ public class TestScript : MonoBehaviour
     [SerializeField] private bool doSearch;
     [SerializeField] private int depth;
     [SerializeField] private bool useMoveOrdering;
+    [Space, Header("Move Generation")]
+    [SerializeField] private bool testGen;
+    [SerializeField] private bool testOrder;
+    [SerializeField] private List<ushort> moves1 = new List<ushort>();
+    [SerializeField] private List<ushort> moves2 = new List<ushort>();
+    private int currentGenIndex = 0;
 
     void Awake()
     {
@@ -23,10 +31,11 @@ public class TestScript : MonoBehaviour
         if (runPerft)
         {
             string result = Perft.RunDetailed(perftDepth);
+            //Debug.Log(result);
             if (compareToFish) CompareToStockfish(result);
         }
 
-        Debug.Log("11: " + BoardHelper.FlipIndex(11));
+        //Debug.Log("11: " + BoardHelper.FlipIndex(11));
 
         return;
         for (int i = 0; i < 64; i++)
@@ -43,11 +52,16 @@ public class TestScript : MonoBehaviour
         string[] moves = result.Split('\n');
         string[] stockfishResults = stockFishCompare.Split(' ');
 
+        Debug.Log("Our Count: " + moves.Length);
+        Debug.Log("Fish Count: " + stockfishResults.Length);
+
         for (int i = 0; i < moves.Length; i++)
         {
+            if (string.IsNullOrWhiteSpace(moves[i]) || moves[i] == "") continue;
             string[] parts = moves[i].Split(' ');
 
-            for (int j = 0; j < stockfishResults.Length; j++)
+
+            for (int j = 0; j < stockfishResults.Length / 2; j++)
             {
                 if (stockfishResults[j * 2] == parts[0])
                 {
@@ -88,6 +102,38 @@ public class TestScript : MonoBehaviour
             Debug.Log(BoardHelper.NameMove(Search.StartSearch(depth, useMoveOrdering)));
             stopwatch.Stop();
             Debug.Log("Search Took: " + stopwatch.ElapsedMilliseconds + "ms");
+        }
+
+
+        if (testGen)
+        {
+            testGen = false;
+
+            bool shouldGenInFirstList = currentGenIndex % 2 == 0;
+
+            Span<Move> moves = MoveGenerator.GenerateMovesSlow();
+
+            for (int i = 0; i < moves.Length; i++)
+            {
+                if (shouldGenInFirstList) moves1.Add(moves[i].data);
+                else moves2.Add(moves[i].data);
+            }
+
+            currentGenIndex++;
+        }
+
+        if (testOrder)
+        {
+            testOrder = false;
+            if (moves1.Count < 1 || moves2.Count < 1) return;
+
+            for (int i = 0; i < moves1.Count; i++)
+            {
+                if (moves1[i] != moves2[i])
+                {
+                    Debug.Log("Difference at i=" + i);
+                }
+            }
         }
     }
 }

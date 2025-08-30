@@ -4,8 +4,6 @@ using UnityEngine;
 
 public static class Search
 {
-    private static List<ushort> testmoves = new List<ushort>();
-
     private const int immediateMateScore = 100000;
     private const int positiveInfinity = 9999999;
     private const int negativeInfinity = -positiveInfinity;
@@ -39,7 +37,7 @@ public static class Search
 
     private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta)//, bool test)
     {
-        /*if (plyFromRoot > 0)
+        if (plyFromRoot > 0)
         {
             // Skip this position if a mating sequence has already been found earlier in
             // the search, which would be shorter than any mate we could find from here.
@@ -51,42 +49,20 @@ public static class Search
             {
                 return alpha;
             }
-        }*/
+        }
 
 
         if (depth == 0)
         {
             //positionCount++;
             quiescenseCount++;
-            return Evaluation.Evaluate();
-            //return SearchAllCaptures(alpha, beta);
+            //return Evaluation.Evaluate();
+            return SearchAllCaptures(alpha, beta);
         }
 
         Span<Move> moves = stackalloc Move[256];
 
         int moveCount = MoveGenerator.GenerateMoves(ref moves);
-        if (plyFromRoot == 1)
-        {
-            if (moveCount != testmoves.Count)
-            {
-                Debug.Log("Length didn't match");
-                testmoves = new List<ushort>();
-
-                for (int i = 0; i < moveCount; i++)
-                {
-                    testmoves.Add(0);
-                }
-            }
-
-            for (int i = 0; i < moveCount; i++)
-            {
-                if (moves[i].data != testmoves[i])
-                {
-                    Debug.Log("Mismatch at i: " + i);
-                    testmoves[i] = moves[i].data;
-                }
-            }
-        }
 
         /*if (test)*/
         MoveOrdering.OrderMoves(ref moves, moveCount);

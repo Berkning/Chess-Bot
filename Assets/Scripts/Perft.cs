@@ -10,11 +10,12 @@ public static class Perft
 
     public static string RunDetailed(int depth)
     {
+        MoveGenerator.PromotionMode prevPromotionMode = MoveGenerator.promotionMode; //Save what the promotionmode was set to
+        MoveGenerator.promotionMode = MoveGenerator.PromotionMode.All; //Set the promotion mode to all to ensure we get all possible moves
+
         Span<Move> moves = stackalloc Move[256];
         int moveCountInCurrentPosition = MoveGenerator.GenerateMoves(ref moves);
 
-        MoveGenerator.PromotionMode prevPromotionMode = MoveGenerator.promotionMode; //Save what the promotionmode was set to
-        MoveGenerator.promotionMode = MoveGenerator.PromotionMode.All; //Set the promotion mode to all to ensure we get all possible moves
 
         string results = "";
 
