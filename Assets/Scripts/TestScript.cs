@@ -20,6 +20,8 @@ public class TestScript : MonoBehaviour
     [SerializeField] private List<ushort> moves1 = new List<ushort>();
     [SerializeField] private List<ushort> moves2 = new List<ushort>();
     private int currentGenIndex = 0;
+    [Space, Header("Zobrist")]
+    [SerializeField] private bool hashPosition;
 
     void Awake()
     {
@@ -36,6 +38,36 @@ public class TestScript : MonoBehaviour
         }
 
         //Debug.Log("11: " + BoardHelper.FlipIndex(11));
+
+        // int piece1 = Piece.White | Piece.Bishop;
+        // int piece2 = Piece.White | Piece.Rook;
+        // int piece3 = Piece.Black | Piece.Queen;
+        // int piece4 = Piece.Black | Piece.King;
+        // int piece5 = Piece.White | Piece.Pawn;
+
+        // System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        // sw.Start();
+        // for (int i = 0; i < 100000000; i++)
+        // {
+        //     Zobrist.PieceToPolyGlot(piece1);
+        //     Zobrist.PieceToPolyGlot(piece2);
+        //     Zobrist.PieceToPolyGlot(piece3);
+        //     Zobrist.PieceToPolyGlot(piece4);
+        //     Zobrist.PieceToPolyGlot(piece5);
+        // }
+        // sw.Stop();
+        // Debug.Log("Conversion with array took: " + sw.ElapsedMilliseconds + "ms");
+
+
+        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        sw.Start();
+        for (int i = 0; i < 1000000; i++)
+        {
+            Zobrist.Hash();
+        }
+        sw.Stop();
+        Debug.Log("Hashing took: " + sw.ElapsedMilliseconds + "ms");
+
 
         return;
         for (int i = 0; i < 64; i++)
@@ -134,6 +166,13 @@ public class TestScript : MonoBehaviour
                     Debug.Log("Difference at i=" + i);
                 }
             }
+        }
+
+
+        if (hashPosition)
+        {
+            hashPosition = false;
+            Debug.Log(string.Format("0x{0:X}", Zobrist.Hash()));
         }
     }
 }

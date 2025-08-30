@@ -579,7 +579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 
+  customFen: rnbq1bnr/ppp1pkpp/8/3pPp2/8/8/PPPPKPPP/RNBQ1BNR w - - 0 4
   runPerft: 0
   perftDepth: 1
   compareToFish: 0
@@ -597,6 +597,7 @@ MonoBehaviour:
   testOrder: 0
   moves1: 
   moves2: 
+  hashPosition: 0
 --- !u!4 &692186463
 Transform:
   m_ObjectHideFlags: 0
@@ -1213,7 +1214,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &2078178137
 SpriteRenderer:
   m_ObjectHideFlags: 0

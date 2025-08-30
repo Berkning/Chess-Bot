@@ -446,7 +446,7 @@ public class Piece
     {
         //return ((piece ^ 0b001) & 0b100) == 0b101;
         int test = piece & TypeMask;
-        return test == Bishop || test == Queen;
+        return test == Bishop || test == Queen; //TODO: Optimize way more
     }
 
     public static bool IsRookOrQueen(int piece)
