@@ -14,12 +14,15 @@ public static class Search
     private static Move bestMove;
     private static int bestEval;
 
+    private static RepetitionTable repetitionTable = new RepetitionTable();
+
     public static Move StartSearch(int depth, bool test)
     {
         //return AlphaBeta(depth, negativeInfinity, positiveInfinity);
 
         bestMove = Move.nullMove;
         bestEval = negativeInfinity;
+        repetitionTable.Copy(Board.repetitionTable);
 
         positionCount = 0;
         quiescenseCount = 0;
@@ -39,6 +42,11 @@ public static class Search
     {
         if (plyFromRoot > 0)
         {
+            if (repetitionTable.Contains(Board.currentZobrist)) //TODO: 50 move rule as well
+            {
+                return 0;
+            }
+
             // Skip this position if a mating sequence has already been found earlier in
             // the search, which would be shorter than any mate we could find from here.
             // This is done by observing that alpha can't possibly be worse (and likewise
@@ -79,16 +87,19 @@ public static class Search
 
         Move bestMoveInPosition = Move.nullMove;
 
+        if (plyFromRoot > 0) repetitionTable.Push(Board.currentZobrist);
+
 
         for (int i = 0; i < moveCount; i++)
         {
-            Board.MakeMove(moves[i]);
+            Board.MakeMove(moves[i], true);
             int evaluation = -AlphaBeta(depth - 1, plyFromRoot + 1, -beta, -alpha);//, test);
-            Board.UnMakeMove(moves[i]);
+            Board.UnMakeMove(moves[i], true);
 
             if (evaluation >= beta)
             {
                 //Move was good opponent will avoid this position
+                repetitionTable.PopNoRtn();
                 return beta;
             }
 
@@ -104,6 +115,7 @@ public static class Search
             }
         }
 
+        repetitionTable.PopNoRtn();
         return alpha;
     }
 
@@ -132,9 +144,9 @@ public static class Search
 
         for (int i = 0; i < moveCount; i++)
         {
-            Board.MakeMove(moves[i]);
+            Board.MakeMove(moves[i], true);
             eval = -SearchAllCaptures(-beta, -alpha);
-            Board.UnMakeMove(moves[i]);
+            Board.UnMakeMove(moves[i], true);
             //numQNodes++;
 
             if (eval >= beta)

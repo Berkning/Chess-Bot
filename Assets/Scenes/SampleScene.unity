@@ -566,7 +566,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &692186462
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -677,7 +677,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &865560317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -736,8 +736,8 @@ MonoBehaviour:
   gamesToPlay: 1000
   uciManager: {fileID: 865560319}
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V3\LichessBot.exe
-  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V1_MateFix\LichessBot.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V4\LichessBot.exe
+  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V2\LichessBot.exe
   debugMessage: isready
   send: 0
   target: 0

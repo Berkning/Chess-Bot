@@ -25,11 +25,11 @@ public static class Perft
 
             ulong before = Board.currentGameState;
             //Debug.Log("Trying to play " + BoardHelper.NameMove(move));
-            Board.MakeMove(moves[i]);
+            Board.MakeMove(moves[i], true);
             long result = RunSpecifiedDepth(depth - 1);
             Debug.Log(BoardHelper.NameMove(moves[i]) + ": " + result);
             results += BoardHelper.NameMove(moves[i]) + ": " + result + "\n";
-            Board.UnMakeMove(moves[i]);
+            Board.UnMakeMove(moves[i], true);
             ulong after = Board.currentGameState;
 
             Debug.Assert(before == after, "State mismatch - Before: " + before + " After:" + after);
@@ -101,9 +101,9 @@ public static class Perft
 
         for (int i = 0; i < moveCount; i++)
         {
-            Board.MakeMove(moves[i]);
+            Board.MakeMove(moves[i], true);
             numPositions += RunSpecifiedDepth(depth - 1);
-            Board.UnMakeMove(moves[i]);
+            Board.UnMakeMove(moves[i], true);
         }
 
         return numPositions;

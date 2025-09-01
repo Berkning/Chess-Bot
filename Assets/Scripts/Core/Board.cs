@@ -14,12 +14,14 @@ public static class Board
     //0-5 = Captured Piece //TODO: Could be pretty easily reduced by removing the two color bits and infering the color based on colorToMove
     //6-9 = EP file
     //10-13 = Castling Rights - 10 = Wshort, 11 = Bshort, 12 = Wlong, 13 = Blong
+    //14-19 = fifty move counter
     private static Stack<uint> gameStateHistory = new Stack<uint>();
     public static uint currentGameState = 0;//0b1111000000000; //Castles allowed by default 
 
     public static uint capturedPieceMask = 0b11111;
     public static uint epFileMask = 0b111100000;
     public static uint castleRightsMask = 0b1111000000000;
+    public static uint fiftyMoveCounterMask = 0b1111110000000000000;
 
     //Piece lists
     public static PieceList[] pawnList;
@@ -38,6 +40,9 @@ public static class Board
 
     //Zobrist
     public static ulong currentZobrist;
+
+    //Repetition Table
+    public static RepetitionTable repetitionTable;
 
 
 
@@ -114,6 +119,7 @@ public static class Board
     {
         Squares = new int[64];
         gameStateHistory.Push(currentGameState);
+        repetitionTable = new RepetitionTable();
 
         currentZobrist = 0;
 
@@ -142,6 +148,7 @@ public static class Board
 
     public static void ResetBoard()
     {
+        repetitionTable.Clear();
         Array.Clear(Squares, 0, 64);
 
         foreach (PieceList pieceList in allPieceList)
@@ -159,13 +166,14 @@ public static class Board
 
 
 
-    public static void MakeMove(Move move)
+    public static void MakeMove(Move move, bool inSearch = false)
     {
         if (Squares[move.startSquare] == Piece.None) Debug.Log("Tried to move null piece " + BoardHelper.NameMove(move) + " " + move.flag);
 
         uint prevGameState = currentGameState;
         uint prevCastleRights = (prevGameState & castleRightsMask) >> 9;
         int prevEpFile = (int)((prevGameState & epFileMask) >> 5) - 1;
+        uint prev50MoveCount = (prevGameState & fiftyMoveCounterMask) >> 13; //TODO: have to implement this differently in search as well
 
         currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Remove previous castling rights
 
@@ -175,6 +183,12 @@ public static class Board
         currentZobrist ^= Zobrist.sideToMove; //Toggle side to move
 
         int movedPieceType = Piece.Type(Squares[move.startSquare]);
+
+        if (!inSearch && (movedPieceType == Piece.Pawn || Squares[move.targetSquare] != Piece.None)) //Pawn moves and captures reset 3 and 50 move rule
+        {
+            //TODO: reset 50 move
+            repetitionTable.Clear();
+        }
 
 
 
@@ -343,6 +357,7 @@ public static class Board
         if (prevEpFile != -1) currentZobrist ^= Zobrist.epArray[prevEpFile]; //Remove old ep file
 
         gameStateHistory.Push(currentGameState);
+        if (!inSearch) repetitionTable.Push(currentZobrist);
         //Debug.Log(Convert.ToString(currentGameState, 2));
     }
 
@@ -351,7 +366,7 @@ public static class Board
 
 
 
-    public static void UnMakeMove(Move move)
+    public static void UnMakeMove(Move move, bool inSearch = false)
     {
         SetColorToMove(Piece.OppositeColor(colorToMove));
         int movedPieceType = Piece.Type(Squares[move.targetSquare]);
@@ -451,6 +466,8 @@ public static class Board
         currentZobrist ^= Zobrist.castlingArray[prevCastleRights];
 
         gameStateHistory.Pop();
+
+        if (!inSearch) repetitionTable.PopNoRtn();
 
         currentGameState = gameStateHistory.Peek();
 
