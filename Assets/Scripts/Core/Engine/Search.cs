@@ -35,6 +35,7 @@ public static class Search
 
     public static float Eval(int depth, bool test)
     {
+        repetitionTable.Copy(Board.repetitionTable);
         return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity/*, test*/) / 100f;
     }
 
