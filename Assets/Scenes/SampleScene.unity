@@ -954,7 +954,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 
+  customFen: rnb1qbnr/1pppp1k1/p4p2/4P1N1/3P4/P1PB2Q1/1P3PPP/RN2K2R w KQ - 1 12
   runPerft: 0
   perftDepth: 5
   compareToFish: 0
@@ -1113,8 +1113,8 @@ MonoBehaviour:
   gamesToPlay: 1000
   uciManager: {fileID: 865560319}
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V5\350ms\LichessBot.exe
-  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V4\LichessBot.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V6_OnlyPawn\LichessBot.exe
+  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V5\LichessBot.exe
   debugMessage: isready
   send: 0
   target: 0

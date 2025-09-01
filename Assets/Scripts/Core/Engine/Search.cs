@@ -8,6 +8,8 @@ public static class Search
     private const int positiveInfinity = 9999999;
     private const int negativeInfinity = -positiveInfinity;
 
+    private const int maxExtensions = 8;
+
     private static int positionCount = 0;
     private static int quiescenseCount = 0;
 
@@ -36,6 +38,8 @@ public static class Search
         {
             int result = AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
 
+            Debug.Log("Depth " + depth + " eval: " + result / 100f + " move: " + BoardHelper.NameMove(bestMove));
+
             if (cancelSearch) break;
             else Debug.Log("Depth " + depth + " Complete");
         }
@@ -54,7 +58,7 @@ public static class Search
         return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity/*, test*/) / 100f;
     }
 
-    private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta)//, bool test) //TODO?: Dont waste partial search when cancelled
+    private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta, int numExtensions = 0)//, bool test) //TODO?: Dont waste partial search when cancelled
     {
         if (cancelSearch) return 0;
 
@@ -111,7 +115,18 @@ public static class Search
         for (int i = 0; i < moveCount; i++)
         {
             Board.MakeMove(moves[i], true);
-            int evaluation = -AlphaBeta(depth - 1, plyFromRoot + 1, -beta, -alpha);//, test);
+
+            int extensions = 0;
+            if (numExtensions < maxExtensions)
+            {
+                //if (MoveGenerator.inCheck) extensions = 1;//TODO: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
+                int targetRank = BoardHelper.IndexToRank(moves[i].targetSquare);
+                if (Piece.Type(Board.Squares[moves[i].targetSquare]) == Piece.Pawn && (targetRank == 1 || targetRank == 6)) extensions = 1; //Extend when about to promote
+            }
+
+
+
+            int evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);
             Board.UnMakeMove(moves[i], true);
 
             if (cancelSearch) return 0;
