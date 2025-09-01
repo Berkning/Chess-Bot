@@ -16,9 +16,12 @@ public static class Search
 
     private static RepetitionTable repetitionTable = new RepetitionTable();
 
-    public static Move StartSearch(int depth, bool test)
+    public static bool cancelSearch = false;
+
+    public static Move StartSearch(int searchDepth)
     {
         //return AlphaBeta(depth, negativeInfinity, positiveInfinity);
+        cancelSearch = false;
 
         bestMove = Move.nullMove;
         bestEval = negativeInfinity;
@@ -26,10 +29,22 @@ public static class Search
 
         positionCount = 0;
         quiescenseCount = 0;
-        int result = AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);//, test);
+
+        TimeManagement.ScheduleSearchCancel();
+
+        for (int depth = 1; depth <= searchDepth; depth++)
+        {
+            int result = AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
+
+            if (cancelSearch) break;
+            else Debug.Log("Depth " + depth + " Complete");
+        }
+
+        if (!cancelSearch) TimeManagement.RevokeScheduledCancel();
+
         Debug.Log(positionCount + " positions");
         Debug.Log(quiescenseCount + " quiescenseCount");
-        Debug.Log("Eval: " + result / 100f);
+        //Debug.Log("Eval: " + result / 100f);
         return bestMove;
     }
 
@@ -39,8 +54,10 @@ public static class Search
         return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity/*, test*/) / 100f;
     }
 
-    private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta)//, bool test)
+    private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta)//, bool test) //TODO: Dont waste partial search when cancelled
     {
+        if (cancelSearch) return 0;
+
         if (plyFromRoot > 0)
         {
             if (repetitionTable.Contains(Board.currentZobrist)) //TODO: 50 move rule as well
@@ -74,7 +91,7 @@ public static class Search
         int moveCount = MoveGenerator.GenerateMoves(ref moves);
 
         /*if (test)*/
-        MoveOrdering.OrderMoves(ref moves, moveCount);
+        MoveOrdering.OrderMoves(ref moves, moveCount, bestMove);
 
 
 
@@ -97,6 +114,8 @@ public static class Search
             int evaluation = -AlphaBeta(depth - 1, plyFromRoot + 1, -beta, -alpha);//, test);
             Board.UnMakeMove(moves[i], true);
 
+            if (cancelSearch) return 0;
+
             if (evaluation >= beta)
             {
                 //Move was good opponent will avoid this position
@@ -116,12 +135,15 @@ public static class Search
             }
         }
 
-        repetitionTable.PopNoRtn();
+        if (plyFromRoot > 0) repetitionTable.PopNoRtn();
+
         return alpha;
     }
 
     private static int SearchAllCaptures(int alpha, int beta)
     {
+        if (cancelSearch) return 0; //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
+
         // A player isn't forced to make a capture (typically), so see what the evaluation is without capturing anything.
         // This prevents situations where a player ony has bad captures available from being evaluated as bad,
         // when the player might have good non-capture moves available.
@@ -141,7 +163,7 @@ public static class Search
 
         int moveCount = MoveGenerator.GenerateMoves(ref moves, true);
 
-        MoveOrdering.OrderMoves(ref moves, moveCount);
+        MoveOrdering.OrderMoves(ref moves, moveCount, bestMove);
 
         for (int i = 0; i < moveCount; i++)
         {

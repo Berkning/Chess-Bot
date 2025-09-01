@@ -6,7 +6,9 @@ public static class MoveOrdering
 {
     private static int[] moveScores = new int[218];
 
-    public static void OrderMoves(ref Span<Move> moves, int moveCount)
+    const int prevBestBias = 2000;
+
+    public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove)
     {
         for (int i = 0; i < moveCount; i++)
         {
@@ -16,6 +18,8 @@ public static class MoveOrdering
 
             int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
             int flag = moves[i].flag;
+
+            if (moves[i].data == prevBestMove.data) moveScore += prevBestBias; //TODO: Could optimize checking through all moves to find this one prob
 
             if (capturedPieceType != Piece.None)
             {

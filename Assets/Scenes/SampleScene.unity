@@ -566,7 +566,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &692186462
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -579,7 +579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 
+  customFen: q7/4R3/2k5/8/8/8/5PPP/6K1 b - - 0 1
   runPerft: 0
   perftDepth: 5
   compareToFish: 0
@@ -591,7 +591,7 @@ MonoBehaviour:
     1364 h1g1: 1311 d1d2: 1436 d1d3: 1685 d1d4: 1751 d1d5: 1688 d1d6: 1500 e1f1:
     1445 e1d2: 978 e1f2: 1269 e1g1: 1376 '
   doSearch: 0
-  depth: 6
+  depth: 99
   useMoveOrdering: 1
   testGen: 0
   testOrder: 0
@@ -677,7 +677,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &865560317
 MonoBehaviour:
   m_ObjectHideFlags: 0

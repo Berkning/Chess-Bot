@@ -131,7 +131,7 @@ public class TestScript : MonoBehaviour
             doSearch = false;
             System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
-            Debug.Log(BoardHelper.NameMove(Search.StartSearch(depth, useMoveOrdering)));
+            Debug.Log(BoardHelper.NameMove(Search.StartSearch(depth)));
             stopwatch.Stop();
             Debug.Log("Search Took: " + stopwatch.ElapsedMilliseconds + "ms");
         }
