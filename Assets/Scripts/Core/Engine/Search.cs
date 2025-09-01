@@ -40,7 +40,7 @@ public static class Search
             else Debug.Log("Depth " + depth + " Complete");
         }
 
-        if (!cancelSearch) TimeManagement.RevokeScheduledCancel();
+        //if (!cancelSearch) TimeManagement.RevokeScheduledCancel();
 
         Debug.Log(positionCount + " positions");
         Debug.Log(quiescenseCount + " quiescenseCount");
@@ -54,7 +54,7 @@ public static class Search
         return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity/*, test*/) / 100f;
     }
 
-    private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta)//, bool test) //TODO: Dont waste partial search when cancelled
+    private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta)//, bool test) //TODO?: Dont waste partial search when cancelled
     {
         if (cancelSearch) return 0;
 

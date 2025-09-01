@@ -7,6 +7,7 @@ namespace EngVEng
     {
         public static string Fen;
         [SerializeField] private EngineManager engineManager;
+        [SerializeField] private EngineTimer engineTimer;
 
         void Start()
         {
@@ -27,6 +28,8 @@ namespace EngVEng
             int engineToStart = Random.Range(1, 3); //Random number from 1-2 - 3 is exluded
 
             engineManager.TellEngine(engineToStart, "position fen " + Fen);
+
+            engineTimer.RestartEngineTimer();
             engineManager.TellEngine(engineToStart, "go");
         }
 
@@ -68,6 +71,7 @@ namespace EngVEng
 
         private void RecieveBestMove(int sender, string move)
         {
+            engineTimer.StopEngineTimer(sender);
             playedMoves.Add(move);
 
             Board.MakeMove(BoardHelper.GetMoveFromUCIName(move));
@@ -104,6 +108,7 @@ namespace EngVEng
                 }
             }
 
+            engineTimer.RestartEngineTimer();
             int otherEngine = GetOtherEngineIndex(sender);
             engineManager.TellEngine(otherEngine, GetMoveString());
             engineManager.TellEngine(otherEngine, "go");
