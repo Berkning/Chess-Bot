@@ -16,7 +16,7 @@ public static class TimeManagement
 
     public static void ScheduleSearchCancel()
     {
-        _ = CancelTimer(source.Token);
+        Task.Run(() => CancelTimer(source.Token));
     }
 
     public static void RevokeScheduledCancel()
@@ -24,10 +24,10 @@ public static class TimeManagement
         source.Cancel();
     }
 
-    private static async Awaitable CancelTimer(CancellationToken token)
+    private static async Task CancelTimer(CancellationToken token)
     {
         Debug.Log("Cancel Timer Started");
-        await Awaitable.BackgroundThreadAsync();
+        //await Awaitable.BackgroundThreadAsync();
 
 
         await Task.Delay(GetSearchTime());
