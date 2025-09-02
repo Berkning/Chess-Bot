@@ -1113,8 +1113,8 @@ MonoBehaviour:
   gamesToPlay: 1000
   uciManager: {fileID: 865560319}
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V6_OnlyPawn\LichessBot.exe
-  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V5\LichessBot.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V7_Manhattan\LichessBot.exe
+  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V6_OnlyPawn\LichessBot.exe
   debugMessage: isready
   send: 0
   target: 0

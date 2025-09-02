@@ -77,6 +77,14 @@ public static class Positioning
         int kingIndex = colorBit == 0 ? Board.whiteKingSquare : BoardHelper.FlipIndex(Board.blackKingSquare);
         score += KingScores[kingIndex];
 
+
+        //Mopup
+        int enemyKingSquare = colorBit == 0 ? Board.blackKingSquare : Board.whiteKingSquare;
+
+        score += Mathf.CeilToInt(10f * PrecomputedData.manhattanDistanceFromCenter[enemyKingSquare] * Mathf.Max(Evaluation.gameStage - 1f, 0f));
+
+        //TODO: Move king closer to enemy king in endgame as well
+
         return score;
     }
 }

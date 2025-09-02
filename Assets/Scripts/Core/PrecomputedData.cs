@@ -20,6 +20,11 @@ public static class PrecomputedData
 
     public static readonly int[] directionLookup = new int[127];
 
+
+    //Mopup
+    public static readonly int[] manhattanDistanceFromCenter = new int[64];
+    //public static readonly int[] 
+
     public const int Up = 8;
     public const int Down = -8;
     public const int Left = -1;
@@ -155,6 +160,12 @@ public static class PrecomputedData
 
                     directionLookup[i] = absDir * System.Math.Sign(offset);
                 }
+
+
+                //Distance Lookup
+                int fileDstFromCentre = Mathf.Max(3 - file, file - 4);
+                int rankDstFromCentre = Mathf.Max(3 - rank, rank - 4);
+                manhattanDistanceFromCenter[squareIndex] = fileDstFromCentre + rankDstFromCentre;
             }
         }
     }
