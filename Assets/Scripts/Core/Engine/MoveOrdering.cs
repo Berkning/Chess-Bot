@@ -6,7 +6,7 @@ public static class MoveOrdering
 {
     private static int[] moveScores = new int[218];
 
-    const int prevBestBias = 2000; //Increase by a ton
+    const int prevBestBias = 2000000; //Increase by a ton
 
     public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove)
     {

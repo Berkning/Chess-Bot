@@ -9,26 +9,34 @@ public static class TimeManagement
 
     private static CancellationTokenSource source = new CancellationTokenSource();
 
-    public static int GetSearchTime()
+    public static int GetSearchTime(int colorToMove)
     {
-        return 100; //Spend max 20th of our total time on one move
+        if (colorToMove == Piece.White) return whiteTime / 20; //Spend max 20th of our total time on one move
+
+        return blackTime / 20;
     }
 
-    public static void ScheduleSearchCancel()
+    public static void UpdateTimes(int white, int black)
+    {
+        whiteTime = white;
+        blackTime = black;
+    }
+
+    public static void ScheduleSearchCancel(int time)
     {
         source.Cancel();
 
         source = new CancellationTokenSource();
-        Task.Run(() => CancelTimer(source.Token));
+        Task.Run(() => CancelTimer(source.Token, time));
     }
 
-    private static async Task CancelTimer(CancellationToken token)
+    private static async Task CancelTimer(CancellationToken token, int time)
     {
         Debug.Log("Cancel Timer Started");
         //await Awaitable.BackgroundThreadAsync();
 
 
-        await Task.Delay(GetSearchTime(), token);
+        await Task.Delay(time, token);
 
         if (!token.IsCancellationRequested)
         {

@@ -32,7 +32,9 @@ public static class Search
         positionCount = 0;
         quiescenseCount = 0;
 
-        TimeManagement.ScheduleSearchCancel();
+        int maxSearchTime = TimeManagement.GetSearchTime(Board.colorToMove);
+
+        TimeManagement.ScheduleSearchCancel(maxSearchTime);
 
         for (int depth = 1; depth <= searchDepth; depth++)
         {
