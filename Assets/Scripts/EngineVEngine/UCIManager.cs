@@ -8,6 +8,7 @@ namespace EngVEng
         public static string Fen;
         [SerializeField] private EngineManager engineManager;
         [SerializeField] private EngineTimer engineTimer;
+        [SerializeField] private int thinkTimeMs = 100;
 
         void Start()
         {
@@ -30,7 +31,7 @@ namespace EngVEng
             engineManager.TellEngine(engineToStart, "position fen " + Fen);
 
             engineTimer.RestartEngineTimer();
-            engineManager.TellEngine(engineToStart, "go");
+            engineManager.TellEngine(engineToStart, "go movetime " + thinkTimeMs);
         }
 
         private List<string> playedMoves = new List<string>();
@@ -111,7 +112,7 @@ namespace EngVEng
             engineTimer.RestartEngineTimer();
             int otherEngine = GetOtherEngineIndex(sender);
             engineManager.TellEngine(otherEngine, GetMoveString());
-            engineManager.TellEngine(otherEngine, "go");
+            engineManager.TellEngine(otherEngine, "go movetime " + thinkTimeMs);
         }
 
 

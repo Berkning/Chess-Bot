@@ -1053,7 +1053,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &865560317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1098,6 +1098,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   engineManager: {fileID: 865560320}
   engineTimer: {fileID: 865560322}
+  thinkTimeMs: 100
 --- !u!114 &865560320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1110,11 +1111,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38015fc910ef3074892bb07e656acf2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gamesToPlay: 1000
+  gamesToPlay: 804
   uciManager: {fileID: 865560319}
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V7_Manhattan\LichessBot.exe
-  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V6_OnlyPawn\LichessBot.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V7B_Fix\LichessBot.exe
+  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V7_Time\LichessBot.exe
   debugMessage: isready
   send: 0
   target: 0
@@ -1605,7 +1606,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &2078178137
 SpriteRenderer:
   m_ObjectHideFlags: 0
