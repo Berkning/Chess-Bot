@@ -12,15 +12,22 @@ public static class Search
 
     private static int positionCount = 0;
     private static int quiescenseCount = 0;
+    private static int ttHits = 0;
 
     private static Move bestMove;
     private static int bestEval;
 
     private static RepetitionTable repetitionTable = new RepetitionTable();
 
+    private static TranspositionTable transpositionTable = new TranspositionTable();
+
+
+
     public static bool cancelSearch = false;
 
-    public static Move StartSearch(int searchDepth)
+
+
+    public static Move StartSearch(int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite
     {
         //return AlphaBeta(depth, negativeInfinity, positiveInfinity);
         cancelSearch = false;
@@ -31,34 +38,47 @@ public static class Search
 
         positionCount = 0;
         quiescenseCount = 0;
+        ttHits = 0;
 
-        int maxSearchTime = TimeManagement.GetSearchTime(Board.colorToMove);
+        if (searchTime == -1)
+        {
+            int maxSearchTime = TimeManagement.GetSearchTime(Board.colorToMove);
 
-        TimeManagement.ScheduleSearchCancel(maxSearchTime);
+            TimeManagement.ScheduleSearchCancel(maxSearchTime);
+        }
+        else if (searchTime > 0) TimeManagement.ScheduleSearchCancel(searchTime); //If less than -1, let it go till stop is recieved
 
         for (int depth = 1; depth <= searchDepth; depth++)
         {
             int result = AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
 
-            Debug.Log("Depth " + depth + " eval: " + result / 100f + " move: " + BoardHelper.NameMove(bestMove));
+            //Debug.Log("Depth " + depth + " eval: " + result / 100f + " move: " + BoardHelper.NameMove(bestMove));
 
-            if (cancelSearch) break;
-            else Debug.Log("Depth " + depth + " Complete");
+            if (cancelSearch)
+            {
+                Debug.Log("info depth " + depth + " score cp " + result + " string partial search"); //TODO: Dont log score bc it always returns 0
+                break;
+            }
+            else Debug.Log("info depth " + depth + " score cp " + result); //TODO: check if matescore and then exit - no need to wait if we have mate
         }
 
         //if (!cancelSearch) TimeManagement.RevokeScheduledCancel();
 
         Debug.Log(positionCount + " positions");
         Debug.Log(quiescenseCount + " quiescenseCount");
+        Debug.Log(ttHits + " ttHits");
         //Debug.Log("Eval: " + result / 100f);
         return bestMove;
     }
 
-    public static float Eval(int depth, bool test)
+    public static float Eval(int depth, bool test) //FIXME:
     {
         repetitionTable.Copy(Board.repetitionTable);
         return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity/*, test*/) / 100f;
     }
+
+
+
 
     private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta, int numExtensions = 0)//, bool test) //TODO?: Dont waste partial search when cancelled
     {
@@ -83,6 +103,17 @@ public static class Search
             }
         }
 
+        int tableEval = transpositionTable.LookupEvaluation(depth, plyFromRoot, alpha, beta);
+        if (tableEval != TranspositionTable.LookupFailed)
+        {
+            ttHits++;
+            if (plyFromRoot == 0)
+            {
+                bestMove = transpositionTable.GetStoredMove();
+            }
+            return tableEval;
+        }
+
 
         if (depth == 0)
         {
@@ -101,7 +132,7 @@ public static class Search
 
 
 
-        if (moveCount == 0)
+        if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
         {
             //Debug.Log("Found Mate");
             if (MoveGenerator.inCheck) return -(immediateMateScore - plyFromRoot); //Checkmate
@@ -110,6 +141,7 @@ public static class Search
         }
 
         Move bestMoveInPosition = Move.nullMove;
+        int transpositionBound = TranspositionTable.UpperBound;
 
         if (plyFromRoot > 0) repetitionTable.Push(Board.currentZobrist);
 
@@ -136,6 +168,8 @@ public static class Search
             if (evaluation >= beta)
             {
                 //Move was good opponent will avoid this position
+                transpositionTable.StoreEvaluation(depth, plyFromRoot, beta, TranspositionTable.LowerBound, moves[i]);
+
                 repetitionTable.PopNoRtn();
                 return beta;
             }
@@ -144,6 +178,7 @@ public static class Search
             {
                 alpha = evaluation;
                 bestMoveInPosition = moves[i];
+                transpositionBound = TranspositionTable.Exact;
 
                 if (plyFromRoot == 0)
                 {
@@ -153,6 +188,8 @@ public static class Search
         }
 
         if (plyFromRoot > 0) repetitionTable.PopNoRtn();
+
+        transpositionTable.StoreEvaluation(depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);
 
         return alpha;
     }
@@ -201,5 +238,15 @@ public static class Search
         }
 
         return alpha;
+    }
+
+
+    public static bool IsMateScore(int score)
+    {
+        if (score == int.MinValue)
+        {
+            return false;
+        }
+        return Mathf.Abs(score) > immediateMateScore - 1000;
     }
 }
