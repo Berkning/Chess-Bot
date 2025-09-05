@@ -19,7 +19,7 @@ public static class Search
 
     private static RepetitionTable repetitionTable = new RepetitionTable();
 
-    private static TranspositionTable transpositionTable = new TranspositionTable();
+    public static TranspositionTable transpositionTable = new TranspositionTable();
 
 
 

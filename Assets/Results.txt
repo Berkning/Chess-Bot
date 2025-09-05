@@ -10,3 +10,6 @@ V6_OP vs V1_MF -> 1: 29+285, D: 39+568, 2: 7+72                              Elo
 V7_MH vs V6_OP -> 1: 238, D: 597, 2: 165                                     Elo = 25 +- 14
 V7B vs V7_T -> 1: 466, D: 457, 2: 77                                         Elo = 143 +- 16
 V8 vs V7B -> 1: 187, D: 694, 2: 119                                          Elo = 24 +- 12 --- Think this would make a ton of difference if move time was higher
+V9.0 vs V8 -> 1: 150, D: 683, 2: 167
+V8-4mb vs V8-1gb -> 4mb wins
+V8-4mb vs V8-16mb -> 1: 153, D: 705, 2: 142                                  Elo = 4 +- 12

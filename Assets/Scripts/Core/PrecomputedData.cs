@@ -19,6 +19,7 @@ public static class PrecomputedData
     public static readonly ulong[] kingAttackBitboards = new ulong[64];
 
     public static readonly int[] directionLookup = new int[127];
+    public static readonly int[][] kingDistanceLookup = new int[64][];
 
 
     //Mopup
@@ -166,6 +167,20 @@ public static class PrecomputedData
                 int fileDstFromCentre = Mathf.Max(3 - file, file - 4);
                 int rankDstFromCentre = Mathf.Max(3 - rank, rank - 4);
                 manhattanDistanceFromCenter[squareIndex] = fileDstFromCentre + rankDstFromCentre;
+
+                //King Distance Lookup
+                kingDistanceLookup[squareIndex] = new int[64];
+
+                for (int targetRank = 0; targetRank < 8; targetRank++)
+                {
+                    for (int targetFile = 0; targetFile < 8; targetFile++)
+                    {
+                        int targetSquare = BoardHelper.CoordToIndex(targetFile, targetRank);
+                        int chebyshevDist = Mathf.Max(Mathf.Abs(targetFile - file), Mathf.Abs(targetRank - rank));
+
+                        kingDistanceLookup[squareIndex][targetSquare] = chebyshevDist;
+                    }
+                }
             }
         }
     }

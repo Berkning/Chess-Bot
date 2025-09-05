@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class TranspositionTable
 {
-    private const int SizeMB = 16;
+    public static int SizeMB = 16;
 
     public const int LookupFailed = int.MinValue;
 
