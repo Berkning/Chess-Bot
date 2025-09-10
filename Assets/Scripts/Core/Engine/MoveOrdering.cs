@@ -19,6 +19,8 @@ public static class MoveOrdering
             int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
             int flag = moves[i].flag;
 
+            //TODO: guess if opponent cant recapture
+
             if (moves[i].data == prevBestMove.data) moveScore += prevBestBias; //TODO: Could optimize checking through all moves to find this one prob
 
             if (capturedPieceType != Piece.None)

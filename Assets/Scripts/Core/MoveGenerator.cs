@@ -9,6 +9,26 @@ public static class MoveGenerator
     public enum PromotionMode { All, KnightAndQueen };
     public static PromotionMode promotionMode = PromotionMode.KnightAndQueen;
 
+    private static ulong allPieces;
+
+    private static ulong friendlyPieces;
+    private static ulong friendlyPawns;
+    private static ulong friendlyKnights;
+    private static ulong friendlyBishops;
+    private static ulong friendlyRooks;
+    private static ulong friendlyQueens;
+    private static ulong friendlyOrthos;
+    private static ulong friendlyDiags;
+
+    private static ulong enemyPieces;
+    private static ulong enemyPawns;
+    private static ulong enemyKnights;
+    private static ulong enemyBishops;
+    private static ulong enemyRooks;
+    private static ulong enemyQueens;
+    private static ulong enemyOrthos;
+    private static ulong enemyDiags;
+
 
     public static ulong oponnentPawnAttackMap;
     public static ulong opponentKnightAttackMap;
@@ -54,7 +74,7 @@ public static class MoveGenerator
             for (int n = 0; n < PrecomputedData.NumSquaresToEdge[friendlyKingSquare][directionIndex]; n++)
             {
                 int square = friendlyKingSquare + PrecomputedData.DirectionOffsets[directionIndex] * (n + 1);
-                BitBoardHelper.AddSquare(ref currentRayBitMap, square);
+                currentRayBitMap = BitBoardHelper.AddSquare(currentRayBitMap, square);
                 int piece = Board.Squares[square];
 
                 if (piece != Piece.None)
@@ -108,7 +128,7 @@ public static class MoveGenerator
                 isKnightCheck = true;
                 inDoubleCheck = inCheck;
                 inCheck = true;
-                BitBoardHelper.AddSquare(ref checkRayBitMap, startSquare);
+                checkRayBitMap = BitBoardHelper.AddSquare(checkRayBitMap, startSquare);
             }
         }
 
@@ -128,12 +148,14 @@ public static class MoveGenerator
                 isPawnCheck = true;
                 inDoubleCheck = inCheck;
                 inCheck = true;
-                BitBoardHelper.AddSquare(ref checkRayBitMap, startSquare);
+                checkRayBitMap = BitBoardHelper.AddSquare(checkRayBitMap, startSquare);
             }
         }
 
         opponentAttackMapNoPawns = opponentSlidingAttackMap | opponentKnightAttackMap | PrecomputedData.kingAttackBitboards[enemyKingSquare];
         opponentAttackMap = opponentAttackMapNoPawns | oponnentPawnAttackMap;
+
+        if (!inCheck) checkRayBitMap = ulong.MaxValue; //Make all squares available to move to if not in check
     }
 
     private static void GenerateSlidingAttackMap()
@@ -170,7 +192,7 @@ public static class MoveGenerator
                 int targetSquare = startSquare + currentDirOffset * (n + 1);
                 int targetSquarePiece = Board.Squares[targetSquare];
                 opponentSlidingAttackMap |= 1ul << targetSquare;
-                if (targetSquare != friendlyKingSquare) //From seb lague - don't have any idea why we need to continue the ray through the king? - Found out why
+                if (targetSquare != friendlyKingSquare) //From seb lague - don't have any idea why we need to continue the ray through the king? - Found out why -> prevents king from moving backwards and still being in the check ray
                 {
                     if (targetSquarePiece != Piece.None)
                     {
@@ -179,6 +201,37 @@ public static class MoveGenerator
                 }
             }
         }
+    }
+
+    #endregion
+
+    #region PieceBoards
+
+    private static void GeneratePieceBoards() //TODO: would be more performant to keep track of these and update them in board on make an unmake move
+    {
+        //allPieces = 0; //BitBoardHelper.BitboardFromPieceListArray(Board.allPieceList);
+
+        friendlyPawns = BitBoardHelper.BitboardFromPieceList(Board.pawnList[Board.friendlyColorBit]);
+        friendlyKnights = BitBoardHelper.BitboardFromPieceList(Board.knightList[Board.friendlyColorBit]);
+        friendlyBishops = BitBoardHelper.BitboardFromPieceList(Board.bishopList[Board.friendlyColorBit]);
+        friendlyRooks = BitBoardHelper.BitboardFromPieceList(Board.rookList[Board.friendlyColorBit]);
+        friendlyQueens = BitBoardHelper.BitboardFromPieceList(Board.queenList[Board.friendlyColorBit]);
+
+        enemyPawns = BitBoardHelper.BitboardFromPieceList(Board.pawnList[Board.opponentColorBit]);
+        enemyKnights = BitBoardHelper.BitboardFromPieceList(Board.knightList[Board.opponentColorBit]);
+        enemyBishops = BitBoardHelper.BitboardFromPieceList(Board.bishopList[Board.opponentColorBit]);
+        enemyRooks = BitBoardHelper.BitboardFromPieceList(Board.rookList[Board.opponentColorBit]);
+        enemyQueens = BitBoardHelper.BitboardFromPieceList(Board.queenList[Board.opponentColorBit]);
+
+        friendlyOrthos = friendlyRooks | friendlyQueens;
+        friendlyDiags = friendlyBishops | friendlyQueens;
+        enemyOrthos = enemyRooks | enemyQueens;
+        enemyDiags = enemyBishops | enemyQueens;
+
+        friendlyPieces = friendlyPawns | friendlyKnights | friendlyBishops | friendlyRooks | friendlyQueens | (1UL << friendlyKingSquare);
+        enemyPieces = enemyPawns | enemyKnights | enemyBishops | enemyRooks | enemyQueens | (1UL << enemyKingSquare);
+
+        allPieces = friendlyPieces | enemyPieces;
     }
 
     #endregion
@@ -197,6 +250,7 @@ public static class MoveGenerator
         return moves;
     }
 
+    //TODO: Remove ref here bc unnecessary - span is ref to array anyway so just return a span like normal
     public static int GenerateMoves(ref Span<Move> moves, bool genOnlyCaptures = false) //Returns move count
     {
         moveCount = 0;
@@ -220,6 +274,7 @@ public static class MoveGenerator
         inCheck = false;
         inDoubleCheck = false;
 
+        GeneratePieceBoards();
 
         GenerateAttackMaps();
 
@@ -237,73 +292,72 @@ public static class MoveGenerator
             GenerateKnightMoves(ref moves, Board.knightList[Board.friendlyColorBit][i], genOnlyCaptures);
         }
 
-        for (int i = 0; i < Board.bishopList[Board.friendlyColorBit].Count; i++)
-        {
-            GenerateSlidingMoves(ref moves, Board.bishopList[Board.friendlyColorBit][i], Piece.Bishop, genOnlyCaptures);
-        }
-
-        for (int i = 0; i < Board.rookList[Board.friendlyColorBit].Count; i++)
-        {
-            GenerateSlidingMoves(ref moves, Board.rookList[Board.friendlyColorBit][i], Piece.Rook, genOnlyCaptures);
-        }
-
-        for (int i = 0; i < Board.queenList[Board.friendlyColorBit].Count; i++)
-        {
-            GenerateSlidingMoves(ref moves, Board.queenList[Board.friendlyColorBit][i], Piece.Queen, genOnlyCaptures);
-        }
+        GenerateSlidingMoves(ref moves, genOnlyCaptures);
 
         moves = moves.Slice(0, moveCount);
         return moveCount;
     }
 
-    private static void GenerateSlidingMoves(ref Span<Move> moves, int startSquare, int piece, bool genOnlyCaptures)
+    private static void GenerateSlidingMoves(ref Span<Move> moves, bool genOnlyCaptures)
     {
-        //Debug.Log(BoardHelper.SquareNameFromIndex(startSquare));
-        //Debug.Log("Sliding Piece: " + Convert.ToString(piece, 2));
+        //            Only if blocks check
+        ulong moveMask = checkRayBitMap;
 
-        bool isPinned = IsPinned(startSquare);
+        if (genOnlyCaptures) moveMask &= enemyPieces;
+        else moveMask &= ~friendlyPieces;//Only empty or enemy squares
 
-        if (inCheck && isPinned)
+        ulong orthos = friendlyOrthos;
+        ulong diags = friendlyDiags;
+
+        //Pinned pieces cannot move if king is in check
+        //Credit to seb lague for this if statement
+        if (inCheck)
         {
-            //Piece cannot move
-            //Prob check if this if statement is even worth it performance wise as this is probably a pretty rare situation i think
-            return;
+            orthos &= ~pinRayBitMap;
+            diags &= ~pinRayBitMap;
         }
 
 
-        int startDirIndex = (Piece.Type(piece) == Piece.Bishop) ? 4 : 0;
-        int endDirIndex = (Piece.Type(piece) == Piece.Rook) ? 4 : 8;
-
-        for (int directionIndex = startDirIndex; directionIndex < endDirIndex; directionIndex++)
+        while (orthos != 0)
         {
-            int directionOffset = PrecomputedData.DirectionOffsets[directionIndex];
+            int startSquare = BitBoardHelper.PopFirstBit(ref orthos);
 
-            //If we are pinned we can only move along the pinray - the pinray goes from the kings square to the square the pinned piece is on, before continuing ofc
-            if (isPinned && !IsMovingAlongRay(friendlyKingSquare, startSquare, directionOffset))
+            ulong blockers = MagicData.rookMasks[startSquare] & allPieces;
+            ulong index = (blockers * MagicData.rookMagics[startSquare]) >> MagicData.rookShifts[startSquare];
+
+            ulong moveBoard = MagicData.rookMoveBitboards[startSquare][index] & moveMask;
+
+            if (IsPinned(startSquare))
             {
-                continue; //TODOnt: could prob be slightly more beneficial to just directly calculate the two directions we could possibly move in if were pinned. We would avoid having to check all 8 directions for a pinned queen fx who is always only able to move in 2 directions when pinned (i think)
-                          //Honestly dont think this would be benefitial with the extra overhead compared to how little overhead checking this if statement for 4 times as many directions is
+                moveBoard &= PrecomputedData.directionalMasks[friendlyKingSquare][startSquare] & pinRayBitMap;
             }
 
-
-            for (int n = 0; n < PrecomputedData.NumSquaresToEdge[startSquare][directionIndex]; n++)
+            while (moveBoard != 0)
             {
-                int targetSquare = startSquare + directionOffset * (n + 1);
-                int pieceOnTarget = Board.Squares[targetSquare];
+                int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
+                moves[moveCount++] = new Move(startSquare, targetSquare);
+            }
+        }
 
-                if (Piece.Color(pieceOnTarget) == Board.friendlyColor) break;
 
+        while (diags != 0)
+        {
+            int startSquare = BitBoardHelper.PopFirstBit(ref diags);
 
-                bool isCapture = pieceOnTarget != Piece.None;
-                bool preventsCheck = SquareIsInCheckRay(targetSquare);
+            ulong blockers = MagicData.bishopMasks[startSquare] & allPieces;
+            ulong index = (blockers * MagicData.bishopMagics[startSquare]) >> MagicData.bishopShifts[startSquare];
 
-                if ((!inCheck || preventsCheck) && (isCapture || !genOnlyCaptures)) //If were not in check, or if this move prevents the check
-                {
-                    //TODO: think about implementing quiet moves    if (isCapture || genQuiets)
-                    moves[moveCount++] = new Move(startSquare, targetSquare);
-                }
+            ulong moveBoard = MagicData.bishopMoveBitboards[startSquare][index] & moveMask;
 
-                if (isCapture || preventsCheck) break; //If we hit an enemy piece we cant move further in this direction, if we can block the check on this square, we def wont be able to on any following squares
+            if (IsPinned(startSquare))
+            {
+                moveBoard &= PrecomputedData.directionalMasks[friendlyKingSquare][startSquare] & pinRayBitMap;
+            }
+
+            while (moveBoard != 0)
+            {
+                int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
+                moves[moveCount++] = new Move(startSquare, targetSquare);
             }
         }
     }

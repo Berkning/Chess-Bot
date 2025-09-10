@@ -19,12 +19,15 @@ public static class PrecomputedData
     public static readonly ulong[] kingAttackBitboards = new ulong[64];
 
     public static readonly int[] directionLookup = new int[127];
+    public static readonly ulong[][] directionalMasks = new ulong[64][]; //King Square , Piece Square
+
     public static readonly int[][] kingDistanceLookup = new int[64][];
 
 
     //Mopup
     public static readonly int[] manhattanDistanceFromCenter = new int[64];
     //public static readonly int[] 
+
 
     public const int Up = 8;
     public const int Down = -8;
@@ -140,11 +143,11 @@ public static class PrecomputedData
 
 
 
-                //DirectionLookup
-                for (int i = 0; i < 127; i++)
+                //DirectionLookup //TODO: Move this out of all for loops asap bc literally doing this over on every square for no reason
+                for (int i = 0; i < 127; i++) //pieceSquare - friendlyKingSquare + 63
                 {
                     int offset = i - 63;
-                    int absOffset = System.Math.Abs(offset);
+                    int absOffset = System.Math.Abs(offset); //TODO: Dont think we need this - can just use offset i think
                     int absDir = 1;
                     if (absOffset % 9 == 0)
                     {
@@ -159,8 +162,29 @@ public static class PrecomputedData
                         absDir = 7;
                     }
 
-                    directionLookup[i] = absDir * System.Math.Sign(offset);
+                    int direction = absDir * System.Math.Sign(offset);
+                    directionLookup[i] = direction;
                 }
+
+                //Direction Mask Lookup
+                //TODO: Could theoretically be optimized since we only need a direction, and not the actual square the piece is on
+                directionalMasks[squareIndex] = new ulong[64]; //King is on squareIndex
+                for (int pieceSquare = 0; pieceSquare < 64; pieceSquare++)
+                {
+                    //if (squareIndex == pieceSquare) continue; //If king- and pieceSquare are the same we skip this square
+
+                    int direction = directionLookup[pieceSquare - squareIndex + 63];
+                    ulong mask = 0;
+
+                    for (int i = 0; i < 8; i++) //Start at king square and move in the direction of the piece
+                    {
+                        int targetSquare = squareIndex + direction * i;
+                        if (targetSquare < 64 && targetSquare >= 0) mask = BitBoardHelper.AddSquare(mask, targetSquare);
+                    }
+
+                    directionalMasks[squareIndex][pieceSquare] = mask;
+                }
+
 
 
                 //Distance Lookup

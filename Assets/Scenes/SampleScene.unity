@@ -1231,19 +1231,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 4k3/2p5/1p4p1/8/8/1P1P2P1/4P3/3QK3 w - - 0 1
-  runPerft: 0
+  customFen: 
+  runPerft: 1
   perftDepth: 5
   compareToFish: 0
-  stockFishCompare: 'a2a3: 1373 b2b3: 1368 c2c3: 1440 g2g3: 1308 h2h3: 1371 a2a4:
-    1433 b2b4: 1398 g2g4: 1337 h2h4: 1402 d7c8q: 1459 d7c8r: 1296 d7c8b: 1668 d7c8n:
-    1607 b1d2: 1174 b1a3: 1303 b1c3: 1467 e2g1: 1431 e2c3: 1595 e2g3: 1523 e2d4:
-    1554 e2f4: 1555 c1d2: 1368 c1e3: 1587 c1f4: 1552 c1g5: 1422 c1h6: 1312 c4b3:
-    1275 c4d3: 1269 c4b5: 1332 c4d5: 1375 c4a6: 1256 c4e6: 1438 c4f7: 1328 h1f1:
-    1364 h1g1: 1311 d1d2: 1436 d1d3: 1685 d1d4: 1751 d1d5: 1688 d1d6: 1500 e1f1:
-    1445 e1d2: 978 e1f2: 1269 e1g1: 1376 '
+  stockFishCompare: 'a2a3: 1936679 b2b3: 1904400 c2c3: 2090166 g2g3: 1779903 h2h3:
+    1926608 a2a4: 2101105 b2b4: 1990854 g2g4: 1830854 h2h4: 2015932 d7c8q: 2106366
+    d7c8r: 1628284 d7c8b: 2712122 d7c8n: 2522065 b1d2: 1450852 b1a3: 1777712 b1c3:
+    2191455 e2g1: 2032466 e2c3: 2465011 e2g3: 2302529 e2d4: 2353001 e2f4: 2274063
+    c1d2: 1894062 c1e3: 2484771 c1f4: 2380374 c1g5: 2042591 c1h6: 1748274 c4b3: 1686064
+    c4d3: 1672391 c4b5: 1832566 c4d5: 1934045 c4a6: 1644109 c4e6: 2079471 c4f7: 1817665
+    h1f1: 1911413 h1g1: 1781002 d1d2: 2109913 d1d3: 2792521 d1d4: 2920749 d1d5: 2742654
+    d1d6: 2229266 e1f1: 2154511 e1d2: 1043007 e1f2: 1667505 e1g1: 1979843 '
   doSearch: 0
-  depth: 99
+  depth: 5
   useMoveOrdering: 1
   testGen: 0
   testOrder: 0
@@ -1391,13 +1392,13 @@ MonoBehaviour:
   gamesToPlay: 1000
   uciManager: {fileID: 865560319}
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V8\Adjustable\LichessBot.exe
-  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V8\Adjustable\LichessBot.exe
-  debugMessage: isready
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V9a\LichessBot.exe
+  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V8_ClrTbl\LichessBot.exe
+  debugMessage: table size
   send: 0
   target: 1
   moveDelay: 10
-  logAll: 0
+  logAll: 1
 --- !u!114 &865560321
 MonoBehaviour:
   m_ObjectHideFlags: 0
