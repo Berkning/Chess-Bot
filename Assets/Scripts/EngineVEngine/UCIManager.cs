@@ -9,6 +9,7 @@ namespace EngVEng
         [SerializeField] private EngineManager engineManager;
         [SerializeField] private EngineTimer engineTimer;
         [SerializeField] private int thinkTimeMs = 100;
+        [SerializeField] private int maxMoveCount = 150;
 
         void Start()
         {
@@ -93,7 +94,7 @@ namespace EngVEng
 
                 return;
             }
-            else if (playedMoves.Count > 100)
+            else if (playedMoves.Count > maxMoveCount)
             {
                 Debug.Log("Draw bc exceeded max moves");
                 engineManager.Draw();

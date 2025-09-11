@@ -1372,6 +1372,7 @@ MonoBehaviour:
   engineManager: {fileID: 865560320}
   engineTimer: {fileID: 865560322}
   thinkTimeMs: 100
+  maxMoveCount: 150
 --- !u!114 &865560320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1389,11 +1390,11 @@ MonoBehaviour:
   resultManager: {fileID: 865560321}
   engine1Path: F:\Unity Projects\Lichess Bot\Builds\V9c\LichessBot.exe
   engine2Path: F:\Unity Projects\Lichess Bot\Builds\V8_ClrTbl\LichessBot.exe
-  debugMessage: table size
+  debugMessage: 
   send: 0
   target: 1
-  moveDelay: 10
-  logAll: 1
+  moveDelay: 0
+  logAll: 0
 --- !u!114 &865560321
 MonoBehaviour:
   m_ObjectHideFlags: 0
