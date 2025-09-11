@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class BoardGraphics : MonoBehaviour
 {
+    public static BoardGraphics instance;
+
     [SerializeField] private Color lightColor;
     [SerializeField] private Color darkColor;
     [SerializeField] private Color highlightColor;
@@ -21,6 +23,11 @@ public class BoardGraphics : MonoBehaviour
 
     private MeshRenderer[] squareRenderers;
     private SpriteRenderer[] squarePieceRenderers;
+
+    void Awake()
+    {
+        instance = this;
+    }
 
     void Start()
     {
@@ -85,6 +92,18 @@ public class BoardGraphics : MonoBehaviour
             }
             else squareRenderers[i].sharedMaterial.color = falseColor;
         }
+    }
+
+    ulong bitboard = 0;
+    public void HighlightBitBoardCummulative(ulong board)
+    {
+        bitboard |= board;
+        HighlightBitBoard(bitboard);
+    }
+
+    public void ResetCummulativeBoard()
+    {
+        bitboard = 0;
     }
 
 

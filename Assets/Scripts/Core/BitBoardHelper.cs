@@ -56,4 +56,10 @@ public static class BitBoardHelper
         board &= board - 1UL;
         return z;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int BitCount(ulong board)
+    {
+        return math.countbits(board);
+    }
 }

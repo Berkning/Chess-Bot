@@ -1218,7 +1218,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &692186462
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1231,14 +1231,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 
+  customFen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - '
   runPerft: 0
   perftDepth: 5
   compareToFish: 0
-  stockFishCompare: 'a2a3: 8457 b2b3: 9345 c2c3: 9272 d2d3: 11959 e2e3: 13134 f2f3:
-    8457 g2g3: 9345 h2h3: 8457 a2a4: 9329 b2b4: 9332 c2c4: 9744 d2d4: 12435 e2e4:
-    13160 f2f4: 8929 g2g4: 9328 h2h4: 9329 b1a3: 8885 b1c3: 9755 g1f3: 9748 g1h3:
-    8881 '
+  stockFishCompare: 'e2e3: 745505 g2g3: 271220 a5a6: 968724 e2e4: 597519 g2g4: 892781
+    b4b1: 1160678 b4b2: 818501 b4b3: 941129 b4a4: 745667 b4c4: 1027199 b4d4: 957108
+    b4e4: 860971 b4f4: 174919 a5a4: 868162 '
   doSearch: 0
   depth: 5
   useMoveOrdering: 1
@@ -1327,7 +1326,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &865560317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1388,7 +1387,7 @@ MonoBehaviour:
   gamesToPlay: 1000
   uciManager: {fileID: 865560319}
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V9a\LichessBot.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V9c\LichessBot.exe
   engine2Path: F:\Unity Projects\Lichess Bot\Builds\V8_ClrTbl\LichessBot.exe
   debugMessage: table size
   send: 0

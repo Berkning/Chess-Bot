@@ -53,63 +53,57 @@ public static class MoveGenerator
     {
         GenerateSlidingAttackMap();
 
-        int startDirIndex = 0;
-        int endDirIndex = 8;
+        //int startDirIndex = 0;
+        //int endDirIndex = 8;
 
-        if (Board.queenList[Board.opponentColorBit].Count == 0)
+        //TODO: try: if friendly king is not in sliding attack map dont check for sliding checks? still pins ofc
+
+        //ulong kingOrthoMask = MagicData.rookMoveBitboards[friendlyKingSquare][0]; //All possible ortho moves ignoring other pieces
+        //ulong potentialOrthoAttackers = enemyOrthos & kingOrthoMask; //Bitboard of all orthos in line of sight of the king
+
+
+        ulong kingOrthoMask = MagicData.rookMasks[friendlyKingSquare] & enemyPieces; //Bitboard of enemy ortho attack blcoks by enemy's own pieces
+
+        ulong kingOrthoIndex = (kingOrthoMask * MagicData.rookMagics[friendlyKingSquare]) >> MagicData.rookShifts[friendlyKingSquare];
+
+        ulong kingOrthoAttackMask = MagicData.rookMoveBitboards[friendlyKingSquare][kingOrthoIndex]; //Bitboard of potential ortho attack directions
+
+        ulong kingDiagMask = MagicData.bishopMasks[friendlyKingSquare] & enemyPieces; //Bitboard of enemy diags attack blcoks by enemy's own pieces
+        ulong kingDiagIndex = (kingDiagMask * MagicData.bishopMagics[friendlyKingSquare]) >> MagicData.bishopShifts[friendlyKingSquare];
+
+        ulong kingDiagAttackMask = MagicData.bishopMoveBitboards[friendlyKingSquare][kingDiagIndex]; //Bitboard of potential ortho attack directions
+
+        ulong kingAttackMask = kingOrthoAttackMask | kingDiagAttackMask; //Bitboard of enemy slider attack blcoks - ignoring slider behind slider
+        ulong potentialKingAttackers = (kingOrthoAttackMask & enemyOrthos) | (kingDiagAttackMask & enemyDiags); //Bitboard of all enemy sliders that could be checking or pinning
+
+        //TODO: have precomputed moveBitboard array in MagicData for queen moves - prevents having to do all this for both orthos and diags at runtime
+
+        //Could just check here if kingOrthoAttackMask & enemyOrthos != 0 bc always check, but this is done in the pin checking anyway
+        //BoardGraphics.instance.ResetCummulativeBoard();
+
+        while (potentialKingAttackers != 0) //TODOnt: Massive optimisation - could just precompute a directionMask array that doesn't go to board edge - just to piece - no need to do magic stuff above -> we need attack mask - look above and think
         {
-            startDirIndex = (Board.rookList[Board.opponentColorBit].Count > 0) ? 0 : 4;
-            endDirIndex = (Board.bishopList[Board.opponentColorBit].Count > 0) ? 8 : 4;
-        }
+            int startSquare = BitBoardHelper.PopFirstBit(ref potentialKingAttackers);
+            ulong directionMask = PrecomputedData.directionalMasks[friendlyKingSquare][startSquare]; //Mask of line from king through piece to board edge
+            ulong pinMask = kingAttackMask & directionMask; //Bitboard of line from king to attacking slider - includes slider itself
+            //BoardGraphics.instance.HighlightBitBoardCummulative(directionMask);
+            //Debug.Log("Direciton: " + PrecomputedData.directionLookup[startSquare - friendlyKingSquare + 63]);
 
+            ulong pinBoard = pinMask & friendlyPieces; //Bitboard of all potentially pinned pieces between this slider and the king - if none; were in check
 
-        //loop over all possible attack directions from friendly king
-        for (int directionIndex = startDirIndex; directionIndex < endDirIndex; directionIndex++)
-        {
-            bool isDiagonal = directionIndex > 3;
-            bool friendlyPieceAlongRay = false;
-            ulong currentRayBitMap = 0;
+            int pinCount = BitBoardHelper.BitCount(pinBoard); //Number of pieces in pinboard
 
-
-            for (int n = 0; n < PrecomputedData.NumSquaresToEdge[friendlyKingSquare][directionIndex]; n++)
+            if (pinCount > 1) continue; //More than 1 piece means no pin and no check
+            else if (pinCount == 1)
             {
-                int square = friendlyKingSquare + PrecomputedData.DirectionOffsets[directionIndex] * (n + 1);
-                currentRayBitMap = BitBoardHelper.AddSquare(currentRayBitMap, square);
-                int piece = Board.Squares[square];
-
-                if (piece != Piece.None)
-                {
-                    if (Piece.ColorBit(piece) == Board.friendlyColorBit) //If friendly piece
-                    {
-                        if (!friendlyPieceAlongRay) friendlyPieceAlongRay = true; //First in this direction so possibly pinned
-                        else break; //Second friendly piece = no pin
-                    }
-                    else //if its an enemy piece
-                    {
-                        if ((Piece.IsBishopOrQueen(piece) && isDiagonal) || (Piece.IsRookOrQueen(piece) && !isDiagonal))
-                        {
-
-                            if (friendlyPieceAlongRay)
-                            {
-                                //Piece is pinned
-                                pinRayBitMap |= currentRayBitMap;
-                            }
-                            else
-                            {
-                                //No piece blocking so were in check
-                                checkRayBitMap |= currentRayBitMap;
-                                inDoubleCheck = inCheck;
-                                inCheck = true;
-                            }
-
-                            break;
-                        }
-                        else break; //Enemy piece here is blocking the check and not checking the king
-                    }
-                }
+                pinRayBitMap |= pinMask;
             }
-
-            if (inDoubleCheck) break;
+            else
+            {
+                inDoubleCheck = inCheck;
+                inCheck = true;
+                checkRayBitMap |= pinMask;
+            }
         }
 
 

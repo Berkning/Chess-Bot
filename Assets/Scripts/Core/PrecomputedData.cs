@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public static class PrecomputedData
 {
+    //TODO: check if 2d arrays are more performant than array of array
     // First 4 are orthogonal, last 4 are diagonals (Up, Down, Left, Right, UpRight, DownLeft, UpLeft, DownRight)
     public static readonly int[] DirectionOffsets = { 8, -8, -1, 1, 7, -7, 9, -9 };
     public static readonly int[][] NumSquaresToEdge = new int[64][];
@@ -167,19 +170,67 @@ public static class PrecomputedData
                 }
 
                 //Direction Mask Lookup
-                //TODO: Could theoretically be optimized since we only need a direction, and not the actual square the piece is on
+                //TODOnt: Could theoretically be optimized since we only need a direction, and not the actual square the piece is on
                 directionalMasks[squareIndex] = new ulong[64]; //King is on squareIndex
                 for (int pieceSquare = 0; pieceSquare < 64; pieceSquare++)
                 {
                     //if (squareIndex == pieceSquare) continue; //If king- and pieceSquare are the same we skip this square
 
-                    int direction = directionLookup[pieceSquare - squareIndex + 63];
+                    //int direction = directionLookup[pieceSquare - squareIndex + 63]; //59-60+63 = 62     Can't fucking do this for some reason so have to do it manually ig
                     ulong mask = 0;
+                    int cap = 7;
 
-                    for (int i = 0; i < 8; i++) //Start at king square and move in the direction of the piece
+
+                    int direction;
+
+                    int fileDelta = BoardHelper.IndexToFile(pieceSquare) - BoardHelper.IndexToFile(squareIndex);
+                    int rankDelta = BoardHelper.IndexToRank(pieceSquare) - BoardHelper.IndexToRank(squareIndex);
+
+                    if (fileDelta == 0)
+                    {
+                        direction = Math.Sign(rankDelta) * 8;
+                    }
+                    else if (rankDelta == 0)
+                    {
+                        direction = Math.Sign(fileDelta);
+                        if (direction == Right) cap = 7 - BoardHelper.IndexToFile(squareIndex);
+                        else cap = BoardHelper.IndexToFile(squareIndex);
+                    }
+                    else if (fileDelta == rankDelta || -fileDelta == rankDelta)
+                    {
+                        bool up = Math.Sign(rankDelta) > 0;
+                        bool right = fileDelta > 0;
+
+                        if (right)
+                        {
+                            cap = 7 - BoardHelper.IndexToFile(squareIndex);
+                        }
+                        else cap = BoardHelper.IndexToFile(squareIndex);
+
+                        if (up)
+                        {
+                            direction = right ? UpRight : UpLeft;
+                        }
+                        else
+                        {
+                            direction = right ? DownRight : DownLeft;
+                        }
+                    }
+                    else continue; //Invalid Direction
+
+
+
+
+                    //if (direction == Left || direction == UpLeft || direction == DownLeft) cap = BoardHelper.IndexToFile(squareIndex);
+                    //else if (direction == Right || direction == UpRight || direction == DownRight) cap = 7 - BoardHelper.IndexToFile(squareIndex);
+
+
+                    for (int i = 1; i <= cap; i++) //Start at king square and move in the direction of the piece
                     {
                         int targetSquare = squareIndex + direction * i;
                         if (targetSquare < 64 && targetSquare >= 0) mask = BitBoardHelper.AddSquare(mask, targetSquare);
+
+                        //if (targetSquare == pieceSquare) break;
                     }
 
                     directionalMasks[squareIndex][pieceSquare] = mask;
