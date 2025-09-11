@@ -27,7 +27,7 @@ public static class Search
 
 
 
-    public static Move StartSearch(int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite
+    public static Move StartSearch(int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite TODO: Change to enum
     {
         //return AlphaBeta(depth, negativeInfinity, positiveInfinity);
         cancelSearch = false;
@@ -80,7 +80,7 @@ public static class Search
 
 
 
-    private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta, int numExtensions = 0)//, bool test) //TODO?: Dont waste partial search when cancelled
+    private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta, int numExtensions = 0)//, bool test)
     {
         if (cancelSearch) return 0;
 

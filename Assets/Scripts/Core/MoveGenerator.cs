@@ -162,44 +162,33 @@ public static class MoveGenerator
     {
         opponentSlidingAttackMap = 0;
 
-        PieceList enemyRooks = Board.rookList[Board.opponentColorBit];
-        for (int i = 0; i < enemyRooks.Count; i++)
+        ulong orthos = enemyOrthos;
+        ulong diags = enemyDiags;
+
+        while (orthos != 0)
         {
-            UpdateSlidingAttackPiece(enemyRooks[i], 0, 4);
+            int startSquare = BitBoardHelper.PopFirstBit(ref orthos);
+
+            ulong blockers = MagicData.rookMasks[startSquare] & (allPieces ^ (1UL << friendlyKingSquare)); //Remove friendly king square from blockers so attack ray will continue through it - prevents king from just moving backwards and still being in the ray
+
+            ulong index = (blockers * MagicData.rookMagics[startSquare]) >> MagicData.rookShifts[startSquare];
+
+            ulong moveBoard = MagicData.rookMoveBitboards[startSquare][index];
+
+            opponentSlidingAttackMap |= moveBoard;
         }
 
-        PieceList enemyQueens = Board.queenList[Board.opponentColorBit];
-        for (int i = 0; i < enemyQueens.Count; i++)
+        while (diags != 0)
         {
-            UpdateSlidingAttackPiece(enemyQueens[i], 0, 8);
-        }
+            int startSquare = BitBoardHelper.PopFirstBit(ref diags);
 
-        PieceList enemyBishops = Board.bishopList[Board.opponentColorBit];
-        for (int i = 0; i < enemyBishops.Count; i++)
-        {
-            UpdateSlidingAttackPiece(enemyBishops[i], 4, 8);
-        }
-    }
+            ulong blockers = MagicData.bishopMasks[startSquare] & (allPieces ^ (1UL << friendlyKingSquare)); //Remove friendly king square from blockers so attack ray will continue through it - prevents king from just moving backwards and still being in the ray
 
-    private static void UpdateSlidingAttackPiece(int startSquare, int startDirIndex, int endDirIndex)
-    {
+            ulong index = (blockers * MagicData.bishopMagics[startSquare]) >> MagicData.bishopShifts[startSquare];
 
-        for (int directionIndex = startDirIndex; directionIndex < endDirIndex; directionIndex++)
-        {
-            int currentDirOffset = PrecomputedData.DirectionOffsets[directionIndex];
-            for (int n = 0; n < PrecomputedData.NumSquaresToEdge[startSquare][directionIndex]; n++)
-            {
-                int targetSquare = startSquare + currentDirOffset * (n + 1);
-                int targetSquarePiece = Board.Squares[targetSquare];
-                opponentSlidingAttackMap |= 1ul << targetSquare;
-                if (targetSquare != friendlyKingSquare) //From seb lague - don't have any idea why we need to continue the ray through the king? - Found out why -> prevents king from moving backwards and still being in the check ray
-                {
-                    if (targetSquarePiece != Piece.None)
-                    {
-                        break;
-                    }
-                }
-            }
+            ulong moveBoard = MagicData.bishopMoveBitboards[startSquare][index];
+
+            opponentSlidingAttackMap |= moveBoard;
         }
     }
 

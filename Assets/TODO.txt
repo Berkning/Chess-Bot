@@ -1,2 +1,3 @@
 King to backrank endgame
 Transposition table
+Make max movecount in tournament adjustable - like 70% of results are bc of this setting
