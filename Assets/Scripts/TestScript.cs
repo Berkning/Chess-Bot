@@ -22,6 +22,7 @@ public class TestScript : MonoBehaviour
     private int currentGenIndex = 0;
     [Space, Header("Zobrist")]
     [SerializeField] private bool hashPosition;
+    [Space, Header("Benchmarking"), SerializeField] private bool bench;
 
     void Awake()
     {
@@ -58,15 +59,14 @@ public class TestScript : MonoBehaviour
         // sw.Stop();
         // Debug.Log("Conversion with array took: " + sw.ElapsedMilliseconds + "ms");
 
-
-        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-        sw.Start();
-        for (int i = 0; i < 1000000; i++)
+        if (bench)
         {
-            Zobrist.Hash();
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            Perft.RunFullSuite();
+            sw.Stop();
+            Debug.Log("Benc took: " + sw.ElapsedMilliseconds + "ms");
         }
-        sw.Stop();
-        Debug.Log("Hashing took: " + sw.ElapsedMilliseconds + "ms");
 
 
         return;
@@ -131,7 +131,7 @@ public class TestScript : MonoBehaviour
             doSearch = false;
             System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
-            Debug.Log(BoardHelper.NameMove(Search.StartSearch(depth)));
+            Debug.Log(BoardHelper.NameMove(Search.StartSearch(depth, -2)));
             stopwatch.Stop();
             Debug.Log("Search Took: " + stopwatch.ElapsedMilliseconds + "ms");
         }

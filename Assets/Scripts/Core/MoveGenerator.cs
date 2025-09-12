@@ -8,20 +8,20 @@ public static class MoveGenerator
     private static ulong allPieces;
 
     private static ulong friendlyPieces;
-    private static ulong friendlyPawns;
-    private static ulong friendlyKnights;
-    private static ulong friendlyBishops;
-    private static ulong friendlyRooks;
-    private static ulong friendlyQueens;
+    //private static ulong friendlyPawns;
+    //private static ulong friendlyKnights;
+    //private static ulong friendlyBishops;
+    //private static ulong friendlyRooks;
+    //private static ulong friendlyQueens;
     private static ulong friendlyOrthos;
     private static ulong friendlyDiags;
 
     private static ulong enemyPieces;
-    private static ulong enemyPawns;
-    private static ulong enemyKnights;
-    private static ulong enemyBishops;
-    private static ulong enemyRooks;
-    private static ulong enemyQueens;
+    //private static ulong enemyPawns;
+    //private static ulong enemyKnights;
+    //private static ulong enemyBishops;
+    //private static ulong enemyRooks;
+    //private static ulong enemyQueens;
     private static ulong enemyOrthos;
     private static ulong enemyDiags;
 
@@ -190,25 +190,31 @@ public static class MoveGenerator
     {
         //allPieces = 0; //BitBoardHelper.BitboardFromPieceListArray(Board.allPieceList);
 
-        friendlyPawns = BitBoardHelper.BitboardFromPieceList(Board.pawnList[Board.friendlyColorBit]);
-        friendlyKnights = BitBoardHelper.BitboardFromPieceList(Board.knightList[Board.friendlyColorBit]);
-        friendlyBishops = BitBoardHelper.BitboardFromPieceList(Board.bishopList[Board.friendlyColorBit]);
-        friendlyRooks = BitBoardHelper.BitboardFromPieceList(Board.rookList[Board.friendlyColorBit]);
-        friendlyQueens = BitBoardHelper.BitboardFromPieceList(Board.queenList[Board.friendlyColorBit]);
+        //friendlyPawns = BitBoardHelper.BitboardFromPieceList(Board.pawnList[Board.friendlyColorBit]);
+        //friendlyKnights = BitBoardHelper.BitboardFromPieceList(Board.knightList[Board.friendlyColorBit]);
+        //friendlyBishops = BitBoardHelper.BitboardFromPieceList(Board.bishopList[Board.friendlyColorBit]);
+        //friendlyRooks = BitBoardHelper.BitboardFromPieceList(Board.rookList[Board.friendlyColorBit]);
+        //friendlyQueens = BitBoardHelper.BitboardFromPieceList(Board.queenList[Board.friendlyColorBit]);
 
-        enemyPawns = BitBoardHelper.BitboardFromPieceList(Board.pawnList[Board.opponentColorBit]);
-        enemyKnights = BitBoardHelper.BitboardFromPieceList(Board.knightList[Board.opponentColorBit]);
-        enemyBishops = BitBoardHelper.BitboardFromPieceList(Board.bishopList[Board.opponentColorBit]);
-        enemyRooks = BitBoardHelper.BitboardFromPieceList(Board.rookList[Board.opponentColorBit]);
-        enemyQueens = BitBoardHelper.BitboardFromPieceList(Board.queenList[Board.opponentColorBit]);
+        //enemyPawns = BitBoardHelper.BitboardFromPieceList(Board.pawnList[Board.opponentColorBit]);
+        //enemyKnights = BitBoardHelper.BitboardFromPieceList(Board.knightList[Board.opponentColorBit]);
+        //enemyBishops = BitBoardHelper.BitboardFromPieceList(Board.bishopList[Board.opponentColorBit]);
+        //enemyRooks = BitBoardHelper.BitboardFromPieceList(Board.rookList[Board.opponentColorBit]);
+        //enemyQueens = BitBoardHelper.BitboardFromPieceList(Board.queenList[Board.opponentColorBit]);
 
-        friendlyOrthos = friendlyRooks | friendlyQueens;
-        friendlyDiags = friendlyBishops | friendlyQueens;
-        enemyOrthos = enemyRooks | enemyQueens;
-        enemyDiags = enemyBishops | enemyQueens;
+        int friendlyBit = Board.friendlyColorBit;
+        int enemyBit = Board.opponentColorBit;
 
-        friendlyPieces = friendlyPawns | friendlyKnights | friendlyBishops | friendlyRooks | friendlyQueens | (1UL << friendlyKingSquare);
-        enemyPieces = enemyPawns | enemyKnights | enemyBishops | enemyRooks | enemyQueens | (1UL << enemyKingSquare);
+        ulong friendlyQueens = Board.GetPieceList(Piece.Queen, friendlyBit).bitboard;
+        ulong enemyQueens = Board.GetPieceList(Piece.Queen, enemyBit).bitboard;
+
+        friendlyOrthos = Board.GetPieceList(Piece.Rook, friendlyBit).bitboard | friendlyQueens;//friendlyRooks | friendlyQueens;
+        friendlyDiags = Board.GetPieceList(Piece.Bishop, friendlyBit).bitboard | friendlyQueens;
+        enemyOrthos = Board.GetPieceList(Piece.Rook, enemyBit).bitboard | enemyQueens;
+        enemyDiags = Board.GetPieceList(Piece.Bishop, enemyBit).bitboard | enemyQueens;
+
+        friendlyPieces = Board.GetPieceList(Piece.Pawn, friendlyBit).bitboard | Board.GetPieceList(Piece.Knight, friendlyBit).bitboard | friendlyDiags | friendlyOrthos | (1UL << friendlyKingSquare);
+        enemyPieces = Board.GetPieceList(Piece.Pawn, enemyBit).bitboard | Board.GetPieceList(Piece.Knight, enemyBit).bitboard | enemyDiags | enemyOrthos | (1UL << enemyKingSquare);
 
         allPieces = friendlyPieces | enemyPieces;
     }

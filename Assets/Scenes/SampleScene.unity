@@ -1231,7 +1231,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - '
+  customFen: 
   runPerft: 0
   perftDepth: 5
   compareToFish: 0
@@ -1239,13 +1239,14 @@ MonoBehaviour:
     b4b1: 1160678 b4b2: 818501 b4b3: 941129 b4a4: 745667 b4c4: 1027199 b4d4: 957108
     b4e4: 860971 b4f4: 174919 a5a4: 868162 '
   doSearch: 0
-  depth: 5
+  depth: 9
   useMoveOrdering: 1
   testGen: 0
   testOrder: 0
   moves1: 
   moves2: 
   hashPosition: 0
+  bench: 0
 --- !u!4 &692186463
 Transform:
   m_ObjectHideFlags: 0
@@ -1385,11 +1386,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38015fc910ef3074892bb07e656acf2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gamesToPlay: 1000
+  gamesToPlay: 714
   uciManager: {fileID: 865560319}
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V9c\LichessBot.exe
-  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V8_ClrTbl\LichessBot.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V9d\LichessBot.exe
+  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V1_MateFix\LichessBot.exe
   debugMessage: 
   send: 0
   target: 1

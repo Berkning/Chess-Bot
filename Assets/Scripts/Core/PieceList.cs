@@ -6,6 +6,9 @@ public class PieceList
     private int[] indexMap; //64 length
     private int numPieces;
 
+    public ulong bitboard;
+
+
     public int Count { get { return numPieces; } }
 
     public int this[int index] => occupiedSquares[index];
@@ -17,12 +20,14 @@ public class PieceList
         occupiedSquares = new int[maxPieceCount];
         indexMap = new int[64];
         numPieces = 0;
+        bitboard = 0;
     }
 
     public void AddPieceAtSquare(int square)
     {
         occupiedSquares[numPieces] = square;
         indexMap[square] = numPieces;
+        bitboard ^= 1UL << square;
         numPieces++;
     }
 
@@ -31,6 +36,7 @@ public class PieceList
         int removedPieceIndex = indexMap[square];
         occupiedSquares[removedPieceIndex] = occupiedSquares[numPieces - 1];
         indexMap[occupiedSquares[removedPieceIndex]] = removedPieceIndex;
+        bitboard ^= 1UL << square;
         numPieces--;
     }
 
@@ -48,5 +54,6 @@ public class PieceList
         int index = indexMap[startSquare];
         occupiedSquares[index] = targetSquare;
         indexMap[targetSquare] = index;
+        bitboard ^= (1UL << startSquare) | (1UL << targetSquare);
     }
 }

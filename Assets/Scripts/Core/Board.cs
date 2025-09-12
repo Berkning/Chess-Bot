@@ -47,7 +47,7 @@ public static class Board
 
 
 
-    private static PieceList GetPieceList(int type, int colorBit)
+    public static PieceList GetPieceList(int type, int colorBit)
     {
         return allPieceList[type - 2 + colorBit * 5];
     }
