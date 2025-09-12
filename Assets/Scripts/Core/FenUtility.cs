@@ -1,4 +1,5 @@
-using UnityEngine;
+
+using System;
 
 public static class FenUtility
 {
@@ -106,7 +107,7 @@ public static class FenUtility
                     castleRights |= 0b1000;
                     break;
                 default:
-                    Debug.LogError("Invalid Castle Rights in Fen");
+                    Console.WriteLine("Invalid Castle Rights in Fen");
                     continue;
             }
         }

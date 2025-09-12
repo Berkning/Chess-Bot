@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using UnityEngine;
 
 public static class Search
 {
@@ -10,9 +8,9 @@ public static class Search
 
     private const int maxExtensions = 8;
 
-    private static int positionCount = 0;
-    private static int quiescenseCount = 0;
-    private static int ttHits = 0;
+    //private static int positionCount = 0;
+    //private static int quiescenseCount = 0;
+    //private static int ttHits = 0;
 
     private static Move bestMove;
     private static int bestEval;
@@ -36,9 +34,9 @@ public static class Search
         bestEval = negativeInfinity;
         repetitionTable.Copy(Board.repetitionTable);
 
-        positionCount = 0;
-        quiescenseCount = 0;
-        ttHits = 0;
+        //positionCount = 0;
+        //quiescenseCount = 0;
+        //ttHits = 0;
 
         if (searchTime == -1)
         {
@@ -56,17 +54,18 @@ public static class Search
 
             if (cancelSearch)
             {
-                Debug.Log("info depth " + depth + " score cp " + result + " string partial search"); //TODO: Dont log score bc it always returns 0
+                //Console.WriteLine("info depth " + depth + " score cp " + result + " string partial search"); //TODO: Dont log score bc it always returns 0
+                Console.WriteLine("info depth " + depth + " string partial");
                 break;
             }
-            else Debug.Log("info depth " + depth + " score cp " + result); //TODO: check if matescore and then exit - no need to wait if we have mate
+            else Console.WriteLine("info depth " + depth + " score cp " + result); //TODO: check if matescore and then exit - no need to wait if we have mate
         }
 
         //if (!cancelSearch) TimeManagement.RevokeScheduledCancel();
 
-        Debug.Log(positionCount + " positions");
-        Debug.Log(quiescenseCount + " quiescenseCount");
-        Debug.Log(ttHits + " ttHits");
+        //Console.WriteLine(positionCount + " positions");
+        //Console.WriteLine(quiescenseCount + " quiescenseCount");
+        //Console.WriteLine(ttHits + " ttHits");
         //Debug.Log("Eval: " + result / 100f);
         return bestMove;
     }
@@ -95,8 +94,8 @@ public static class Search
             // the search, which would be shorter than any mate we could find from here.
             // This is done by observing that alpha can't possibly be worse (and likewise
             // beta can't  possibly be better) than being mated in the current position.
-            alpha = Mathf.Max(alpha, -immediateMateScore + plyFromRoot);
-            beta = Mathf.Min(beta, immediateMateScore - plyFromRoot);
+            alpha = Math.Max(alpha, -immediateMateScore + plyFromRoot);
+            beta = Math.Min(beta, immediateMateScore - plyFromRoot);
             if (alpha >= beta)
             {
                 return alpha;
@@ -106,7 +105,7 @@ public static class Search
         int tableEval = transpositionTable.LookupEvaluation(depth, plyFromRoot, alpha, beta);
         if (tableEval != TranspositionTable.LookupFailed)
         {
-            ttHits++;
+            //ttHits++;
             if (plyFromRoot == 0)
             {
                 bestMove = transpositionTable.GetStoredMove();
@@ -118,7 +117,7 @@ public static class Search
         if (depth == 0)
         {
             //positionCount++;
-            quiescenseCount++;
+            //quiescenseCount++;
             //return Evaluation.Evaluate();
             return SearchAllCaptures(alpha, beta);
         }
@@ -202,7 +201,7 @@ public static class Search
         // This prevents situations where a player ony has bad captures available from being evaluated as bad,
         // when the player might have good non-capture moves available.
         int eval = Evaluation.Evaluate();
-        positionCount++;
+        //positionCount++;
 
         if (eval >= beta)
         {
@@ -247,6 +246,6 @@ public static class Search
         {
             return false;
         }
-        return Mathf.Abs(score) > immediateMateScore - 1000;
+        return Math.Abs(score) > immediateMateScore - 1000;
     }
 }

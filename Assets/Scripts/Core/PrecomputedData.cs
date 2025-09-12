@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
-using UnityEngine;
 
 public static class PrecomputedData
 {
@@ -60,10 +58,10 @@ public static class PrecomputedData
                     numDown,
                     numLeft,
                     numRight,
-                    Mathf.Min(numUp, numLeft),
-                    Mathf.Min(numDown, numRight),
-                    Mathf.Min(numUp, numRight),
-                    Mathf.Min(numDown, numLeft)
+                    Math.Min(numUp, numLeft),
+                    Math.Min(numDown, numRight),
+                    Math.Min(numUp, numRight),
+                    Math.Min(numDown, numLeft)
                 };
 
 
@@ -106,7 +104,7 @@ public static class PrecomputedData
 
                     int targetFile = BoardHelper.IndexToFile(targetSquare);
 
-                    if (Mathf.Abs(targetFile - file) > 2) continue; //Detects whether the move wrapped around the board
+                    if (Math.Abs(targetFile - file) > 2) continue; //Detects whether the move wrapped around the board
 
                     knightMoves.Add(targetSquare);
                     BitBoardHelper.AddSquare(ref knightAttackBitboard, targetSquare);
@@ -131,7 +129,7 @@ public static class PrecomputedData
 
                     int targetFile = BoardHelper.IndexToFile(targetSquare);
 
-                    if (Mathf.Abs(targetFile - file) > 1) continue; //Detects if move wraps around the board
+                    if (Math.Abs(targetFile - file) > 1) continue; //Detects if move wraps around the board
 
                     kingMoves.Add(targetSquare);
                     BitBoardHelper.AddSquare(ref kingAttackBitboard, targetSquare);
@@ -239,8 +237,8 @@ public static class PrecomputedData
 
 
                 //Distance Lookup
-                int fileDstFromCentre = Mathf.Max(3 - file, file - 4);
-                int rankDstFromCentre = Mathf.Max(3 - rank, rank - 4);
+                int fileDstFromCentre = Math.Max(3 - file, file - 4);
+                int rankDstFromCentre = Math.Max(3 - rank, rank - 4);
                 manhattanDistanceFromCenter[squareIndex] = fileDstFromCentre + rankDstFromCentre;
 
                 //King Distance Lookup
@@ -251,7 +249,7 @@ public static class PrecomputedData
                     for (int targetFile = 0; targetFile < 8; targetFile++)
                     {
                         int targetSquare = BoardHelper.CoordToIndex(targetFile, targetRank);
-                        int chebyshevDist = Mathf.Max(Mathf.Abs(targetFile - file), Mathf.Abs(targetRank - rank));
+                        int chebyshevDist = Math.Max(Math.Abs(targetFile - file), Math.Abs(targetRank - rank));
 
                         kingDistanceLookup[squareIndex][targetSquare] = chebyshevDist;
                     }

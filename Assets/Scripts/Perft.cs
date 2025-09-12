@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
 
 public static class Perft
 {
@@ -27,16 +25,16 @@ public static class Perft
             //Debug.Log("Trying to play " + BoardHelper.NameMove(move));
             Board.MakeMove(moves[i], true);
             long result = RunSpecifiedDepth(depth - 1);
-            Debug.Log(BoardHelper.NameMove(moves[i]) + ": " + result);
+            Console.WriteLine(BoardHelper.NameMove(moves[i]) + ": " + result);
             results += BoardHelper.NameMove(moves[i]) + ": " + result + "\n";
             Board.UnMakeMove(moves[i], true);
             ulong after = Board.currentGameState;
 
-            Debug.Assert(before == after, "State mismatch - Before: " + before + " After:" + after);
+            //Debug.Assert(before == after, "State mismatch - Before: " + before + " After:" + after);
             totalCount += result;
         }
 
-        Debug.Log("Total Nodes: " + totalCount);
+        Console.WriteLine("Total Nodes: " + totalCount);
 
         MoveGenerator.promotionMode = prevPromotionMode; //Set the promotionmode back to what it was before
 
@@ -60,8 +58,8 @@ public static class Perft
             long timeMS = stopwatch.ElapsedMilliseconds;
             long nodesPerSecond = timeMS == 0 ? result * 1000L : result / timeMS * 1000L;
 
-            Debug.Log("Depth: " + i + " ply   Result: " + result + " Positions   Time: " + timeMS + "ms   NPS: " + nodesPerSecond);
-            if (compareToCorrect) Debug.Log("Passed: " + (result == correctResults[i]) + "   Off By: " + (correctResults[i] - result));
+            Console.WriteLine("Depth: " + i + " ply   Result: " + result + " Positions   Time: " + timeMS + "ms   NPS: " + nodesPerSecond);
+            if (compareToCorrect) Console.WriteLine("Passed: " + (result == correctResults[i]) + "   Off By: " + (correctResults[i] - result));
         }
     }
 
@@ -79,8 +77,8 @@ public static class Perft
             long timeMS = stopwatch.ElapsedMilliseconds;
             long nodesPerSecond = timeMS == 0 ? result * 1000L : result / timeMS * 1000L;
 
-            Debug.Log("Depth: " + i + " ply   Result: " + result + " Positions   Time: " + timeMS + "ms   NPS: " + nodesPerSecond);
-            if (compareToCorrect) Debug.Log("Passed: " + (result == correctResults[i]) + "   Off By: " + (correctResults[i] - result));
+            Console.WriteLine("Depth: " + i + " ply   Result: " + result + " Positions   Time: " + timeMS + "ms   NPS: " + nodesPerSecond);
+            if (compareToCorrect) Console.WriteLine("Passed: " + (result == correctResults[i]) + "   Off By: " + (correctResults[i] - result));
 
             await Task.Yield();
         }
@@ -149,10 +147,10 @@ public static class Perft
 
             if (!passed) passedAll = false;
             //Debug.Log("Fen: " + component.fen + " Ply: " + component.depth + " Nodes: " + result + " Passed: " + passed + (passed ? "" : " Expected: " + component.correctResult));
-            Debug.Log("Test " + (i + 1) + " - Ply: " + component.depth + " Nodes: " + result + " Passed: " + passed + (passed ? "" : " Expected: " + component.correctResult) + "   Fen: " + component.fen);
+            Console.WriteLine("Test " + (i + 1) + " - Ply: " + component.depth + " Nodes: " + result + " Passed: " + passed + (passed ? "" : " Expected: " + component.correctResult) + "   Fen: " + component.fen);
         }
 
-        Debug.Log(passedAll ? "Suite Passed" : "Suite Failed");
+        Console.WriteLine(passedAll ? "Suite Passed" : "Suite Failed");
 
         MoveGenerator.promotionMode = prevPromotionMode;
     }

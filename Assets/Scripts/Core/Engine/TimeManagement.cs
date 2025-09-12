@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 
 public static class TimeManagement
 {
@@ -32,7 +31,7 @@ public static class TimeManagement
 
     private static async Task CancelTimer(CancellationToken token, int time)
     {
-        Debug.Log("Cancel Timer Started");
+        //Debug.Log("Cancel Timer Started");
         //await Awaitable.BackgroundThreadAsync();
 
 
@@ -40,12 +39,12 @@ public static class TimeManagement
 
         if (!token.IsCancellationRequested)
         {
-            Debug.Log("Cancelling");
+            //Debug.Log("Cancelling");
             Search.cancelSearch = true;
         }
         else
         {
-            Debug.Log("Timer Cancelled");
+            //Debug.Log("Timer Cancelled");
         }
     }
 }

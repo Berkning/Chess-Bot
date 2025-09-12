@@ -1,4 +1,5 @@
-using UnityEngine;
+
+using System;
 
 public static class Evaluation
 {
@@ -57,7 +58,7 @@ public static class Evaluation
         if (material < 13.3) return 2f;
         //stage = -0.0006f * material * material + 0.0091f * material + 2;
         //stage = -0.035f * material + 2.645f;
-        return Mathf.Max(-0.0008f * material * material + 0.0213f * material + 1.7824f, 0f);
+        return Math.Max(-0.0008f * material * material + 0.0213f * material + 1.7824f, 0f);
     }
 
     public static int GetPieceTypeValue(int type)
@@ -72,7 +73,7 @@ public static class Evaluation
             case Piece.Queen: return QueenValue;
         }
 
-        Debug.LogError("Invalid Piece Type: " + type);
+        Console.WriteLine("Invalid Piece Type: " + type);
         return -1234567;
     }
 }

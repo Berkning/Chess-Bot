@@ -1,5 +1,5 @@
+
 using System;
-using UnityEngine;
 
 public static class Positioning
 {
@@ -80,9 +80,9 @@ public static class Positioning
 
         //Mopup
         int enemyKingSquare = colorBit == 0 ? Board.blackKingSquare : Board.whiteKingSquare;
-        float endgameMultiplier = Mathf.Max(Evaluation.gameStage - 1f, 0f);
+        float endgameMultiplier = Math.Max(Evaluation.gameStage - 1f, 0f);
 
-        score += Mathf.CeilToInt(10f * PrecomputedData.manhattanDistanceFromCenter[enemyKingSquare] * endgameMultiplier);
+        score += (int)Math.Ceiling(10f * PrecomputedData.manhattanDistanceFromCenter[enemyKingSquare] * endgameMultiplier);
 
         //TODO: Move king closer to enemy king in endgame as well
         //score += Mathf.CeilToInt(10f * (7f - PrecomputedData.kingDistanceLookup[kingSquare][enemyKingSquare]) * endgameMultiplier);

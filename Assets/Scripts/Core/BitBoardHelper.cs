@@ -51,7 +51,7 @@ public static class BitBoardHelper
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PopFirstBit(ref ulong board)
     {
-        //BitOperations.TrailingZeroCount(2UL);
+        //int z = BitOperations.TrailingZeroCount(board);
         int z = math.tzcnt(board);
         board &= board - 1UL;
         return z;
