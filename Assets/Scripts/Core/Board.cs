@@ -45,7 +45,13 @@ public static class Board
     public static RepetitionTable repetitionTable;
 
 
+    //Bitboards
+    public static ulong allPieces;
+    private static ulong[] pieceBitboards = new ulong[10];
 
+    public static ulong[] colorPieces = new ulong[2];
+    //public static ulong[] orthos = new ulong[2];
+    //public static ulong[] diags = new ulong[2];
 
 
     private static PieceList GetPieceList(int type, int colorBit)
@@ -53,36 +59,81 @@ public static class Board
         return allPieceList[type - 2 + colorBit * 5];
     }
 
+    public static ulong GetPieceBitboard(int type, int colorBit)
+    {
+        return pieceBitboards[type - 2 + colorBit * 5];
+    }
+
     public static void AddPiece(int square, int piece)
     {
         Squares[square] = piece;
 
+        if (piece == Piece.None) return; //FIXME: maybe add checks for this in code instead bc seems inefficient
+
         int type = Piece.Type(piece);
+        int colorBit = Piece.ColorBit(piece);
+
+        ulong squareBoard = 1UL << square;
+        allPieces ^= squareBoard;
+        colorPieces[colorBit] ^= squareBoard;
 
         if (type == Piece.King) //No need to do zobrist stuff here bc only adding king when loading fen
         {
-            int color = Piece.Color(piece);
-            if (color == Piece.White) whiteKingSquare = square;
+            if (colorBit == 0) whiteKingSquare = square;
             else blackKingSquare = square;
 
             return;
         }
-        else if (type == Piece.None) return; //TODO: prob remove somehow, bc performance
+        //else if (type == Piece.None) return; //TODOne: prob remove somehow, bc performance
 
-        int colorBit = Piece.ColorBit(piece);
+
+        int listIndex = type - 2 + colorBit * 5;
+
+        pieceBitboards[listIndex] ^= squareBoard; //Add piece to its bitboard
+
+        //if (Piece.IsRookOrQueen(piece)) //TODO: could save having to call these functions and doing an and operation three times with the type mask
+        //{
+        //    orthos[colorBit] ^= squareBoard;
+        //}
+
+        //if (Piece.IsBishopOrQueen(piece))
+        //{
+        //    diags[colorBit] ^= squareBoard;
+        //}
+
 
         currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, square]; //Add piece to zobrist
 
-        GetPieceList(type, colorBit).AddPieceAtSquare(square);
+        allPieceList[listIndex].AddPieceAtSquare(square);
     }
 
     public static void MovePiece(int startSquare, int targetSquare) //WARNING: Target square has to be empty!!!!
     {
         int piece = Squares[startSquare];
+        if (piece == Piece.None) return; //FIXME: maybe add checks for this in code instead bc seems inefficient
+
         int type = Piece.Type(piece);
         int colorBit = Piece.ColorBit(piece);
 
-        GetPieceList(type, colorBit).MovePiece(startSquare, targetSquare);
+        ulong moveBoard = (1UL << startSquare) | (1UL << targetSquare); // Bitboard of both target- and startSquare
+        int listIndex = type - 2 + colorBit * 5;
+
+        allPieces ^= moveBoard;
+        colorPieces[colorBit] ^= moveBoard;
+        pieceBitboards[listIndex] ^= moveBoard; //Move piece on its bitboard
+
+        //if (Piece.IsRookOrQueen(piece)) //TODO: could save having to call these functions and doing an and operation three times with the type mask
+        //{
+        //    orthos[colorBit] ^= moveBoard;
+        //}
+
+        //if (Piece.IsBishopOrQueen(piece))
+        //{
+        //    diags[colorBit] ^= moveBoard;
+        //}
+
+
+        allPieceList[listIndex].MovePiece(startSquare, targetSquare);
 
         currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, startSquare]; //Remove piece from zobrist on startSquare
         currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, targetSquare]; //Add piece to zobrist on targetSquare
@@ -94,6 +145,8 @@ public static class Board
     public static void RemovePiece(int square)
     {
         int piece = Squares[square];
+        if (piece == Piece.None) return; //FIXME: maybe add checks for this in code instead bc seems inefficient
+
         Squares[square] = Piece.None;
 
         int type = Piece.Type(piece);
@@ -101,7 +154,25 @@ public static class Board
 
         currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, square]; //Remove piece from zobrist
 
-        GetPieceList(type, colorBit).RemovePieceAtSquare(square);
+
+        ulong squareBoard = 1UL << square;
+        int listIndex = type - 2 + colorBit * 5;
+
+        allPieces ^= squareBoard;
+        colorPieces[colorBit] ^= squareBoard;
+        pieceBitboards[listIndex] ^= squareBoard; //Remove piece from its bitboard
+
+        //if (Piece.IsRookOrQueen(piece)) //TODO: could save having to call these functions and doing an and operation three times with the type mask
+        //{
+        //orthos[colorBit] ^= squareBoard;
+        //}
+
+        //if (Piece.IsBishopOrQueen(piece))
+        //{
+        //diags[colorBit] ^= squareBoard;
+        //}
+
+        allPieceList[listIndex].RemovePieceAtSquare(square);
     }
 
 
@@ -142,6 +213,8 @@ public static class Board
             rookList[1],
             queenList[1],
         };
+
+        pieceBitboards = new ulong[10]; //Same structure as allPieceList
     }
 
 
@@ -150,6 +223,14 @@ public static class Board
     {
         repetitionTable.Clear();
         Array.Clear(Squares, 0, 64);
+
+        allPieces = 0;
+        pieceBitboards = new ulong[10];
+
+        colorPieces = new ulong[2];
+        //orthos = new ulong[2];
+        //diags = new ulong[2];
+
 
         foreach (PieceList pieceList in allPieceList)
         {
@@ -168,7 +249,7 @@ public static class Board
 
     public static void MakeMove(Move move, bool inSearch = false)
     {
-        if (Squares[move.startSquare] == Piece.None) Debug.Log("Tried to move null piece " + BoardHelper.NameMove(move) + " " + move.flag);
+        if (Squares[move.startSquare] == Piece.None) Debug.Log("Tried to move null piece " + BoardHelper.NameMove(move) + " " + move.flag); //TODO: Can remove for performance sake
 
         uint prevGameState = currentGameState;
         uint prevCastleRights = (prevGameState & castleRightsMask) >> 9;
@@ -274,9 +355,14 @@ public static class Board
             Squares[move.startSquare] = Piece.None;
 
             int pieceColor = Piece.Color(Squares[move.targetSquare]);
+            ulong moveBoard = (1UL << move.startSquare) | (1UL << move.targetSquare);
+
+            allPieces ^= moveBoard;
+
             if (pieceColor == Piece.White)
             {
                 whiteKingSquare = move.targetSquare;
+                colorPieces[0] ^= moveBoard;
                 prevCastleRights &= ~0b0101U; //Turn off white castling bc king moved
                 currentZobrist ^= Zobrist.piecesArray[0, 0, move.startSquare]; //Remove white king from prev square in zobrist
                 currentZobrist ^= Zobrist.piecesArray[0, 0, move.targetSquare]; //Place white king on new square in zobrist
@@ -284,6 +370,7 @@ public static class Board
             else
             {
                 blackKingSquare = move.targetSquare;
+                colorPieces[1] ^= moveBoard;
                 prevCastleRights &= ~0b1010U; //Turn off black castling bc king moved
                 currentZobrist ^= Zobrist.piecesArray[0, 1, move.startSquare]; //Remove black king from prev square in zobrist
                 currentZobrist ^= Zobrist.piecesArray[0, 1, move.targetSquare]; //Place black king on new square in zobrist
@@ -377,15 +464,21 @@ public static class Board
             Squares[move.startSquare] = Squares[move.targetSquare];
 
             int pieceColor = Piece.Color(Squares[move.startSquare]);
+            ulong moveBoard = (1UL << move.startSquare) | (1UL << move.targetSquare);
+
+            allPieces ^= moveBoard;
+
             if (pieceColor == Piece.White)
             {
                 whiteKingSquare = move.startSquare;
+                colorPieces[0] ^= moveBoard;
                 currentZobrist ^= Zobrist.piecesArray[0, 0, move.targetSquare];
                 currentZobrist ^= Zobrist.piecesArray[0, 0, move.startSquare];
             }
             else
             {
                 blackKingSquare = move.startSquare;
+                colorPieces[1] ^= moveBoard;
                 currentZobrist ^= Zobrist.piecesArray[0, 1, move.targetSquare];
                 currentZobrist ^= Zobrist.piecesArray[0, 1, move.startSquare];
             }

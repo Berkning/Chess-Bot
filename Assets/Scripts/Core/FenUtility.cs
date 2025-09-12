@@ -69,7 +69,7 @@ public static class FenUtility
                     }
 
                     //Board.Squares[BoardHelper.CoordToIndex(file, rank)] = pieceType | pieceColor;
-                    Board.AddPiece(BoardHelper.CoordToIndex(file, rank), pieceType | pieceColor);
+                    if (pieceType != 0) Board.AddPiece(BoardHelper.CoordToIndex(file, rank), pieceType | pieceColor);
                     file++;
                 }
             }

@@ -9,27 +9,6 @@ public static class MoveGenerator
     public enum PromotionMode { All, KnightAndQueen };
     public static PromotionMode promotionMode = PromotionMode.KnightAndQueen;
 
-    private static ulong allPieces;
-
-    private static ulong friendlyPieces;
-    private static ulong friendlyPawns;
-    private static ulong friendlyKnights;
-    private static ulong friendlyBishops;
-    private static ulong friendlyRooks;
-    private static ulong friendlyQueens;
-    private static ulong friendlyOrthos;
-    private static ulong friendlyDiags;
-
-    private static ulong enemyPieces;
-    private static ulong enemyPawns;
-    private static ulong enemyKnights;
-    private static ulong enemyBishops;
-    private static ulong enemyRooks;
-    private static ulong enemyQueens;
-    private static ulong enemyOrthos;
-    private static ulong enemyDiags;
-
-
     public static ulong oponnentPawnAttackMap;
     public static ulong opponentKnightAttackMap;
     public static ulong opponentSlidingAttackMap;
@@ -46,6 +25,8 @@ public static class MoveGenerator
     private static int friendlyIndexOffset;
     private static int opponentIndexOffset;
 
+    private static ulong enemyOrthos;
+    private static ulong enemyDiags;
 
     #region LegalityMaps
 
@@ -61,6 +42,7 @@ public static class MoveGenerator
         //ulong kingOrthoMask = MagicData.rookMoveBitboards[friendlyKingSquare][0]; //All possible ortho moves ignoring other pieces
         //ulong potentialOrthoAttackers = enemyOrthos & kingOrthoMask; //Bitboard of all orthos in line of sight of the king
 
+        ulong enemyPieces = Board.colorPieces[Board.opponentColorBit];
 
         ulong kingOrthoMask = MagicData.rookMasks[friendlyKingSquare] & enemyPieces; //Bitboard of enemy ortho attack blcoks by enemy's own pieces
 
@@ -89,7 +71,7 @@ public static class MoveGenerator
             //BoardGraphics.instance.HighlightBitBoardCummulative(directionMask);
             //Debug.Log("Direciton: " + PrecomputedData.directionLookup[startSquare - friendlyKingSquare + 63]);
 
-            ulong pinBoard = pinMask & friendlyPieces; //Bitboard of all potentially pinned pieces between this slider and the king - if none; were in check
+            ulong pinBoard = pinMask & Board.colorPieces[Board.friendlyColorBit]; //Bitboard of all potentially pinned pieces between this slider and the king - if none; were in check
 
             int pinCount = BitBoardHelper.BitCount(pinBoard); //Number of pieces in pinboard
 
@@ -156,6 +138,10 @@ public static class MoveGenerator
     {
         opponentSlidingAttackMap = 0;
 
+        ulong queens = Board.GetPieceBitboard(Piece.Queen, Board.opponentColorBit); //Only used in the next two lines
+        enemyOrthos = Board.GetPieceBitboard(Piece.Rook, Board.opponentColorBit) | queens;//Board.orthos[Board.opponentColorBit];
+        enemyDiags = Board.GetPieceBitboard(Piece.Bishop, Board.opponentColorBit) | queens;//Board.diags[Board.opponentColorBit];
+
         ulong orthos = enemyOrthos;
         ulong diags = enemyDiags;
 
@@ -163,7 +149,7 @@ public static class MoveGenerator
         {
             int startSquare = BitBoardHelper.PopFirstBit(ref orthos);
 
-            ulong blockers = MagicData.rookMasks[startSquare] & (allPieces ^ (1UL << friendlyKingSquare)); //Remove friendly king square from blockers so attack ray will continue through it - prevents king from just moving backwards and still being in the ray
+            ulong blockers = MagicData.rookMasks[startSquare] & (Board.allPieces ^ (1UL << friendlyKingSquare)); //Remove friendly king square from blockers so attack ray will continue through it - prevents king from just moving backwards and still being in the ray
 
             ulong index = (blockers * MagicData.rookMagics[startSquare]) >> MagicData.rookShifts[startSquare];
 
@@ -176,7 +162,7 @@ public static class MoveGenerator
         {
             int startSquare = BitBoardHelper.PopFirstBit(ref diags);
 
-            ulong blockers = MagicData.bishopMasks[startSquare] & (allPieces ^ (1UL << friendlyKingSquare)); //Remove friendly king square from blockers so attack ray will continue through it - prevents king from just moving backwards and still being in the ray
+            ulong blockers = MagicData.bishopMasks[startSquare] & (Board.allPieces ^ (1UL << friendlyKingSquare)); //Remove friendly king square from blockers so attack ray will continue through it - prevents king from just moving backwards and still being in the ray
 
             ulong index = (blockers * MagicData.bishopMagics[startSquare]) >> MagicData.bishopShifts[startSquare];
 
@@ -188,36 +174,6 @@ public static class MoveGenerator
 
     #endregion
 
-    #region PieceBoards
-
-    private static void GeneratePieceBoards() //TODO: would be more performant to keep track of these and update them in board on make an unmake move
-    {
-        //allPieces = 0; //BitBoardHelper.BitboardFromPieceListArray(Board.allPieceList);
-
-        friendlyPawns = BitBoardHelper.BitboardFromPieceList(Board.pawnList[Board.friendlyColorBit]);
-        friendlyKnights = BitBoardHelper.BitboardFromPieceList(Board.knightList[Board.friendlyColorBit]);
-        friendlyBishops = BitBoardHelper.BitboardFromPieceList(Board.bishopList[Board.friendlyColorBit]);
-        friendlyRooks = BitBoardHelper.BitboardFromPieceList(Board.rookList[Board.friendlyColorBit]);
-        friendlyQueens = BitBoardHelper.BitboardFromPieceList(Board.queenList[Board.friendlyColorBit]);
-
-        enemyPawns = BitBoardHelper.BitboardFromPieceList(Board.pawnList[Board.opponentColorBit]);
-        enemyKnights = BitBoardHelper.BitboardFromPieceList(Board.knightList[Board.opponentColorBit]);
-        enemyBishops = BitBoardHelper.BitboardFromPieceList(Board.bishopList[Board.opponentColorBit]);
-        enemyRooks = BitBoardHelper.BitboardFromPieceList(Board.rookList[Board.opponentColorBit]);
-        enemyQueens = BitBoardHelper.BitboardFromPieceList(Board.queenList[Board.opponentColorBit]);
-
-        friendlyOrthos = friendlyRooks | friendlyQueens;
-        friendlyDiags = friendlyBishops | friendlyQueens;
-        enemyOrthos = enemyRooks | enemyQueens;
-        enemyDiags = enemyBishops | enemyQueens;
-
-        friendlyPieces = friendlyPawns | friendlyKnights | friendlyBishops | friendlyRooks | friendlyQueens | (1UL << friendlyKingSquare);
-        enemyPieces = enemyPawns | enemyKnights | enemyBishops | enemyRooks | enemyQueens | (1UL << enemyKingSquare);
-
-        allPieces = friendlyPieces | enemyPieces;
-    }
-
-    #endregion
 
 
 
@@ -257,8 +213,6 @@ public static class MoveGenerator
         inCheck = false;
         inDoubleCheck = false;
 
-        GeneratePieceBoards();
-
         GenerateAttackMaps();
 
         GenerateKingMoves(ref moves, genOnlyCaptures);
@@ -286,11 +240,12 @@ public static class MoveGenerator
         //            Only if blocks check
         ulong moveMask = checkRayBitMap;
 
-        if (genOnlyCaptures) moveMask &= enemyPieces;
-        else moveMask &= ~friendlyPieces;//Only empty or enemy squares
+        if (genOnlyCaptures) moveMask &= Board.colorPieces[Board.opponentColorBit];
+        else moveMask &= ~Board.colorPieces[Board.friendlyColorBit];//Only empty or enemy squares
 
-        ulong orthos = friendlyOrthos;
-        ulong diags = friendlyDiags;
+        ulong queens = Board.GetPieceBitboard(Piece.Queen, Board.friendlyColorBit); //Only used in the next two lines
+        ulong orthos = Board.GetPieceBitboard(Piece.Rook, Board.friendlyColorBit) | queens; //Board.orthos[Board.friendlyColorBit];
+        ulong diags = Board.GetPieceBitboard(Piece.Bishop, Board.friendlyColorBit) | queens;//Board.diags[Board.friendlyColorBit];
 
         //Pinned pieces cannot move if king is in check
         //Credit to seb lague for this if statement
@@ -305,7 +260,7 @@ public static class MoveGenerator
         {
             int startSquare = BitBoardHelper.PopFirstBit(ref orthos);
 
-            ulong blockers = MagicData.rookMasks[startSquare] & allPieces;
+            ulong blockers = MagicData.rookMasks[startSquare] & Board.allPieces;
             ulong index = (blockers * MagicData.rookMagics[startSquare]) >> MagicData.rookShifts[startSquare];
 
             ulong moveBoard = MagicData.rookMoveBitboards[startSquare][index] & moveMask;
@@ -327,7 +282,7 @@ public static class MoveGenerator
         {
             int startSquare = BitBoardHelper.PopFirstBit(ref diags);
 
-            ulong blockers = MagicData.bishopMasks[startSquare] & allPieces;
+            ulong blockers = MagicData.bishopMasks[startSquare] & Board.allPieces;
             ulong index = (blockers * MagicData.bishopMagics[startSquare]) >> MagicData.bishopShifts[startSquare];
 
             ulong moveBoard = MagicData.bishopMoveBitboards[startSquare][index] & moveMask;
@@ -347,6 +302,8 @@ public static class MoveGenerator
 
     private static void GenerateKingMoves(ref Span<Move> moves, bool genOnlyCaptures)
     {
+        //TODO: Could prob be easily optimized with bitboards
+
         for (int i = 0; i < PrecomputedData.KingMoves[friendlyKingSquare].Length; i++)
         {
             int targetSquare = PrecomputedData.KingMoves[friendlyKingSquare][i];
@@ -404,6 +361,8 @@ public static class MoveGenerator
 
     private static void GeneratePawnMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
     {
+        //TODO: use bitboards for pawn moves
+
         int moveDir = Board.friendlyColor == Piece.White ? PrecomputedData.Up : PrecomputedData.Down;
         int targetSquare = startSquare + moveDir;//One move up/down
 
