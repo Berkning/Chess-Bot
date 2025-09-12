@@ -50,8 +50,8 @@ public static class Board
     private static ulong[] pieceBitboards = new ulong[10];
 
     public static ulong[] colorPieces = new ulong[2];
-    //public static ulong[] orthos = new ulong[2];
-    //public static ulong[] diags = new ulong[2];
+    public static ulong[] orthos = new ulong[2];
+    public static ulong[] diags = new ulong[2];
 
 
     private static PieceList GetPieceList(int type, int colorBit)
@@ -91,15 +91,15 @@ public static class Board
 
         pieceBitboards[listIndex] ^= squareBoard; //Add piece to its bitboard
 
-        //if (Piece.IsRookOrQueen(piece)) //TODO: could save having to call these functions and doing an and operation three times with the type mask
-        //{
-        //    orthos[colorBit] ^= squareBoard;
-        //}
+        if (Piece.IsRookOrQueen(piece)) //TODO: could save having to call these functions and doing an and operation three times with the type mask
+        {
+            orthos[colorBit] ^= squareBoard;
+        }
 
-        //if (Piece.IsBishopOrQueen(piece))
-        //{
-        //    diags[colorBit] ^= squareBoard;
-        //}
+        if (Piece.IsBishopOrQueen(piece))
+        {
+            diags[colorBit] ^= squareBoard;
+        }
 
 
         currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, square]; //Add piece to zobrist
@@ -122,15 +122,15 @@ public static class Board
         colorPieces[colorBit] ^= moveBoard;
         pieceBitboards[listIndex] ^= moveBoard; //Move piece on its bitboard
 
-        //if (Piece.IsRookOrQueen(piece)) //TODO: could save having to call these functions and doing an and operation three times with the type mask
-        //{
-        //    orthos[colorBit] ^= moveBoard;
-        //}
+        if (Piece.IsRookOrQueen(piece)) //TODO: could save having to call these functions and doing an and operation three times with the type mask
+        {
+            orthos[colorBit] ^= moveBoard;
+        }
 
-        //if (Piece.IsBishopOrQueen(piece))
-        //{
-        //    diags[colorBit] ^= moveBoard;
-        //}
+        if (Piece.IsBishopOrQueen(piece))
+        {
+            diags[colorBit] ^= moveBoard;
+        }
 
 
         allPieceList[listIndex].MovePiece(startSquare, targetSquare);
@@ -162,15 +162,15 @@ public static class Board
         colorPieces[colorBit] ^= squareBoard;
         pieceBitboards[listIndex] ^= squareBoard; //Remove piece from its bitboard
 
-        //if (Piece.IsRookOrQueen(piece)) //TODO: could save having to call these functions and doing an and operation three times with the type mask
-        //{
-        //orthos[colorBit] ^= squareBoard;
-        //}
+        if (Piece.IsRookOrQueen(piece)) //TODO: could save having to call these functions and doing an and operation three times with the type mask
+        {
+            orthos[colorBit] ^= squareBoard;
+        }
 
-        //if (Piece.IsBishopOrQueen(piece))
-        //{
-        //diags[colorBit] ^= squareBoard;
-        //}
+        if (Piece.IsBishopOrQueen(piece))
+        {
+            diags[colorBit] ^= squareBoard;
+        }
 
         allPieceList[listIndex].RemovePieceAtSquare(square);
     }
@@ -228,8 +228,8 @@ public static class Board
         pieceBitboards = new ulong[10];
 
         colorPieces = new ulong[2];
-        //orthos = new ulong[2];
-        //diags = new ulong[2];
+        orthos = new ulong[2];
+        diags = new ulong[2];
 
 
         foreach (PieceList pieceList in allPieceList)

@@ -25,9 +25,6 @@ public static class MoveGenerator
     private static int friendlyIndexOffset;
     private static int opponentIndexOffset;
 
-    private static ulong enemyOrthos;
-    private static ulong enemyDiags;
-
     #region LegalityMaps
 
     private static void GenerateAttackMaps()
@@ -56,7 +53,7 @@ public static class MoveGenerator
         ulong kingDiagAttackMask = MagicData.bishopMoveBitboards[friendlyKingSquare][kingDiagIndex]; //Bitboard of potential ortho attack directions
 
         ulong kingAttackMask = kingOrthoAttackMask | kingDiagAttackMask; //Bitboard of enemy slider attack blcoks - ignoring slider behind slider
-        ulong potentialKingAttackers = (kingOrthoAttackMask & enemyOrthos) | (kingDiagAttackMask & enemyDiags); //Bitboard of all enemy sliders that could be checking or pinning
+        ulong potentialKingAttackers = (kingOrthoAttackMask & Board.orthos[Board.opponentColorBit]) | (kingDiagAttackMask & Board.diags[Board.opponentColorBit]); //Bitboard of all enemy sliders that could be checking or pinning
 
         //TODO: have precomputed moveBitboard array in MagicData for queen moves - prevents having to do all this for both orthos and diags at runtime
 
@@ -138,12 +135,8 @@ public static class MoveGenerator
     {
         opponentSlidingAttackMap = 0;
 
-        ulong queens = Board.GetPieceBitboard(Piece.Queen, Board.opponentColorBit); //Only used in the next two lines
-        enemyOrthos = Board.GetPieceBitboard(Piece.Rook, Board.opponentColorBit) | queens;//Board.orthos[Board.opponentColorBit];
-        enemyDiags = Board.GetPieceBitboard(Piece.Bishop, Board.opponentColorBit) | queens;//Board.diags[Board.opponentColorBit];
-
-        ulong orthos = enemyOrthos;
-        ulong diags = enemyDiags;
+        ulong orthos = Board.orthos[Board.opponentColorBit];
+        ulong diags = Board.diags[Board.opponentColorBit];
 
         while (orthos != 0)
         {
@@ -243,9 +236,8 @@ public static class MoveGenerator
         if (genOnlyCaptures) moveMask &= Board.colorPieces[Board.opponentColorBit];
         else moveMask &= ~Board.colorPieces[Board.friendlyColorBit];//Only empty or enemy squares
 
-        ulong queens = Board.GetPieceBitboard(Piece.Queen, Board.friendlyColorBit); //Only used in the next two lines
-        ulong orthos = Board.GetPieceBitboard(Piece.Rook, Board.friendlyColorBit) | queens; //Board.orthos[Board.friendlyColorBit];
-        ulong diags = Board.GetPieceBitboard(Piece.Bishop, Board.friendlyColorBit) | queens;//Board.diags[Board.friendlyColorBit];
+        ulong orthos = Board.orthos[Board.friendlyColorBit]; //Board.orthos[Board.friendlyColorBit];
+        ulong diags = Board.diags[Board.friendlyColorBit];//Board.diags[Board.friendlyColorBit];
 
         //Pinned pieces cannot move if king is in check
         //Credit to seb lague for this if statement
