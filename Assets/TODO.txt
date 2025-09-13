@@ -1,3 +1,5 @@
 King to backrank endgame
 Transposition table
-Make max movecount in tournament adjustable - like 70% of results are bc of this setting
+//DONE: Make max movecount in tournament adjustable - like 70% of results are bc of this setting
+Include all promotion types - adjust for this in moveordering to always look at queen and knight first
+Guess if opponent can recapture in moveordering

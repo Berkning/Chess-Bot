@@ -1386,11 +1386,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38015fc910ef3074892bb07e656acf2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gamesToPlay: 714
+  gamesToPlay: 100
   uciManager: {fileID: 865560319}
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V9d\LichessBot.exe
-  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V1_MateFix\LichessBot.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V9dPromoFix\LichessBot.exe
+  engine2Path: C:\Users\Tim\Downloads\stockfish-windows-x86-64-avx2\stockfish\stockfish.exe
   debugMessage: 
   send: 0
   target: 1

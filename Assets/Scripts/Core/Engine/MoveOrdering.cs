@@ -5,11 +5,11 @@ public static class MoveOrdering
 {
     private static int[] moveScores = new int[218];
 
-    const int prevBestBias = 2000000; //Increase by a ton
+    const int prevBestBias = 2000000;
 
     public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove)
     {
-        for (int i = 0; i < moveCount; i++)
+        for (int i = 0; i < moveCount; i++) //TODO: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
         {
             int moveScore = 0;
             int movedPieceType = Piece.Type(Board.Squares[moves[i].startSquare]);
