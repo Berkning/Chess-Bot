@@ -89,16 +89,16 @@ public static class BoardHelper
             switch (move.flag)
             {
                 case Move.Flag.PromoteToRook:
-                    moveName += "r";
+                    moveName += 'r';
                     break;
                 case Move.Flag.PromoteToKnight:
-                    moveName += "n";
+                    moveName += 'n';
                     break;
                 case Move.Flag.PromoteToBishop:
-                    moveName += "b";
+                    moveName += 'b';
                     break;
                 case Move.Flag.PromoteToQueen:
-                    moveName += "q";
+                    moveName += 'q';
                     break;
             }
         }
@@ -107,13 +107,6 @@ public static class BoardHelper
 
 
 
-
-
-
-    public static string NameMove(Move move)
-    {
-        return SquareNameFromIndex(move.startSquare) + SquareNameFromIndex(move.targetSquare);
-    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string SquareNameFromCoord(int file, int rank)

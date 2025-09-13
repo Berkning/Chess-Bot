@@ -167,7 +167,7 @@ public static class Board
 
     public static void MakeMove(Move move, bool inSearch = false)
     {
-        if (Squares[move.startSquare] == Piece.None) Console.WriteLine("Tried to move null piece " + BoardHelper.NameMove(move) + " " + move.flag); //TODO: remove for performance
+        if (Squares[move.startSquare] == Piece.None) Console.WriteLine("Tried to move null piece " + BoardHelper.GetMoveNameUCI(move) + " " + move.flag); //TODO: remove for performance
 
         uint prevGameState = currentGameState;
         uint prevCastleRights = (prevGameState & castleRightsMask) >> 9;

@@ -25,8 +25,8 @@ public static class Perft
             //Debug.Log("Trying to play " + BoardHelper.NameMove(move));
             Board.MakeMove(moves[i], true);
             long result = RunSpecifiedDepth(depth - 1);
-            Console.WriteLine(BoardHelper.NameMove(moves[i]) + ": " + result);
-            results += BoardHelper.NameMove(moves[i]) + ": " + result + "\n";
+            Console.WriteLine(BoardHelper.GetMoveNameUCI(moves[i]) + ": " + result);
+            results += BoardHelper.GetMoveNameUCI(moves[i]) + ": " + result + "\n";
             Board.UnMakeMove(moves[i], true);
             ulong after = Board.currentGameState;
 
