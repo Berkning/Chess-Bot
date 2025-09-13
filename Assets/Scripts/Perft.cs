@@ -147,7 +147,7 @@ public static class Perft
 
             if (!passed) passedAll = false;
             //Debug.Log("Fen: " + component.fen + " Ply: " + component.depth + " Nodes: " + result + " Passed: " + passed + (passed ? "" : " Expected: " + component.correctResult));
-            Console.WriteLine("Test " + (i + 1) + " - Ply: " + component.depth + " Nodes: " + result + " Passed: " + passed + (passed ? "" : " Expected: " + component.correctResult) + "   Fen: " + component.fen);
+            Console.WriteLine("Test " + (i + 1) + '/' + testSuite.Length + " - Ply: " + component.depth + " Nodes: " + result + " Passed: " + passed + (passed ? "" : " Expected: " + component.correctResult) + "   Fen: " + component.fen);
         }
 
         Console.WriteLine(passedAll ? "Suite Passed" : "Suite Failed");
