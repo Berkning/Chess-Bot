@@ -57,10 +57,38 @@ public static class MoveOrdering
             }
 
             moveScores[i] = moveScore;
+
+            SwapSortMove(ref moves, i, moveScore);
         }
 
-        SortMoves(ref moves, moveCount);
+        //SortMoves(ref moves, moveCount);
     }
+
+    private static void SwapSortMove(ref Span<Move> moves, int i, int score)
+    {
+        if (i == 0) return;
+
+        int j = i - 1;
+        Move move = moves[i];
+
+        while (moveScores[j] < score)
+        {
+            //Swap Scores
+            moveScores[i] = moveScores[j];
+            moveScores[j] = score;
+            //Swap Moves
+            moves[i] = moves[j];
+            moves[j] = move;
+
+
+            i--;
+            if (i == 0) return;
+
+            j--;
+        }
+    }
+
+
 
     private static void SortMoves(ref Span<Move> moves, int moveCount)
     {
