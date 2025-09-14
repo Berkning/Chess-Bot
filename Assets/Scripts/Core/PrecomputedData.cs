@@ -18,6 +18,7 @@ public static class PrecomputedData
 
     public static readonly int[][] KingMoves = new int[64][];
     public static readonly ulong[] kingAttackBitboards = new ulong[64];
+    public static readonly ulong[] castleMasks; //0 wShort, 1 bShort, 2 wLong, 3 bLong, 4 wLongExtraSquare, 5 bLongExtraSquare
 
     public static readonly int[] directionLookup = new int[127];
     public static readonly ulong[][] directionalMasks = new ulong[64][]; //King Square , Piece Square
@@ -137,6 +138,17 @@ public static class PrecomputedData
 
                 KingMoves[squareIndex] = kingMoves.ToArray();
                 kingAttackBitboards[squareIndex] = kingAttackBitboard;
+
+                castleMasks = new ulong[6];
+                //Short
+                castleMasks[0] = (1UL << BoardHelper.f1) | (1UL << BoardHelper.g1);
+                castleMasks[1] = (1UL << BoardHelper.f8) | (1UL << BoardHelper.g8);
+                //Long
+                castleMasks[2] = (1UL << BoardHelper.d1) | (1UL << BoardHelper.c1);
+                castleMasks[3] = (1UL << BoardHelper.d8) | (1UL << BoardHelper.c8);
+                //Extra
+                castleMasks[4] = 1UL << BoardHelper.b1;
+                castleMasks[5] = 1UL << BoardHelper.b8;
 
 
 

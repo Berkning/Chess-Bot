@@ -1218,7 +1218,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &692186462
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1231,13 +1231,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 
-  runPerft: 0
-  perftDepth: 5
-  compareToFish: 0
-  stockFishCompare: 'e2e3: 745505 g2g3: 271220 a5a6: 968724 e2e4: 597519 g2g4: 892781
-    b4b1: 1160678 b4b2: 818501 b4b3: 941129 b4a4: 745667 b4c4: 1027199 b4d4: 957108
-    b4e4: 860971 b4f4: 174919 a5a4: 868162 '
+  customFen: r3k2r/p1ppqpb1/bn2pnp1/3PN3/4P3/Np3Q1p/PPPBBPPP/R3K2R b KQkq - 1 2
+  runPerft: 1
+  perftDepth: 2
+  compareToFish: 1
+  stockFishCompare: 'g6g5: 52 c7c6: 54 d7d6: 52 c7c5: 54 b3a2: 54 h3g2: 51 e6d5:
+    52 b3c2: 50 b6a4: 53 b6c4: 50 b6d5: 52 b6c8: 53 f6e4: 55 f6g4: 52 f6d5: 53 f6h5:
+    54 f6h7: 54 f6g8: 54 a6e2: 45 a6d3: 49 a6c4: 50 a6b5: 52 a6b7: 53 a6c8: 53 g7h6:
+    53 g7f8: 53 a8b8: 53 a8c8: 53 a8d8: 53 h8h4: 53 h8h5: 53 h8h6: 53 h8h7: 53 h8f8:
+    53 h8g8: 53 e7a3: 51 e7b4: 47 e7c5: 53 e7d6: 52 e7d8: 53 e7f8: 53 e8d8: 53 e8f8:
+    53 e8g8: 53 e8c8: 53 '
   doSearch: 0
   depth: 9
   useMoveOrdering: 1
@@ -1327,7 +1330,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &865560317
 MonoBehaviour:
   m_ObjectHideFlags: 0

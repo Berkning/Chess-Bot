@@ -350,101 +350,38 @@ public static class MoveGenerator
     private static void GenerateKingMoves(ref Span<Move> moves, bool genOnlyCaptures)
     {
         ulong moveBoard = PrecomputedData.kingAttackBitboards[friendlyKingSquare] & (~friendlyPieces);
-        moveBoard &= ~opponentAttackMap; //Remove attacked squares from moveboard
+        ulong safetyMap = ~opponentAttackMap; //All squares not attacked by opponent
+
+        moveBoard &= safetyMap; //Remove attacked squares from moveboard
 
         if (genOnlyCaptures) moveBoard &= enemyPieces; //Keep only capture squares
+        else if (!inCheck)
+        {
+            ulong castleSquares = safetyMap & (~allPieces); //All safe and empty squares
+
+            ulong shortCastleBoard = PrecomputedData.castleMasks[Board.friendlyColorBit] & castleSquares;
+
+            if (ShortCastleAllowed() && BitBoardHelper.BitCount(shortCastleBoard) == 2) //If short allowed and both castle squares are safe and empty
+            {
+                moves[moveCount++] = new Move(friendlyKingSquare, Board.colorToMove == Piece.White ? BoardHelper.g1 : BoardHelper.g8, Move.Flag.Castling);
+            }
+
+            ulong longCastleBoard = PrecomputedData.castleMasks[2 + Board.friendlyColorBit] & castleSquares;
+
+            if (LongCastleAllowed() && BitBoardHelper.BitCount(longCastleBoard) == 2 && (allPieces & PrecomputedData.castleMasks[4 + Board.friendlyColorBit]) == 0) //If long allowed and both castle squares are safe and empty and the last one is empty
+            {
+                moves[moveCount++] = new Move(friendlyKingSquare, Board.colorToMove == Piece.White ? BoardHelper.c1 : BoardHelper.c8, Move.Flag.Castling);
+            }
+        }
+
+
 
         while (moveBoard != 0) //TODO: test splitting this into two loops - one only worries about capture moves (no castle checks) - other does quiet (with castle checks)
         {
             int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
 
             moves[moveCount++] = new Move(friendlyKingSquare, targetSquare);
-
-            //Castling
-            if (!inCheck && ((enemyPieces & (1UL << targetSquare)) == 0)) //If not in check and move isn't capture //TODO: test moving this into seperate loop
-            {
-                //Short
-                if ((targetSquare == BoardHelper.f1 || targetSquare == BoardHelper.f8) && ShortCastleAllowed())
-                {
-                    int castleKingsideSquare = targetSquare + 1;
-                    if (Board.Squares[castleKingsideSquare] == Piece.None)
-                    {
-                        if (!SquareIsAttacked(castleKingsideSquare))
-                        {
-                            moves[moveCount++] = new Move(friendlyKingSquare, castleKingsideSquare, Move.Flag.Castling);
-                        }
-                    }
-                }
-                //Long
-                else if ((targetSquare == BoardHelper.d1 || targetSquare == BoardHelper.d8) && LongCastleAllowed())
-                {
-                    int castleQueensideSquare = targetSquare - 1;
-                    if (Board.Squares[castleQueensideSquare] == Piece.None && Board.Squares[castleQueensideSquare - 1] == Piece.None)
-                    {
-                        if (!SquareIsAttacked(castleQueensideSquare))
-                        {
-                            moves[moveCount++] = new Move(friendlyKingSquare, castleQueensideSquare, Move.Flag.Castling);
-                        }
-                    }
-                }
-            }
         }
-
-
-        // return;
-        // for (int i = 0; i < PrecomputedData.KingMoves[friendlyKingSquare].Length; i++)
-        // {
-        //     int targetSquare = PrecomputedData.KingMoves[friendlyKingSquare][i];
-        //     int pieceOnTarget = Board.Squares[targetSquare];
-
-        //     if (Piece.Color(pieceOnTarget) == Board.friendlyColor) continue;
-
-        //     if (!SquareIsAttacked(targetSquare))
-        //     {
-        //         bool isCapture = pieceOnTarget != Piece.None;
-
-        //         if (isCapture) //if it's a capture we can just add the move, and skip the rest of the code below, because castling won't be possible
-        //         {
-        //             moves[moveCount++] = new Move(friendlyKingSquare, targetSquare);
-        //             continue;
-        //         }
-        //         else if (genOnlyCaptures) continue;
-
-        //         moves[moveCount++] = new Move(friendlyKingSquare, targetSquare);
-
-        //         //Castling
-        //         if (!inCheck) //Should also check for not capture, but we have done that above
-        //         {
-        //             //Short
-        //             if ((targetSquare == BoardHelper.f1 || targetSquare == BoardHelper.f8) && ShortCastleAllowed())
-        //             {
-        //                 //Debug.Log("Short move added");
-        //                 //Debug.Log(Convert.ToString(Board.currentGameState, 2));
-        //                 int castleKingsideSquare = targetSquare + 1;
-        //                 if (Board.Squares[castleKingsideSquare] == Piece.None)
-        //                 {
-        //                     if (!SquareIsAttacked(castleKingsideSquare))
-        //                     {
-        //                         moves[moveCount++] = new Move(friendlyKingSquare, castleKingsideSquare, Move.Flag.Castling);
-        //                     }
-        //                 }
-        //             }
-        //             //Long
-        //             else if ((targetSquare == BoardHelper.d1 || targetSquare == BoardHelper.d8) && LongCastleAllowed())
-        //             {
-        //                 //Debug.Log("Long move added");
-        //                 int castleQueensideSquare = targetSquare - 1;
-        //                 if (Board.Squares[castleQueensideSquare] == Piece.None && Board.Squares[castleQueensideSquare - 1] == Piece.None)
-        //                 {
-        //                     if (!SquareIsAttacked(castleQueensideSquare))
-        //                     {
-        //                         moves[moveCount++] = new Move(friendlyKingSquare, castleQueensideSquare, Move.Flag.Castling);
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
     }
 
     private static void GeneratePawnMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)

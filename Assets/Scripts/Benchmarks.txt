@@ -7,3 +7,4 @@ Suite: 186966ms, 191457ms
 Startpos 9ply: 137560ms, 139921ms
 
 Bitboard king moves:
+Suite: 198242ms, 203859ms - tested in a better way and its consistently faster
