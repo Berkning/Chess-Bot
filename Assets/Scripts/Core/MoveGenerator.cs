@@ -8,20 +8,10 @@ public static class MoveGenerator
     private static ulong allPieces;
 
     private static ulong friendlyPieces;
-    //private static ulong friendlyPawns;
-    //private static ulong friendlyKnights;
-    //private static ulong friendlyBishops;
-    //private static ulong friendlyRooks;
-    //private static ulong friendlyQueens;
     private static ulong friendlyOrthos;
     private static ulong friendlyDiags;
 
     private static ulong enemyPieces;
-    //private static ulong enemyPawns;
-    //private static ulong enemyKnights;
-    //private static ulong enemyBishops;
-    //private static ulong enemyRooks;
-    //private static ulong enemyQueens;
     private static ulong enemyOrthos;
     private static ulong enemyDiags;
 
@@ -49,15 +39,6 @@ public static class MoveGenerator
     {
         GenerateSlidingAttackMap();
 
-        //int startDirIndex = 0;
-        //int endDirIndex = 8;
-
-        //TODO: try: if friendly king is not in sliding attack map dont check for sliding checks? still pins ofc
-
-        //ulong kingOrthoMask = MagicData.rookMoveBitboards[friendlyKingSquare][0]; //All possible ortho moves ignoring other pieces
-        //ulong potentialOrthoAttackers = enemyOrthos & kingOrthoMask; //Bitboard of all orthos in line of sight of the king
-
-
         ulong kingOrthoMask = MagicData.rookMasks[friendlyKingSquare] & enemyPieces; //Bitboard of enemy ortho attack blcoks by enemy's own pieces
 
         ulong kingOrthoIndex = (kingOrthoMask * MagicData.rookMagics[friendlyKingSquare]) >> MagicData.rookShifts[friendlyKingSquare];
@@ -74,16 +55,11 @@ public static class MoveGenerator
 
         //TODO: have precomputed moveBitboard array in MagicData for queen moves - prevents having to do all this for both orthos and diags at runtime
 
-        //Could just check here if kingOrthoAttackMask & enemyOrthos != 0 bc always check, but this is done in the pin checking anyway
-        //BoardGraphics.instance.ResetCummulativeBoard();
-
         while (potentialKingAttackers != 0) //TODOnt: Massive optimisation - could just precompute a directionMask array that doesn't go to board edge - just to piece - no need to do magic stuff above -> we need attack mask - look above and think
         {
             int startSquare = BitBoardHelper.PopFirstBit(ref potentialKingAttackers);
             ulong directionMask = PrecomputedData.directionalMasks[friendlyKingSquare][startSquare]; //Mask of line from king through piece to board edge
             ulong pinMask = kingAttackMask & directionMask; //Bitboard of line from king to attacking slider - includes slider itself
-            //BoardGraphics.instance.HighlightBitBoardCummulative(directionMask);
-            //Debug.Log("Direciton: " + PrecomputedData.directionLookup[startSquare - friendlyKingSquare + 63]);
 
             ulong pinBoard = pinMask & friendlyPieces; //Bitboard of all potentially pinned pieces between this slider and the king - if none; were in check
 
@@ -186,29 +162,15 @@ public static class MoveGenerator
 
     #region PieceBoards
 
-    private static void GeneratePieceBoards() //TODO: would be more performant to keep track of these and update them in board on make an unmake move
+    private static void GeneratePieceBoards() //TODOne: would be more performant to keep track of these and update them in board on make an unmake move
     {
-        //allPieces = 0; //BitBoardHelper.BitboardFromPieceListArray(Board.allPieceList);
-
-        //friendlyPawns = BitBoardHelper.BitboardFromPieceList(Board.pawnList[Board.friendlyColorBit]);
-        //friendlyKnights = BitBoardHelper.BitboardFromPieceList(Board.knightList[Board.friendlyColorBit]);
-        //friendlyBishops = BitBoardHelper.BitboardFromPieceList(Board.bishopList[Board.friendlyColorBit]);
-        //friendlyRooks = BitBoardHelper.BitboardFromPieceList(Board.rookList[Board.friendlyColorBit]);
-        //friendlyQueens = BitBoardHelper.BitboardFromPieceList(Board.queenList[Board.friendlyColorBit]);
-
-        //enemyPawns = BitBoardHelper.BitboardFromPieceList(Board.pawnList[Board.opponentColorBit]);
-        //enemyKnights = BitBoardHelper.BitboardFromPieceList(Board.knightList[Board.opponentColorBit]);
-        //enemyBishops = BitBoardHelper.BitboardFromPieceList(Board.bishopList[Board.opponentColorBit]);
-        //enemyRooks = BitBoardHelper.BitboardFromPieceList(Board.rookList[Board.opponentColorBit]);
-        //enemyQueens = BitBoardHelper.BitboardFromPieceList(Board.queenList[Board.opponentColorBit]);
-
         int friendlyBit = Board.friendlyColorBit;
         int enemyBit = Board.opponentColorBit;
 
         ulong friendlyQueens = Board.GetPieceList(Piece.Queen, friendlyBit).bitboard;
         ulong enemyQueens = Board.GetPieceList(Piece.Queen, enemyBit).bitboard;
 
-        friendlyOrthos = Board.GetPieceList(Piece.Rook, friendlyBit).bitboard | friendlyQueens;//friendlyRooks | friendlyQueens;
+        friendlyOrthos = Board.GetPieceList(Piece.Rook, friendlyBit).bitboard | friendlyQueens;
         friendlyDiags = Board.GetPieceList(Piece.Bishop, friendlyBit).bitboard | friendlyQueens;
         enemyOrthos = Board.GetPieceList(Piece.Rook, enemyBit).bitboard | enemyQueens;
         enemyDiags = Board.GetPieceList(Piece.Bishop, enemyBit).bitboard | enemyQueens;
@@ -223,7 +185,7 @@ public static class MoveGenerator
 
 
 
-    //public static Move[] moves = new Move[218];
+
     private static int moveCount = 0;
 
     #region MoveGeneration
@@ -376,7 +338,7 @@ public static class MoveGenerator
 
 
 
-        while (moveBoard != 0) //TODO: test splitting this into two loops - one only worries about capture moves (no castle checks) - other does quiet (with castle checks)
+        while (moveBoard != 0) //TODOne: test splitting this into two loops - one only worries about capture moves (no castle checks) - other does quiet (with castle checks) - just seems slightly slower
         {
             int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
 
@@ -438,7 +400,7 @@ public static class MoveGenerator
 
             int targetPiece = Board.Squares[targetSquare];
 
-            if (Piece.Color(targetPiece) == Board.enemyColor) //AddMove(new Move(startSquare, targetSquare)); //If enemy piece on attack square
+            if (Piece.Color(targetPiece) == Board.enemyColor)
             {
                 if (inCheck && !SquareIsInCheckRay(targetSquare)) continue; //Skip direction if were in check and this move doesn't block it
 
@@ -449,7 +411,6 @@ public static class MoveGenerator
             //En passant
             if (targetSquare == epAttackSquare)
             {
-                //Debug.Log("ep possible");
                 int capturedPawnSquare = targetSquare - moveDir;
 
                 if (inCheck && !SquareIsInCheckRay(targetSquare) && !SquareIsInCheckRay(capturedPawnSquare)) continue;
@@ -464,6 +425,7 @@ public static class MoveGenerator
 
     private static void GenerateKnightMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
     {
+        //TODO: Bitboards
         for (int i = 0; i < PrecomputedData.KnightMoves[startSquare].Length; i++)
         {
             if (IsPinned(startSquare)) return; //Knight cant move at all if pinned
