@@ -16,3 +16,4 @@ V8-4mb vs V8-16mb -> 1: 153, D: 705, 2: 142                                  Elo
 V9a vs V8-Clr -> 1: 173, D: 678, 2: 149                                      Elo = 8 +- 12
 V9d vs V8-Clr -> 1: 304, D: 480, 2: 216                                      Elo = 31 +- 16
 V9d vs V1_MateFix -> 1: 750, D: 238, 2: 12                                   Elo = 329 +- 22
+V10.3 vs V9e -> 1: 292, D: 557, 2: 251                                       Elo = 13 +- 14 -- Def needs a lot more work and tuning

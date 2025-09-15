@@ -6,6 +6,9 @@ public static class MoveOrdering
     private static int[] moveScores = new int[218];
 
     const int prevBestBias = 2000000;
+    const int goodCaptureBias = 8000;
+    const int badCaptureBias = 2000;
+
 
     public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove)
     {
@@ -24,7 +27,18 @@ public static class MoveOrdering
 
             if (capturedPieceType != Piece.None)
             {
-                moveScore += 10 * Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
+                //moveScore += 10 * Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
+                int valueDelta = Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
+
+                bool canRecaptureGuess = BitBoardHelper.ContainsSquare(MoveGenerator.opponentAttackMap, moves[i].targetSquare);
+                if (canRecaptureGuess)
+                {
+                    moveScore += valueDelta >= 0 ? goodCaptureBias : badCaptureBias;
+                }
+                else
+                {
+                    moveScore += goodCaptureBias + valueDelta;
+                }
             }
 
             if (movedPieceType == Piece.Pawn)
