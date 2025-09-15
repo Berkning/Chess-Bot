@@ -1218,7 +1218,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &692186462
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1321,16 +1321,17 @@ GameObject:
   - component: {fileID: 865560318}
   - component: {fileID: 865560317}
   - component: {fileID: 865560320}
-  - component: {fileID: 865560319}
   - component: {fileID: 865560321}
+  - component: {fileID: 865560324}
   - component: {fileID: 865560322}
+  - component: {fileID: 865560323}
   m_Layer: 0
   m_Name: EngineVSEngine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &865560317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1361,22 +1362,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &865560319
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 865560316}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5531e9f01e1133142aef5de427b64e2c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  engineManager: {fileID: 865560320}
-  engineTimer: {fileID: 865560322}
-  thinkTimeMs: 100
-  maxMoveCount: 150
 --- !u!114 &865560320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1389,11 +1374,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38015fc910ef3074892bb07e656acf2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gamesToPlay: 100
-  uciManager: {fileID: 865560319}
+  gamesToPlay: 191
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V9dPromoFix\LichessBot.exe
-  engine2Path: C:\Users\Tim\Downloads\stockfish-windows-x86-64-avx2\stockfish\stockfish.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V10\Version 3\LichessBot.exe
+  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V9e\Final\LichessBot.exe
   debugMessage: 
   send: 0
   target: 1
@@ -1428,6 +1412,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   engine1Text: {fileID: 669761605}
   engine2Text: {fileID: 493849534}
+--- !u!114 &865560323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 865560316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83e814abf54c5e149aee4da1cafa5d84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  engineManager: {fileID: 865560320}
+  depth: 7
+  minMarginMS: 15
+  totalMargin1: 0
+  totalMargin2: 0
+  lossPercent1: []
+  lossPercent2: []
+  avgLoss1: 0
+  avgLoss2: 0
+--- !u!114 &865560324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 865560316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 763b7608e36d56d459f9dd0c4f1a7700, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  engineManager: {fileID: 865560320}
+  engineTimer: {fileID: 865560322}
+  thinkTimeMs: 100
+  maxMoveCount: 150
 --- !u!1 &924940487
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -6,6 +7,15 @@ using UnityEngine;
 
 namespace EngVEng
 {
+    public interface UCIManager
+    {
+        public void Initialize();
+
+        public void ResetGame();
+
+        public void InterpretResponse(int sender, string message);
+    }
+
     public class EngineManager : MonoBehaviour
     {
         [SerializeField] private int gamesToPlay;
@@ -42,7 +52,7 @@ namespace EngVEng
             playedGames++;
 
             if (playedGames < gamesToPlay) uciManager.ResetGame(); //Play again
-            else UnityEngine.Debug.Log("Tournament Finished");
+            else UnityEngine.Debug.Log("Finished");
         }
 
         public void Draw()
@@ -54,7 +64,7 @@ namespace EngVEng
             if (playedGames < gamesToPlay) uciManager.ResetGame(); //Play again
             else
             {
-                UnityEngine.Debug.Log("Tournament Finished");
+                UnityEngine.Debug.Log("Finished");
                 StopCoroutine(UpdateUCI());
             }
         }
@@ -62,6 +72,8 @@ namespace EngVEng
 
         void Awake()
         {
+            uciManager = TournamentManager.instance;
+
             StartEngine(1);
             StartEngine(2);
 
@@ -71,6 +83,8 @@ namespace EngVEng
             _ = EngineOutputReader(engine2ErrorOutput, 2, true);
 
             StartCoroutine(UpdateUCI());
+
+            uciManager.Initialize();
         }
 
         void StartEngine(int id)
@@ -161,10 +175,21 @@ namespace EngVEng
                     else
                     {
                         UnityEngine.Debug.LogError("Engine" + id + " says " + line);
+                        UnityEngine.Debug.LogError("EngineError. Attempting to restart engine");
+
+                        await Awaitable.MainThreadAsync();
+                        StartEngine(id);
+
+                        uciManager.ResetGame();
+                        await Awaitable.BackgroundThreadAsync();
+
+                        UnityEngine.Debug.LogError("Restarting...");
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    UnityEngine.Debug.LogError("Encountered Output reader error: " + e);
+
                     if (!isErrorOutput) UnityEngine.Debug.Log("Quitting Output Reader for engine" + id);
                     else UnityEngine.Debug.Log("Quitting Error Output Reader for engine" + id);
                     break;

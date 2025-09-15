@@ -1,17 +1,26 @@
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace EngVEng
 {
-    public class UCIManager : MonoBehaviour
+    public class TournamentManager : MonoBehaviour, UCIManager
     {
+        public static TournamentManager instance;
+
         public static string Fen;
         [SerializeField] private EngineManager engineManager;
         [SerializeField] private EngineTimer engineTimer;
+
+        [Space, Header("Tournament")]
         [SerializeField] private int thinkTimeMs = 100;
         [SerializeField] private int maxMoveCount = 150;
 
-        void Start()
+        void Awake()
+        {
+            instance = this;
+        }
+
+        public void Initialize()
         {
             ResetGame();
         }
