@@ -7,7 +7,7 @@ public static class MoveOrdering
 
     const int prevBestBias = 2000000;
     const int goodCaptureBias = 8000;
-    const int badCaptureBias = 2000;
+    const int badCaptureBias = 1100;
 
 
     public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove)
