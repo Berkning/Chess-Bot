@@ -58,7 +58,7 @@ public static class Search
                 Console.WriteLine("info depth " + depth + " string partial");
                 break;
             }
-            else Console.WriteLine("info depth " + depth + " score cp " + result); //TODO: check if matescore and then exit - no need to wait if we have mate
+            else LogSearchInfo(depth, result); //TODO: check if matescore and then exit - no need to wait if we have mate
         }
 
         //if (!cancelSearch) TimeManagement.RevokeScheduledCancel();
@@ -70,11 +70,16 @@ public static class Search
         return bestMove;
     }
 
-    public static float Eval(int depth, bool test) //FIXME:
+    private static void LogSearchInfo(int depth, int score)
     {
-        repetitionTable.Copy(Board.repetitionTable);
-        return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity/*, test*/) / 100f;
+        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(score) + " pv " + BoardHelper.GetMoveNameUCI(bestMove));
     }
+
+    // public static float Eval(int depth, bool test) //FIXMEn't:
+    // {
+    //     repetitionTable.Copy(Board.repetitionTable);
+    //     return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity/*, test*/) / 100f;
+    // }
 
 
 
@@ -247,5 +252,14 @@ public static class Search
             return false;
         }
         return Math.Abs(score) > immediateMateScore - 1000;
+    }
+
+    public static string GetScoreLogString(int score)
+    {
+        if (!IsMateScore(score)) return "cp " + score.ToString();
+
+        int absMateScore = immediateMateScore - Math.Abs(score);
+
+        return "mate " + (absMateScore * Math.Sign(score)).ToString();
     }
 }
