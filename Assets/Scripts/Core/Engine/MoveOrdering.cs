@@ -8,9 +8,10 @@ public static class MoveOrdering
     const int prevBestBias = 2000000;
     const int goodCaptureBias = 8000;
     const int badCaptureBias = 1100;
+    const int kingAttackBias = -250;
 
 
-    public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove)
+    public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove) //TODO: maybe prioritize checks in endgame
     {
         for (int i = 0; i < moveCount; i++) //TODO: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
         {
@@ -21,7 +22,7 @@ public static class MoveOrdering
             int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
             int flag = moves[i].flag;
 
-            //TODO: guess if opponent cant recapture
+            //TODOne: guess if opponent cant recapture
 
             if (moves[i].data == prevBestMove.data) moveScore += prevBestBias; //TODO: Could optimize checking through all moves to find this one prob
 
@@ -40,11 +41,18 @@ public static class MoveOrdering
                     moveScore += goodCaptureBias + valueDelta;
                 }
             }
+            // else
+            // {
+            //     if (BitBoardHelper.ContainsSquare(MoveGenerator.opponentKingAttackMap, moves[i].targetSquare))
+            //     {
+            //         moveScore += kingAttackBias;
+            //     }
+            // }
 
             if (movedPieceType == Piece.Pawn)
             {
 
-                if (flag == Move.Flag.PromoteToQueen)
+                if (flag == Move.Flag.PromoteToQueen) //TODO: Maybe account for king attack squares here
                 {
                     moveScore += Evaluation.QueenValue;
                 }

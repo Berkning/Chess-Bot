@@ -44,6 +44,8 @@ namespace EngVEng
         ConcurrentQueue<string> engine1ResponseQueue = new ConcurrentQueue<string>();
         ConcurrentQueue<string> engine2ResponseQueue = new ConcurrentQueue<string>();
 
+        private bool attemptingRestart = false;
+
         public void Win(int winner)
         {
             if (winner == 1) resultManager.Engine1Wins++;
@@ -70,7 +72,7 @@ namespace EngVEng
         }
 
 
-        void Awake()
+        void Start()
         {
             uciManager = TournamentManager.instance;
 
@@ -175,15 +177,22 @@ namespace EngVEng
                     else
                     {
                         UnityEngine.Debug.LogError("Engine" + id + " says " + line);
-                        UnityEngine.Debug.LogError("EngineError. Attempting to restart engine");
 
                         await Awaitable.MainThreadAsync();
-                        StartEngine(id);
+                        if (!attemptingRestart)
+                        {
+                            UnityEngine.Debug.LogError("EngineError. Attempting to restart engine");
+                            UnityEngine.Debug.LogError("Restarting...");
+                            StartEngine(id);
 
-                        uciManager.ResetGame();
+                            uciManager.ResetGame();
+
+                            attemptingRestart = true;
+                        }
+                        else UnityEngine.Debug.Log("Awaiting restart...");
+
                         await Awaitable.BackgroundThreadAsync();
 
-                        UnityEngine.Debug.LogError("Restarting...");
                     }
                 }
                 catch (Exception e)

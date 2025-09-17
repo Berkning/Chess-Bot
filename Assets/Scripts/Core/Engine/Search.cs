@@ -258,7 +258,7 @@ public static class Search
     {
         if (!IsMateScore(score)) return "cp " + score.ToString();
 
-        int absMateScore = immediateMateScore - Math.Abs(score);
+        int absMateScore = immediateMateScore - Math.Abs(score); //FIXME:
 
         return "mate " + (absMateScore * Math.Sign(score)).ToString();
     }

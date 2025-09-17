@@ -16,6 +16,7 @@ public static class MoveGenerator
     private static ulong enemyDiags;
 
 
+    public static ulong opponentKingAttackMap;
     public static ulong oponnentPawnAttackMap;
     public static ulong opponentKnightAttackMap;
     public static ulong opponentSlidingAttackMap;
@@ -118,7 +119,10 @@ public static class MoveGenerator
             }
         }
 
-        opponentAttackMapNoPawns = opponentSlidingAttackMap | opponentKnightAttackMap | PrecomputedData.kingAttackBitboards[enemyKingSquare];
+        //King attacks
+        opponentKingAttackMap = PrecomputedData.kingAttackBitboards[enemyKingSquare];
+
+        opponentAttackMapNoPawns = opponentSlidingAttackMap | opponentKnightAttackMap | opponentKingAttackMap;
         opponentAttackMap = opponentAttackMapNoPawns | oponnentPawnAttackMap;
 
         if (!inCheck) checkRayBitMap = ulong.MaxValue; //Make all squares available to move to if not in check
