@@ -32,6 +32,7 @@ public static class PrecomputedData
 
     //Pawn Masks
     public static readonly ulong[] fileMasks = new ulong[8];
+    public static readonly ulong[] passedPawnMasks = new ulong[128];
 
 
     public const int Up = 8;
@@ -274,6 +275,57 @@ public static class PrecomputedData
 
                 //Pawn masks
                 fileMasks[file] = BitBoardHelper.AddSquare(fileMasks[file], squareIndex);
+
+                if (file == 0) //On left edge
+                {
+                    //White pawn
+                    for (int rankIndex = rank + 1; rankIndex < 7; rankIndex++) //Every rank above pawn
+                    {
+                        passedPawnMasks[squareIndex] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex], BoardHelper.CoordToIndex(0, rankIndex));
+                        passedPawnMasks[squareIndex] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex], BoardHelper.CoordToIndex(1, rankIndex));
+                    }
+
+                    //Black pawn
+                    for (int rankIndex = rank - 1; rankIndex > 0; rankIndex--) //Every rank below pawn
+                    {
+                        passedPawnMasks[squareIndex + 64] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex + 64], BoardHelper.CoordToIndex(0, rankIndex));
+                        passedPawnMasks[squareIndex + 64] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex + 64], BoardHelper.CoordToIndex(1, rankIndex));
+                    }
+                }
+                else if (file == 7) //On right edge
+                {
+                    //White pawn
+                    for (int rankIndex = rank + 1; rankIndex < 7; rankIndex++) //Every rank above pawn
+                    {
+                        passedPawnMasks[squareIndex] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex], BoardHelper.CoordToIndex(6, rankIndex));
+                        passedPawnMasks[squareIndex] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex], BoardHelper.CoordToIndex(7, rankIndex));
+                    }
+
+                    //Black pawn
+                    for (int rankIndex = rank - 1; rankIndex > 0; rankIndex--) //Every rank below pawn
+                    {
+                        passedPawnMasks[squareIndex + 64] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex + 64], BoardHelper.CoordToIndex(6, rankIndex));
+                        passedPawnMasks[squareIndex + 64] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex + 64], BoardHelper.CoordToIndex(7, rankIndex));
+                    }
+                }
+                else //In middle of board
+                {
+                    //White pawn
+                    for (int rankIndex = rank + 1; rankIndex < 7; rankIndex++) //Every rank above pawn
+                    {
+                        passedPawnMasks[squareIndex] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex], BoardHelper.CoordToIndex(file - 1, rankIndex));
+                        passedPawnMasks[squareIndex] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex], BoardHelper.CoordToIndex(file, rankIndex));
+                        passedPawnMasks[squareIndex] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex], BoardHelper.CoordToIndex(file + 1, rankIndex));
+                    }
+
+                    //Black pawn
+                    for (int rankIndex = rank - 1; rankIndex > 0; rankIndex--) //Every rank below pawn
+                    {
+                        passedPawnMasks[squareIndex + 64] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex + 64], BoardHelper.CoordToIndex(file - 1, rankIndex));
+                        passedPawnMasks[squareIndex + 64] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex + 64], BoardHelper.CoordToIndex(file, rankIndex));
+                        passedPawnMasks[squareIndex + 64] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex + 64], BoardHelper.CoordToIndex(file + 1, rankIndex));
+                    }
+                }
             }
         }
     }

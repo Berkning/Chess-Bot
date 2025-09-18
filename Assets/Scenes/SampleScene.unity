@@ -1375,10 +1375,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38015fc910ef3074892bb07e656acf2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gamesToPlay: 817
+  gamesToPlay: 1000
   resultManager: {fileID: 865560321}
-  engine1Path: F:\Unity Projects\Lichess Bot\lichess-bot-master\engines\LichessEngine\Release\net6.0\LichessBot.exe
-  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V10\Version 3\Tweaked More\LichessBot.exe
+  engine1Path: F:\Unity Projects\Lichess Bot\Builds\V10\Version 3\Tweaked More\LichessBot.exe
+  engine2Path: F:\Unity Projects\Lichess Bot\Builds\V7B_Fix\LichessBot.exe
   debugMessage: 
   send: 0
   target: 1

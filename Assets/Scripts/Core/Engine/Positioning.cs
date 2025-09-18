@@ -1,7 +1,7 @@
 
 using System;
 
-public static class Positioning
+public static class Positioning //TODO: endgame tables
 {
     private static int[] PawnScores = { -10, -10, -10, -10, -10, -10, -10, -10, -5, -5, -5, -5, -5, -5, -5, -5, 5, 10, 15, 15, 15, 15, 10, 5, 5, 10, 10, 30, 30, 10, 10, 5, 5, 10, 10, 10, 10, 10, 10, 5, 20, 20, 20, 20, 20, 20, 20, 20, 30, 30, 30, 30, 30, 30, 30, 30, -10, -10, -10, -10, -10, -10, -10, -10 };
     private static int[] KnightScores = {
