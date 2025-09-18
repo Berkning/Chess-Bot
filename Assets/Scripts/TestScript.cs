@@ -23,6 +23,7 @@ public class TestScript : MonoBehaviour
     [Space, Header("Zobrist")]
     [SerializeField] private bool hashPosition;
     [Space, Header("Benchmarking"), SerializeField] private bool bench;
+    [Space, Header("Testing"), SerializeField, Range(0, 16)] private int test;
 
     void Awake()
     {
@@ -119,12 +120,16 @@ public class TestScript : MonoBehaviour
 
     void Update()
     {
+
+
         /*int epFile = (int)((Board.currentGameState & Board.epFileMask) >> 5) - 1;
         int epRank = Board.friendlyColor == Piece.White ? 4 : 3;
         int epSquare = epFile != -1 ? BoardHelper.CoordToIndex(epFile, epRank) : -1;
 
         Debug.Log("file: " + epFile);
         Debug.Log("square: " + epSquare);*/
+
+        BoardGraphics.instance.HighlightBitBoard(Board.GetPieceList(Piece.Pawn, test / 8).bitboard & PrecomputedData.fileMasks[test % 8]);
 
         if (doSearch)
         {

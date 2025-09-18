@@ -30,6 +30,9 @@ public static class PrecomputedData
     public static readonly int[] manhattanDistanceFromCenter = new int[64];
     //public static readonly int[] 
 
+    //Pawn Masks
+    public static readonly ulong[] fileMasks = new ulong[8];
+
 
     public const int Up = 8;
     public const int Down = -8;
@@ -266,6 +269,11 @@ public static class PrecomputedData
                         kingDistanceLookup[squareIndex][targetSquare] = chebyshevDist;
                     }
                 }
+
+
+
+                //Pawn masks
+                fileMasks[file] = BitBoardHelper.AddSquare(fileMasks[file], squareIndex);
             }
         }
     }

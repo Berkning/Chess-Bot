@@ -9,6 +9,8 @@ public static class Evaluation
     public const int RookValue = 500;
     public const int QueenValue = 900;
 
+    public const int DoubledPawnValue = -40;
+
     private static int totalMaterialWithoutPawns;
     private static int whiteMaterialValue;
     private static int blackMaterialValue;
@@ -19,14 +21,43 @@ public static class Evaluation
         EvaluateMaterial();
         gameStage = CalculateGameStage();
 
-        int whiteEval = whiteMaterialValue + Positioning.GetPositioningScore(0);
-        int blackEval = blackMaterialValue + Positioning.GetPositioningScore(1);
+        int whiteEval = whiteMaterialValue + Positioning.GetPositioningScore(0) + EvaluatePawnStructure(0);
+        int blackEval = blackMaterialValue + Positioning.GetPositioningScore(1) + EvaluatePawnStructure(1);
 
         int evaluation = whiteEval - blackEval;
 
         int perspective = Board.colorToMove == Piece.White ? 1 : -1;
 
         return evaluation * perspective;
+    }
+
+    private static int EvaluatePawnStructure(int colorBit) //TODO: give high score in early to midgame when king can see pawns above him
+    {
+        int score = 0;
+
+        ulong friendlyPawnBoard = Board.GetPieceList(Piece.Pawn, colorBit).bitboard;
+
+        //Doubled Pawns
+        for (int file = 0; file < 8; file++)
+        {
+            ulong fileMask = PrecomputedData.fileMasks[file];
+            int pawnsOnFile = BitBoardHelper.BitCount(friendlyPawnBoard & fileMask);
+
+            if (pawnsOnFile > 1) score += DoubledPawnValue * (pawnsOnFile - 1);
+        }
+
+        // PieceList friendlyPawns = Board.pawnList[colorBit];
+
+        // for (int i = 0; i < friendlyPawns.Count; i++)
+        // {
+        //     int pawnSquare = friendlyPawns[i];
+        //     ulong attackBoard = PrecomputedData.pawnAttackBitboards[pawnSquare];
+
+        //     ulong connectedPawnBoard = friendlyPawnBoard & attackBoard;
+        //     score += BitBoardHelper.BitCount(connectedPawnBoard) * PawnConnectionValue;
+        // }
+
+        return score;
     }
 
     private static void EvaluateMaterial()
