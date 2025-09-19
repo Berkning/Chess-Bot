@@ -157,7 +157,7 @@ public static class Search
             int extensions = 0;
             if (numExtensions < maxExtensions)
             {
-                //if (MoveGenerator.inCheck) extensions = 1;//TODO: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
+                //if (MoveGenerator.inCheck) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
                 int targetRank = BoardHelper.IndexToRank(moves[i].targetSquare);
                 if (Piece.Type(Board.Squares[moves[i].targetSquare]) == Piece.Pawn && (targetRank == 1 || targetRank == 6)) extensions = 1; //Extend when about to promote
             }
