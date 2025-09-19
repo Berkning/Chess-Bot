@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Analysis;
 using UnityEngine;
 
 public class PieceInteraction : MonoBehaviour
 {
     [SerializeField] private BoardGraphics boardGraphics;
+    [SerializeField] private EngineAnalysis engineAnalysis;
     private int prevSelectedSquare = -1;
     private Move lastMove = Move.nullMove;
 
@@ -38,6 +40,7 @@ public class PieceInteraction : MonoBehaviour
                                 lastMove = move;
                                 Board.MakeMove(move);
                                 boardGraphics.ResetSquareColors();
+                                engineAnalysis.PlayMove(BoardHelper.GetMoveNameUCI(move));
                             }
                         }
 
