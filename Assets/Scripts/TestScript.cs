@@ -129,7 +129,11 @@ public class TestScript : MonoBehaviour
         Debug.Log("file: " + epFile);
         Debug.Log("square: " + epSquare);*/
 
-        //BoardGraphics.instance.HighlightBitBoard(PrecomputedData.passedPawnMasks[test]);
+        BoardGraphics.instance.HighlightBitBoard(PrecomputedData.passedPawnMasks[test] & (~PrecomputedData.fileMasks[BoardHelper.IndexToFile(test)]));
+
+
+
+
 
         if (doSearch)
         {

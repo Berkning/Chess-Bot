@@ -37,15 +37,13 @@ public static class Positioning //TODOne: endgame tables
     {
         int score = 0;
 
-        float endgameMultiplier = Math.Max(Evaluation.gameStage - 1f, 0f);
-
         //Score pawn positions
         for (int i = 0; i < Board.pawnList[colorBit].Count; i++)
         {
             int square = Board.pawnList[colorBit][i];
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square); //TODO: Check if performant to do if every single time; pretty easy to optimize prob
-            score += Blend(PawnEarlyGame[index], PawnLateGame[index], endgameMultiplier);
+            score += Blend(PawnEarlyGame[index], PawnLateGame[index], Evaluation.endgameMultiplier);
         }
 
         //Score knight positions
@@ -86,13 +84,13 @@ public static class Positioning //TODOne: endgame tables
 
         //Score king position
         int kingSquare = colorBit == 0 ? Board.whiteKingSquare : BoardHelper.FlipIndex(Board.blackKingSquare);
-        score += Blend(KingEarlyGame[kingSquare], KingEndgame[kingSquare], endgameMultiplier);
+        score += Blend(KingEarlyGame[kingSquare], KingEndgame[kingSquare], Evaluation.endgameMultiplier);
 
 
         //Mopup
         int enemyKingSquare = colorBit == 0 ? Board.blackKingSquare : Board.whiteKingSquare;
 
-        score += (int)Math.Ceiling(10f * PrecomputedData.manhattanDistanceFromCenter[enemyKingSquare] * endgameMultiplier);
+        score += (int)Math.Ceiling(10f * PrecomputedData.manhattanDistanceFromCenter[enemyKingSquare] * Evaluation.endgameMultiplier);
 
         //TODO: Move king closer to enemy king in endgame as well
         //score += Mathf.CeilToInt(10f * (7f - PrecomputedData.kingDistanceLookup[kingSquare][enemyKingSquare]) * endgameMultiplier);
