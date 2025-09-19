@@ -20,13 +20,18 @@ public static class Positioning //TODO: endgame tables
 
     private static int[] QueenScores = { -20, -10, -10, -5, -5, -10, -10, -20, -10, 0, 0, 0, 0, 0, 0, -10, -10, 0, 5, 5, 5, 5, 0, -10, -5, 0, 5, 5, 5, 5, 0, -5, -5, 0, 5, 5, 5, 5, 0, -5, -10, 0, 5, 5, 5, 5, 0, -10, -10, 0, 0, 0, 0, 0, 0, -10, -20, -10, -10, -5, -5, -10, -10, -20 };
 
-    private static int[] KingScores = { 20, 30, 10, 0, 0, 10, 30, 20, 20, 20, 0, 0, 0, 0, 20, 20, -10, -20, -20, -20, -20, -20, -20, -10, -20, -30, -30, -40, -40, -30, -30, -20, -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -40, -40, -30 };
 
+    //King
+    private static int[] KingEarlyGame = { 20, 30, 10, 0, 0, 10, 30, 20, 20, 20, 0, 0, 0, 0, 20, 20, -10, -20, -20, -20, -20, -20, -20, -10, -20, -30, -30, -40, -40, -30, -30, -20, -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -40, -40, -30, -30, -40, -40, -50, -50, -40, -40, -30 };
+
+    private static int[] KingEndgame = { -20, -10, -10, -10, -10, -10, -10, -20, -10, 5, 5, 5, 5, 5, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 5, 5, 5, 5, 5, -10, -10, 0, 0, 0, 0, 0, 0, -10 };
 
 
     public static int GetPositioningScore(int colorBit)
     {
         int score = 0;
+
+        float endgameMultiplier = Math.Max(Evaluation.gameStage - 1f, 0f);
 
         //Score pawn positions
         for (int i = 0; i < Board.pawnList[colorBit].Count; i++)
@@ -75,12 +80,11 @@ public static class Positioning //TODO: endgame tables
 
         //Score king position
         int kingSquare = colorBit == 0 ? Board.whiteKingSquare : BoardHelper.FlipIndex(Board.blackKingSquare);
-        score += KingScores[kingSquare];
+        score += Blend(KingEarlyGame[kingSquare], KingEndgame[kingSquare], endgameMultiplier);
 
 
         //Mopup
         int enemyKingSquare = colorBit == 0 ? Board.blackKingSquare : Board.whiteKingSquare;
-        float endgameMultiplier = Math.Max(Evaluation.gameStage - 1f, 0f);
 
         score += (int)Math.Ceiling(10f * PrecomputedData.manhattanDistanceFromCenter[enemyKingSquare] * endgameMultiplier);
 
@@ -88,5 +92,16 @@ public static class Positioning //TODO: endgame tables
         //score += Mathf.CeilToInt(10f * (7f - PrecomputedData.kingDistanceLookup[kingSquare][enemyKingSquare]) * endgameMultiplier);
 
         return score;
+    }
+
+
+    private static int Blend(int early, int late, float endgameMultiplier)
+    {
+        return (int)Math.Round(early + (late - early) * endgameMultiplier);
+    }
+
+    private static int Blend(int early, int middle, int late, float gameStage)
+    {
+        return int.MaxValue;
     }
 }

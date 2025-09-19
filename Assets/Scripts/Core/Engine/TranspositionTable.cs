@@ -1,7 +1,7 @@
 
 public class TranspositionTable
 {
-    public static int SizeMB = 16;
+    public static int SizeMB = 16; //TODO: adjust based on game speed - 16mb is WAY too small for 10s think
 
     public const int LookupFailed = int.MinValue;
 

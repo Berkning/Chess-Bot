@@ -25,7 +25,7 @@ public static class Search
 
 
 
-    public static Move StartSearch(int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite TODO: Change to enum
+    public static Move StartSearch(int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite TODO: Change to enum //TODO: Killer moves
     {
         //return AlphaBeta(depth, negativeInfinity, positiveInfinity);
         cancelSearch = false;

@@ -18,3 +18,5 @@ V9d vs V8-Clr -> 1: 304, D: 480, 2: 216                                      Elo
 V9d vs V1_MateFix -> 1: 750, D: 238, 2: 12                                   Elo = 329 +- 22
 V10.3 vs V9e -> 1: 292, D: 557, 2: 251                                       Elo = 13 +- 14 -- Def needs a lot more work and tuning
 DP vs V10.3.1 -> 1: 49, D: 68+23, 2: 43
+KingEnd vs V1031 -> 1: 409, D: 264, 2: 327                                   Elo = 29 +- 19  --Renamed to V11.1
+V11.1 vs V7B -> 1: 506, D: 169, 2: 325                                       Elo = 122 +- 18
