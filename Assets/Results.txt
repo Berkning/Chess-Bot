@@ -23,3 +23,4 @@ V11.1 vs V7B -> 1: 506, D: 169, 2: 325                                       Elo
 V11.2 vs V11.1 -> 1: 388, D: 363, 2: 268                                     Elo = 41 +- 17  --More than 1000 games
 V11.3 vs V11.2 -> 1: 267, D: 369, 2: 360                                     Elo = -33 +- 17 --Less than 1000 games
 V11.3.New vs V11.2 -> 1: 705, D: 633, 2: 662                                 Elo = 7 +- 13 -- 2000 games - still not definitively better
+V11.4 vs V11.3.New -> 1: 313, D: 351, 2: 336                                 Elo = -8 +- 17

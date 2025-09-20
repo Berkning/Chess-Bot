@@ -34,6 +34,10 @@ public static class PrecomputedData
     public static readonly ulong[] fileMasks = new ulong[8];
     public static readonly ulong[] passedPawnMasks = new ulong[128];
 
+    //Square Colors
+    public const ulong DarkSquareMask = 0b1010101001010101101010100101010110101010010101011010101001010101; //Remember these masks are reverse order - bit furthest to right is square 0
+    public const ulong LightSquareMask = ~DarkSquareMask;
+
 
     public const int Up = 8;
     public const int Down = -8;

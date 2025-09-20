@@ -23,7 +23,7 @@ public class TestScript : MonoBehaviour
     [Space, Header("Zobrist")]
     [SerializeField] private bool hashPosition;
     [Space, Header("Benchmarking"), SerializeField] private bool bench;
-    [Space, Header("Testing"), SerializeField, Range(0, 127)] private int test;
+    [Space, Header("Testing"), SerializeField, Range(0, 1)] private int test;
 
     void Awake()
     {
@@ -129,7 +129,10 @@ public class TestScript : MonoBehaviour
         Debug.Log("file: " + epFile);
         Debug.Log("square: " + epSquare);*/
 
-        BoardGraphics.instance.HighlightBitBoard(PrecomputedData.passedPawnMasks[test] & (~PrecomputedData.fileMasks[BoardHelper.IndexToFile(test)]));
+        //BoardGraphics.instance.HighlightBitBoard(PrecomputedData.passedPawnMasks[test] & (~PrecomputedData.fileMasks[BoardHelper.IndexToFile(test)]));
+        if (test > 0) BoardGraphics.instance.HighlightBitBoard(PrecomputedData.DarkSquareMask);
+        else BoardGraphics.instance.HighlightBitBoard(PrecomputedData.LightSquareMask);
+        //BoardGraphics.instance.HighlightBitBoard(test);
 
 
 
