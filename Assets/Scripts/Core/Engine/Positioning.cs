@@ -6,7 +6,13 @@ public static class Positioning //TODOne: endgame tables
     //Pawns
     private static int[] PawnEarlyGame = { 0, 0, 0, 0, 0, 0, 0, 0, 5, 15, 10, -10, -10, 10, 15, 5, 5, 0, 15, 15, 15, 15, 0, 5, -5, -10, 25, 30, 30, 25, -10, -5, -15, -15, 15, 20, 20, 15, -15, -15, -20, -15, -10, -5, -5, -10, -15, -20, -25, -25, -25, -25, -25, -25, -25, -25, 0, 0, 0, 0, 0, 0, 0, 0 };
 
+    //TODO: think about maybe just using this array for passed pawns with a value multiplier - have to offset array values so no negatives
     private static int[] PawnLateGame = { 0, 0, 0, 0, 0, 0, 0, 0, -30, -30, -30, -30, -30, -30, -30, -30, -20, -20, -20, -20, -20, -20, -20, -20, -10, -10, -10, -10, -10, -10, -10, -10, 0, 0, 0, 0, 0, 0, 0, 0, 25, 25, 25, 25, 25, 25, 25, 25, 75, 75, 75, 75, 75, 75, 75, 75, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+    private static int[] PassedPawnLateGame = { 0, -30, -15, 0, 25, 50, 150 };
+
+    //private const int PassedPawnMultiplier = 2;
+    private const int PassedPawnConnectionValue = 10; //Could be weighted base on the rank as well - maybe
 
 
     private static int[] KnightScores = {
@@ -33,23 +39,53 @@ public static class Positioning //TODOne: endgame tables
     private static int[] KingEndgame = { -20, -10, -10, -10, -10, -10, -10, -20, -10, 5, 5, 5, 5, 5, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 5, 5, 5, 5, 5, -10, -10, 0, 0, 0, 0, 0, 0, -10 };
 
 
-    public static int GetPositioningScore(int colorBit)
+    public static int GetPositioningScore(int colorBit, int enemyColorBit)
     {
         int score = 0;
 
+        PieceList friendlyPawns = Board.pawnList[colorBit];
+
+        ulong friendlyPawnBoard = friendlyPawns.bitboard;
+        ulong enemyPawnBoard = Board.pawnList[enemyColorBit].bitboard;
+
         //Score pawn positions
-        for (int i = 0; i < Board.pawnList[colorBit].Count; i++)
+        for (int i = 0; i < friendlyPawns.Count; i++)
         {
-            int square = Board.pawnList[colorBit][i];
+            int square = friendlyPawns[i];
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square); //TODO: Check if performant to do if every single time; pretty easy to optimize prob
-            score += Blend(PawnEarlyGame[index], PawnLateGame[index], Evaluation.endgameMultiplier);
+
+            int endgameValue = PawnLateGame[index];
+
+
+
+            int file = BoardHelper.IndexToFile(square);
+
+            ulong opposingPawnBoard = PrecomputedData.passedPawnMasks[square + colorBit * 64] & enemyPawnBoard;
+            int opposers = BitBoardHelper.BitCount(opposingPawnBoard); //If this is zero this is a passed pawn
+
+            //TODO: do doubled pawn eval in own loop above bc more efficient - tried to do it here but end up counting doubled pawns twice
+            //Actually can prob use the reversed passed pawn mask to also detect pawns only directly behind this one - no double counting and no additional loop needed
+
+
+            if (opposers == 0) //If this is a passed pawn
+            {
+                //TODO: prob also beneficial to give every type of pawn a better score when they have supporters - punish isolated pawns
+                ulong supportingPawnBoard = PrecomputedData.passedPawnMasks[square + enemyColorBit * 64] & (~PrecomputedData.fileMasks[file]) & friendlyPawnBoard; //Looks at pawns beside but not directly behind this one
+                int supporters = BitBoardHelper.BitCount(supportingPawnBoard);
+
+                int rankFromSide = BoardHelper.IndexToRank(index);
+
+                endgameValue = PassedPawnLateGame[rankFromSide] + supporters * PassedPawnConnectionValue;
+            }
+
+            score += Blend(PawnEarlyGame[index], endgameValue, Evaluation.endgameMultiplier);
         }
 
         //Score knight positions
         for (int i = 0; i < Board.knightList[colorBit].Count; i++)
         {
-            int square = Board.knightList[colorBit][i];
+            int square = Board.knightList[colorBit][i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square);
             score += KnightScores[index];
@@ -58,7 +94,7 @@ public static class Positioning //TODOne: endgame tables
         //Score bishop positions
         for (int i = 0; i < Board.bishopList[colorBit].Count; i++)
         {
-            int square = Board.bishopList[colorBit][i];
+            int square = Board.bishopList[colorBit][i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square);
             score += BishopScores[index];
@@ -67,7 +103,7 @@ public static class Positioning //TODOne: endgame tables
         //Score rook positions
         for (int i = 0; i < Board.rookList[colorBit].Count; i++)
         {
-            int square = Board.rookList[colorBit][i];
+            int square = Board.rookList[colorBit][i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square);
             score += RookScores[index];
@@ -76,7 +112,7 @@ public static class Positioning //TODOne: endgame tables
         //Score queen positions
         for (int i = 0; i < Board.queenList[colorBit].Count; i++)
         {
-            int square = Board.queenList[colorBit][i];
+            int square = Board.queenList[colorBit][i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square);
             score += QueenScores[index];
