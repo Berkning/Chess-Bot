@@ -29,7 +29,7 @@ public static class Positioning //TODOne: endgame tables
     //Bishops
     private static int[] BishopScores = { -10, -10, -10, -10, -10, -10, -10, -10, -10, 0, 0, 0, 0, 0, 0, -10, -10, 10, 10, 10, 10, 10, 10, -10, -10, 5, 10, 10, 10, 10, 5, -10, -10, 0, 5, 10, 10, 5, 0, -10, -10, 0, 5, 10, 10, 5, 0, -10, -10, 0, 0, 0, 0, 0, 0, -10, -10, -10, -10, -10, -10, -10, -10, -10 };
 
-    private const int OppositeColorPawnScore = 6;//Value increase of bishop for each pawn on an opposite colored square - bishop is more open
+    //private const int OppositeColorPawnScore = 6;//Value increase of bishop for each pawn on an opposite colored square - bishop is more open
 
 
 
@@ -111,12 +111,12 @@ public static class Positioning //TODOne: endgame tables
         {
             int square = Board.bishopList[colorBit][i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
 
-            bool isDark = BitBoardHelper.ContainsSquare(PrecomputedData.DarkSquareMask, square);
+            //bool isDark = BitBoardHelper.ContainsSquare(PrecomputedData.DarkSquareMask, square);
 
             //TODOne: try to subtract score with same colored pawns maybe - otherwise will raise value of all bishops
             //Doubt we need to taper score here in endgame bc there will be less pawns anyway, and if theres many it prob matters to score anyway
-            if (isDark) score += Evaluation.pawnColorCountDifference * OppositeColorPawnScore * -1; //Difference is flipped here bc want positive when more light pawns
-            else score += Evaluation.pawnColorCountDifference * OppositeColorPawnScore;
+            //if (isDark) score += Evaluation.pawnColorCountDifference * OppositeColorPawnScore * -1; //Difference is flipped here bc want positive when more light pawns
+            //else score += Evaluation.pawnColorCountDifference * OppositeColorPawnScore;
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square);
             score += BishopScores[index];

@@ -28,7 +28,7 @@ public static class Evaluation
 
     //private static int darkPawnCount;
     //private static int lightPawnCount;
-    public static int pawnColorCountDifference; //Darkcount - lightCount
+    //public static int pawnColorCountDifference; //Darkcount - lightCount
 
     public static int Evaluate()
     {
@@ -36,13 +36,13 @@ public static class Evaluation
         gameStage = CalculateGameStage();
         endgameMultiplier = Math.Max(gameStage - 1f, 0f);
 
-        ulong darkPawnBoard = (Board.pawnList[0].bitboard | Board.pawnList[1].bitboard) & PrecomputedData.DarkSquareMask;
-        ulong lightPawnBoard = (Board.pawnList[0].bitboard | Board.pawnList[1].bitboard) & PrecomputedData.LightSquareMask;
+        //ulong darkPawnBoard = (Board.pawnList[0].bitboard | Board.pawnList[1].bitboard) & PrecomputedData.DarkSquareMask;
+        //ulong lightPawnBoard = (Board.pawnList[0].bitboard | Board.pawnList[1].bitboard) & PrecomputedData.LightSquareMask;
 
-        int darkPawnCount = BitBoardHelper.BitCount(darkPawnBoard);
-        int lightPawnCount = BitBoardHelper.BitCount(lightPawnBoard);
+        //int darkPawnCount = BitBoardHelper.BitCount(darkPawnBoard);
+        //int lightPawnCount = BitBoardHelper.BitCount(lightPawnBoard);
 
-        pawnColorCountDifference = darkPawnCount - lightPawnCount;
+        //pawnColorCountDifference = darkPawnCount - lightPawnCount;
 
         int whiteEval = whiteMaterialValue + Positioning.GetPositioningScore(0, 1);// + EvaluatePawnStructure(0, 1);
         int blackEval = blackMaterialValue + Positioning.GetPositioningScore(1, 0);// + EvaluatePawnStructure(1, 0);
