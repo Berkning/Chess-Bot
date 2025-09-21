@@ -30,6 +30,7 @@ public static class Evaluation
     //private static int lightPawnCount;
     //public static int pawnColorCountDifference; //Darkcount - lightCount
 
+
     public static int Evaluate()
     {
         EvaluateMaterial();
@@ -43,6 +44,7 @@ public static class Evaluation
         //int lightPawnCount = BitBoardHelper.BitCount(lightPawnBoard);
 
         //pawnColorCountDifference = darkPawnCount - lightPawnCount;
+
 
         int whiteEval = whiteMaterialValue + Positioning.GetPositioningScore(0, 1);// + EvaluatePawnStructure(0, 1);
         int blackEval = blackMaterialValue + Positioning.GetPositioningScore(1, 0);// + EvaluatePawnStructure(1, 0);

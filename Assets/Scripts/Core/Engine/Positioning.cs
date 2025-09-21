@@ -29,7 +29,8 @@ public static class Positioning //TODOne: endgame tables
     //Bishops
     private static int[] BishopScores = { -10, -10, -10, -10, -10, -10, -10, -10, -10, 0, 0, 0, 0, 0, 0, -10, -10, 10, 10, 10, 10, 10, 10, -10, -10, 5, 10, 10, 10, 10, 5, -10, -10, 0, 5, 10, 10, 5, 0, -10, -10, 0, 5, 10, 10, 5, 0, -10, -10, 0, 0, 0, 0, 0, 0, -10, -10, -10, -10, -10, -10, -10, -10, -10 };
 
-    //private const int OppositeColorPawnScore = 6;//Value increase of bishop for each pawn on an opposite colored square - bishop is more open
+    //private const int OppositeColorPawnScore = 6; //Value increase of bishop for each pawn on an opposite colored square - bishop is more open
+    private const int BishopPairValue = 25; //Extra value added for bishop pair
 
 
 
@@ -105,7 +106,7 @@ public static class Positioning //TODOne: endgame tables
         //if (darkBishopBoard != 0) score += Evaluation.lightPawnCount * OppositeColorPawnScore;
 
         //if (lightBishopBoard != 0) score += Evaluation.darkPawnCount * OppositeColorPawnScore;
-
+        if (Board.bishopList[colorBit].Count > 1) score += BishopPairValue;
 
         for (int i = 0; i < Board.bishopList[colorBit].Count; i++)
         {
