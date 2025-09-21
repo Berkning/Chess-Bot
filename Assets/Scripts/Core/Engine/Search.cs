@@ -58,7 +58,7 @@ public static class Search
                 Console.WriteLine("info depth " + depth + " string partial");
                 break;
             }
-            else LogSearchInfo(depth, result); //TODO: check if matescore and then exit - no need to wait if we have mate
+            else LogSearchInfo(depth, result); //TODO: check if matescore and then exit if were low on time
         }
 
         //if (!cancelSearch) TimeManagement.RevokeScheduledCancel();
@@ -132,7 +132,7 @@ public static class Search
         int moveCount = MoveGenerator.GenerateMoves(ref moves);
 
         /*if (test)*/
-        MoveOrdering.OrderMoves(ref moves, moveCount, bestMove);
+        MoveOrdering.OrderMoves(ref moves, moveCount, bestMove, plyFromRoot);
 
 
 
@@ -152,7 +152,7 @@ public static class Search
 
         for (int i = 0; i < moveCount; i++)
         {
-            Board.MakeMove(moves[i], true);
+            Board.MakeMove(moves[i], true); //TODO: test having ref to move instead of accesing array - prob already done by compiler though
 
             int extensions = 0;
             if (numExtensions < maxExtensions)
@@ -170,10 +170,20 @@ public static class Search
 
             if (cancelSearch) return 0;
 
+
+            //Move was good opponent will avoid this position
             if (evaluation >= beta)
             {
-                //Move was good opponent will avoid this position
                 transpositionTable.StoreEvaluation(depth, plyFromRoot, beta, TranspositionTable.LowerBound, moves[i]);
+
+                //TODO: Test without checking for ep for performance maybe
+                if (Board.Squares[moves[i].targetSquare] == Piece.None && moves[i].flag != Move.Flag.EnPassantCapture) //If not a capture - only add killer moves that aren't captures, bc these are always ranked highly i guess?
+                {
+                    if (plyFromRoot < MoveOrdering.MaxKillerPlys)
+                    {
+                        MoveOrdering.killerMoves[plyFromRoot].Add(moves[i]);
+                    }
+                }
 
                 repetitionTable.PopNoRtn();
                 return beta;
@@ -222,7 +232,7 @@ public static class Search
 
         int moveCount = MoveGenerator.GenerateMoves(ref moves, true);
 
-        MoveOrdering.OrderMoves(ref moves, moveCount, bestMove);
+        MoveOrdering.OrderMoves(ref moves, moveCount, bestMove, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
 
         for (int i = 0; i < moveCount; i++)
         {

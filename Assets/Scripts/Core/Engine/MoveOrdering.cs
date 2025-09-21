@@ -6,12 +6,18 @@ public static class MoveOrdering
     private static int[] moveScores = new int[218];
 
     const int prevBestBias = 2000000;
+    const int killerBias = 500000;
     const int goodCaptureBias = 8000;
     const int badCaptureBias = 1100;
     const int kingAttackBias = -250;
 
+    public const int MaxKillerPlys = 32;
 
-    public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove) //TODO: maybe prioritize checks in endgame
+    public static KillerMove[] killerMoves = new KillerMove[MaxKillerPlys];
+
+
+
+    public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove, int ply) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
     {
         for (int i = 0; i < moveCount; i++) //TODO: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
         {
@@ -20,7 +26,7 @@ public static class MoveOrdering
             int capturedPieceType = Piece.Type(Board.Squares[moves[i].targetSquare]);
 
             int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
-            int flag = moves[i].flag;
+            int flag = moves[i].flag; //TODO: try having ref to current move even though prob done by compiler anyway
 
             //TODOne: guess if opponent cant recapture
 
@@ -41,13 +47,15 @@ public static class MoveOrdering
                     moveScore += goodCaptureBias + valueDelta;
                 }
             }
-            // else
-            // {
-            //     if (BitBoardHelper.ContainsSquare(MoveGenerator.opponentKingAttackMap, moves[i].targetSquare))
-            //     {
-            //         moveScore += kingAttackBias;
-            //     }
-            // }
+            else if (moves[i].flag != Move.Flag.EnPassantCapture) //If not a capture
+            {
+                // if (BitBoardHelper.ContainsSquare(MoveGenerator.opponentKingAttackMap, moves[i].targetSquare))
+                // {
+                //     moveScore += kingAttackBias;
+                // }
+
+                if (ply < MaxKillerPlys && killerMoves[ply].Contains(moves[i])) moveScore += killerBias;
+            }
 
             if (movedPieceType == Piece.Pawn)
             {
@@ -125,6 +133,22 @@ public static class MoveOrdering
                     (moveScores[j], moveScores[swapIndex]) = (moveScores[swapIndex], moveScores[j]);
                 }
             }
+        }
+    }
+
+
+    public struct KillerMove
+    {
+        public Move moveA; //TODO: test adding more than 1 per ply
+
+        public void Add(Move move)
+        {
+            moveA = move;
+        }
+
+        public bool Contains(Move move)
+        {
+            return moveA.data == move.data;
         }
     }
 }
