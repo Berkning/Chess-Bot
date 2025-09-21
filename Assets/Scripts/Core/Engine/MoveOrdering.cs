@@ -137,18 +137,25 @@ public static class MoveOrdering
     }
 
 
-    public struct KillerMove
+    public struct KillerMove //TODO: if only using one killer per ply, try not using struct and these add and contains methods, just pure array
     {
-        public Move moveA; //TODO: test adding more than 1 per ply
+        public Move moveA; //TODO: test adding more than 1 per ply - worse apparently
+        //public Move moveB;
 
         public void Add(Move move)
         {
             moveA = move;
+            // if (move.data != moveA.data)
+            // {
+            //     moveB = moveA;
+            //     moveA = move;
+            // }
         }
 
         public bool Contains(Move move)
         {
-            return moveA.data == move.data;
+            return move.data == moveA.data;
+            //return moveA.data == move.data || moveB.data == move.data;
         }
     }
 }
