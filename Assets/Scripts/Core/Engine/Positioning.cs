@@ -49,15 +49,15 @@ public static class Positioning //TODOne: endgame tables
     {
         int score = 0;
 
-        PieceList friendlyPawns = Board.pawnList[colorBit];
+        PieceList currentPieceList = Board.pawnList[colorBit]; //Isn't very readable, but slightly more performant?
 
-        ulong friendlyPawnBoard = friendlyPawns.bitboard;
+        ulong friendlyPawnBoard = currentPieceList.bitboard;
         ulong enemyPawnBoard = Board.pawnList[enemyColorBit].bitboard;
 
         //Score pawn positions
-        for (int i = 0; i < friendlyPawns.Count; i++)
+        for (int i = 0; i < currentPieceList.Count; i++)
         {
-            int square = friendlyPawns[i];
+            int square = currentPieceList[i];
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square); //TODO: Check if performant to do if every single time; pretty easy to optimize prob
 
@@ -89,9 +89,11 @@ public static class Positioning //TODOne: endgame tables
         }
 
         //Score knight positions
-        for (int i = 0; i < Board.knightList[colorBit].Count; i++)
+        currentPieceList = Board.knightList[colorBit];
+
+        for (int i = 0; i < currentPieceList.Count; i++)
         {
-            int square = Board.knightList[colorBit][i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
+            int square = currentPieceList[i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square);
             score += KnightScores[index];
@@ -106,11 +108,13 @@ public static class Positioning //TODOne: endgame tables
         //if (darkBishopBoard != 0) score += Evaluation.lightPawnCount * OppositeColorPawnScore;
 
         //if (lightBishopBoard != 0) score += Evaluation.darkPawnCount * OppositeColorPawnScore;
-        if (Board.bishopList[colorBit].Count > 1) score += BishopPairValue;
+        currentPieceList = Board.bishopList[colorBit];
 
-        for (int i = 0; i < Board.bishopList[colorBit].Count; i++)
+        if (currentPieceList.Count > 1) score += BishopPairValue;
+
+        for (int i = 0; i < currentPieceList.Count; i++)
         {
-            int square = Board.bishopList[colorBit][i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
+            int square = currentPieceList[i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
 
             //bool isDark = BitBoardHelper.ContainsSquare(PrecomputedData.DarkSquareMask, square);
 
@@ -124,18 +128,22 @@ public static class Positioning //TODOne: endgame tables
         }
 
         //Score rook positions
-        for (int i = 0; i < Board.rookList[colorBit].Count; i++)
+        currentPieceList = Board.rookList[colorBit];
+
+        for (int i = 0; i < currentPieceList.Count; i++)
         {
-            int square = Board.rookList[colorBit][i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
+            int square = currentPieceList[i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square);
             score += RookScores[index];
         }
 
         //Score queen positions
-        for (int i = 0; i < Board.queenList[colorBit].Count; i++)
+        currentPieceList = Board.queenList[colorBit];
+
+        for (int i = 0; i < currentPieceList.Count; i++)
         {
-            int square = Board.queenList[colorBit][i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
+            int square = currentPieceList[i]; //TODO: test if having ref to piecelist is better than accesing piecelist array
 
             int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square);
             score += QueenScores[index];
