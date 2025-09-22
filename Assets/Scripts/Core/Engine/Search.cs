@@ -46,9 +46,13 @@ public static class Search
         }
         else if (searchTime > 0) TimeManagement.ScheduleSearchCancel(searchTime); //If less than -1, let it go till stop is recieved
 
+
+        int prevResult = negativeInfinity;
+
         for (int depth = 1; depth <= searchDepth; depth++)
         {
-            AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
+            //AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
+            prevResult = AspirationSearch(depth, prevResult == negativeInfinity ? 0 : prevResult);
 
             //Debug.Log("Depth " + depth + " eval: " + result / 100f + " move: " + BoardHelper.NameMove(bestMove));
 
@@ -70,6 +74,29 @@ public static class Search
         //Debug.Log("Eval: " + result / 100f);
         return bestMove;
     }
+
+    private static int AspirationSearch(int depth, int prevResult)
+    {
+        int alpha = prevResult - 51;
+        int beta = prevResult + 51;
+
+        int result = AlphaBeta(depth, 0, alpha, beta);
+
+        if (result >= beta)
+        {
+            Console.WriteLine("Failed High");
+            return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
+        }
+        else if (result <= alpha)
+        {
+            Console.WriteLine("Failed Low");
+            return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
+        }
+
+        return result;
+    }
+
+
 
     private static void LogSearchInfo(int depth, int nodeCount, bool isPartial)
     {
@@ -189,7 +216,7 @@ public static class Search
                     }
                 }
 
-                repetitionTable.PopNoRtn();
+                if (plyFromRoot > 0) repetitionTable.PopNoRtn();
                 return beta;
             }
 

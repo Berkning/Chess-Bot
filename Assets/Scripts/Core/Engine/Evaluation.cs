@@ -31,7 +31,7 @@ public static class Evaluation
     //public static int pawnColorCountDifference; //Darkcount - lightCount
 
 
-    public static int Evaluate()
+    public static int Evaluate() //TODO: https://www.chessprogramming.org/Tempo - tempo bonus to avoid score oscillation - except in endgame
     {
         EvaluateMaterial();
         gameStage = CalculateGameStage();
