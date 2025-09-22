@@ -8,7 +8,7 @@ public static class Search
 
     private const int maxExtensions = 8;
 
-    //private static int positionCount = 0;
+    private static int nodeCount = 0;
     //private static int quiescenseCount = 0;
     //private static int ttHits = 0;
 
@@ -34,7 +34,7 @@ public static class Search
         bestEval = negativeInfinity;
         repetitionTable.Copy(Board.repetitionTable);
 
-        //positionCount = 0;
+        nodeCount = -1; //Dont want to include start node - bc stockfish doesn't
         //quiescenseCount = 0;
         //ttHits = 0;
 
@@ -48,17 +48,18 @@ public static class Search
 
         for (int depth = 1; depth <= searchDepth; depth++)
         {
-            int result = AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
+            AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
 
             //Debug.Log("Depth " + depth + " eval: " + result / 100f + " move: " + BoardHelper.NameMove(bestMove));
 
             if (cancelSearch)
             {
-                //Console.WriteLine("info depth " + depth + " score cp " + result + " string partial search"); //TODO: Dont log score bc it always returns 0
-                Console.WriteLine("info depth " + depth + " string partial");
+                //Console.WriteLine("info depth " + depth + " score cp " + result + " string partial search");
+                //Console.WriteLine("info depth " + depth + " string partial");
+                LogSearchInfo(depth, nodeCount, true);
                 break;
             }
-            else LogSearchInfo(depth, result); //TODO: check if matescore and then exit if were low on time
+            else LogSearchInfo(depth, nodeCount, false); //TODO: check if matescore and then exit if were low on time
         }
 
         //if (!cancelSearch) TimeManagement.RevokeScheduledCancel();
@@ -70,9 +71,9 @@ public static class Search
         return bestMove;
     }
 
-    private static void LogSearchInfo(int depth, int score)
+    private static void LogSearchInfo(int depth, int nodeCount, bool isPartial)
     {
-        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(score) + " pv " + BoardHelper.GetMoveNameUCI(bestMove));
+        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv " + BoardHelper.GetMoveNameUCI(bestMove) + " nodes " + nodeCount + (isPartial ? " string partial" : ""));
     }
 
     // public static float Eval(int depth, bool test) //FIXMEn't:
@@ -86,10 +87,13 @@ public static class Search
 
     private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta, int numExtensions = 0)//, bool test)
     {
+        nodeCount++;
+
         if (cancelSearch) return 0;
 
         if (plyFromRoot > 0)
         {
+            //Two fold repetion instead of 3 fold for performance
             if (repetitionTable.Contains(Board.currentZobrist)) //TODO: 50 move rule as well
             {
                 return 0;
@@ -114,18 +118,18 @@ public static class Search
             if (plyFromRoot == 0)
             {
                 bestMove = transpositionTable.GetStoredMove();
+                bestEval = tableEval;
             }
             return tableEval;
         }
 
-
         if (depth == 0)
         {
-            //positionCount++;
             //quiescenseCount++;
             //return Evaluation.Evaluate();
             return SearchAllCaptures(alpha, beta);
         }
+
 
         Span<Move> moves = stackalloc Move[256];
 
@@ -134,8 +138,6 @@ public static class Search
         /*if (test)*/
         MoveOrdering.OrderMoves(ref moves, moveCount, bestMove, plyFromRoot);
 
-
-
         if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
         {
             //Debug.Log("Found Mate");
@@ -143,6 +145,8 @@ public static class Search
 
             return 0; //Stalemate
         }
+
+
 
         Move bestMoveInPosition = Move.nullMove;
         int transpositionBound = TranspositionTable.UpperBound;
@@ -168,8 +172,8 @@ public static class Search
             int evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);
             Board.UnMakeMove(moves[i], true);
 
-            if (cancelSearch) return 0;
 
+            if (cancelSearch) return 0;
 
             //Move was good opponent will avoid this position
             if (evaluation >= beta)
@@ -198,6 +202,7 @@ public static class Search
                 if (plyFromRoot == 0)
                 {
                     bestMove = bestMoveInPosition;
+                    bestEval = evaluation;
                 }
             }
         }
@@ -236,6 +241,8 @@ public static class Search
 
         for (int i = 0; i < moveCount; i++)
         {
+            nodeCount++;
+
             Board.MakeMove(moves[i], true);
             eval = -SearchAllCaptures(-beta, -alpha);
             Board.UnMakeMove(moves[i], true);

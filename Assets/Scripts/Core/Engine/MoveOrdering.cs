@@ -16,10 +16,10 @@ public static class MoveOrdering
     public static KillerMove[] killerMoves = new KillerMove[MaxKillerPlys];
 
 
-
+    //TODO: try penalizing moving very valuable pieces into less valuable enemy attack range - penalize rook in bishop attack range
     public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove, int ply) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
     {
-        for (int i = 0; i < moveCount; i++) //TODO: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
+        for (int i = 0; i < moveCount; i++) //TODOne: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
         {
             int moveScore = 0;
             int movedPieceType = Piece.Type(Board.Squares[moves[i].startSquare]);
