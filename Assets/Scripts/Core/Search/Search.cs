@@ -25,7 +25,7 @@ public static class Search
 
 
 
-    public static Move StartSearch(int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite TODO: Change to enum //TODO: Killer moves
+    public static Move StartSearch(int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite TODO: Change to enum //TODOne: Killer moves
     {
         //return AlphaBeta(depth, negativeInfinity, positiveInfinity);
         cancelSearch = false;
@@ -48,6 +48,15 @@ public static class Search
 
 
         int prevResult = negativeInfinity;
+
+
+        int resultFromLastSearch = transpositionTable.LookupEvaluation(1, 0, positiveInfinity, negativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
+
+        if (resultFromLastSearch != TranspositionTable.LookupFailed)
+        {
+            prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
+            //Console.WriteLine("Got TT Aspiration Hit");
+        }
 
         for (int depth = 1; depth <= searchDepth; depth++)
         {
@@ -104,7 +113,7 @@ public static class Search
 
                 if (result >= beta)
                 {
-                    Console.WriteLine("Failed High");
+                    //Console.WriteLine("Failed High");
                     //Console.WriteLine("New Increment: " + windowIncrements[incrementIndex]);
                     if (incrementIndex == windowIncrements.Length) //If we still fail after having gone through all increments
                     {
@@ -116,7 +125,7 @@ public static class Search
                 }
                 else if (result <= alpha)
                 {
-                    Console.WriteLine("Failed Low");
+                    //Console.WriteLine("Failed Low");
                     //Console.WriteLine("New Increment: " + windowIncrements[incrementIndex]);
                     if (incrementIndex == windowIncrements.Length) //If we still fail after having gone through all increments
                     {
@@ -277,7 +286,9 @@ public static class Search
         return alpha;
     }
 
-    private static int SearchAllCaptures(int alpha, int beta)
+
+
+    private static int SearchAllCaptures(int alpha, int beta) //TODO: maybe try including non-capture promotions - Checks??
     {
         if (cancelSearch) return 0; //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
 

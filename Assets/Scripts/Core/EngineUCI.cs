@@ -35,9 +35,6 @@ public class EngineUCI
             case "go":
                 InterpretGoCommand(args); //TODO: add go perft 'depth' //FIXME: dont log cv 0 at partial depth
                 break;
-            //case "eval":
-                //Console.WriteLine(Search.Eval(6, true));
-                //break;
             case "time":
                 Stopwatch timer = Stopwatch.StartNew();
                 RecieveCommand(command.Remove(0, 5));
@@ -74,7 +71,7 @@ public class EngineUCI
                     else
                     {
                         autoAdjustTT = bool.Parse(args[2]);
-                        Console.WriteLine("info string Auto Adjusting " + (autoAdjustTT?"Enabled": "Disabled"));
+                        Console.WriteLine("info string Auto Adjusting " + (autoAdjustTT ? "Enabled" : "Disabled"));
 
                         shouldAdjust = true;
                     }
@@ -95,20 +92,20 @@ public class EngineUCI
 
 
 
-            /*case "ucinewgame":
-                break;
-            case "position":
-                Program.pipe.nextCommand = command;
-                break;
-            case "go":
-                Program.pipe.nextCommand = command;
-                break;
-            case "stop":
-                Program.pipe.nextCommand = command;
-                break;
-            default:
-                Program.pipe.nextCommand = command; //If command not recognized here we should forward it to the engine
-                break;*/
+                /*case "ucinewgame":
+                    break;
+                case "position":
+                    Program.pipe.nextCommand = command;
+                    break;
+                case "go":
+                    Program.pipe.nextCommand = command;
+                    break;
+                case "stop":
+                    Program.pipe.nextCommand = command;
+                    break;
+                default:
+                    Program.pipe.nextCommand = command; //If command not recognized here we should forward it to the engine
+                    break;*/
         }
     }
 
