@@ -52,7 +52,7 @@ public static class Search
         for (int depth = 1; depth <= searchDepth; depth++)
         {
             //AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
-            prevResult = AspirationSearch(depth, prevResult == negativeInfinity ? 0 : prevResult);
+            prevResult = AspirationWindow.Search(depth, prevResult);
 
             //Debug.Log("Depth " + depth + " eval: " + result / 100f + " move: " + BoardHelper.NameMove(bestMove));
 
@@ -75,27 +75,63 @@ public static class Search
         return bestMove;
     }
 
-    private static int AspirationSearch(int depth, int prevResult)
+
+    public static class AspirationWindow
     {
-        int alpha = prevResult - 51;
-        int beta = prevResult + 51;
+        private static int[] windowIncrements = { 25, 100, 400, 1600 };
+        private const int InstabilityMargin = 25;
 
-        int result = AlphaBeta(depth, 0, alpha, beta);
-
-        if (result >= beta)
+        public static int Search(int depth, int prevResult)
         {
-            Console.WriteLine("Failed High");
-            return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
-        }
-        else if (result <= alpha)
-        {
-            Console.WriteLine("Failed Low");
-            return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
-        }
+            int incrementIndex = 0;
 
-        return result;
+            int alpha = prevResult - windowIncrements[incrementIndex];
+            int beta = prevResult + windowIncrements[incrementIndex];
+
+            if (prevResult == negativeInfinity) //If no previous result, we search with a full window
+            {
+                alpha = negativeInfinity;
+                beta = positiveInfinity;
+            }
+
+            int result;
+
+            while (true)
+            {
+                result = AlphaBeta(depth, 0, alpha, beta);
+
+                incrementIndex++; //If we fail, we have to increment this index anyway, and if we don't, we won't continue the loop anyway
+
+                if (result >= beta)
+                {
+                    Console.WriteLine("Failed High");
+                    //Console.WriteLine("New Increment: " + windowIncrements[incrementIndex]);
+                    if (incrementIndex == windowIncrements.Length) //If we still fail after having gone through all increments
+                    {
+                        return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
+                    }
+
+                    beta = prevResult + windowIncrements[incrementIndex];
+                    alpha = result - InstabilityMargin; //Have to still keep some space for search instability
+                }
+                else if (result <= alpha)
+                {
+                    Console.WriteLine("Failed Low");
+                    //Console.WriteLine("New Increment: " + windowIncrements[incrementIndex]);
+                    if (incrementIndex == windowIncrements.Length) //If we still fail after having gone through all increments
+                    {
+                        return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
+                    }
+
+                    alpha = prevResult - windowIncrements[incrementIndex];
+                    beta = result + InstabilityMargin;
+                }
+                else break; //Result is within window and we can stop re-searching
+            }
+
+            return result;
+        }
     }
-
 
 
     private static void LogSearchInfo(int depth, int nodeCount, bool isPartial)
