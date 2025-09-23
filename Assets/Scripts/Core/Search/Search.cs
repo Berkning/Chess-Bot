@@ -49,15 +49,6 @@ public static class Search
 
         int prevResult = negativeInfinity;
 
-
-        int resultFromLastSearch = transpositionTable.LookupEvaluation(1, 0, positiveInfinity, negativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
-
-        if (resultFromLastSearch != TranspositionTable.LookupFailed)
-        {
-            prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
-            //Console.WriteLine("Got TT Aspiration Hit");
-        }
-
         for (int depth = 1; depth <= searchDepth; depth++)
         {
             //AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
