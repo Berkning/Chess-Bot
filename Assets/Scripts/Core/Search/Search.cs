@@ -12,7 +12,7 @@ public static class Search
     //private static int quiescenseCount = 0;
     //private static int ttHits = 0;
 
-    private static Move bestMove;
+    private static Move bestMove; //TODO: Could just convert to array indexed by depth to store PV
     private static int bestEval;
 
     private static RepetitionTable repetitionTable = new RepetitionTable();
@@ -156,6 +156,7 @@ public static class Search
 
 
 
+    #region Search
 
     private static int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta, int numExtensions = 0)//, bool test)
     {
@@ -239,9 +240,22 @@ public static class Search
                 if (Piece.Type(Board.Squares[moves[i].targetSquare]) == Piece.Pawn && (targetRank == 1 || targetRank == 6)) extensions = 1; //Extend when about to promote
             }
 
+            int evaluation = negativeInfinity;
+            bool searchFullDepth = true;
+
+            //Late Move Reduction
+            if (i > 4 && extensions == 0 && depth > 3)  //Assuming move ordering isn't completely wrong
+            {
+                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -beta, -alpha, numExtensions);
+
+                //TODO: if eval jumps, analyse at full depth
+                //If evals better than anything else so far well search to full depth - horizon effect but outweighed by speed
+                searchFullDepth = evaluation > alpha;
+            }
+
+            if (searchFullDepth) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);
 
 
-            int evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);
             Board.UnMakeMove(moves[i], true);
 
 
@@ -271,7 +285,7 @@ public static class Search
                 bestMoveInPosition = moves[i];
                 transpositionBound = TranspositionTable.Exact;
 
-                if (plyFromRoot == 0)
+                if (plyFromRoot == 0) //TODO: PV
                 {
                     bestMove = bestMoveInPosition;
                     bestEval = evaluation;
@@ -336,6 +350,11 @@ public static class Search
         return alpha;
     }
 
+    #endregion
+
+
+
+    #region Helpers
 
     public static bool IsMateScore(int score)
     {
@@ -354,4 +373,6 @@ public static class Search
 
         return "mate " + (absMateScore * Math.Sign(score)).ToString();
     }
+
+    #endregion
 }
