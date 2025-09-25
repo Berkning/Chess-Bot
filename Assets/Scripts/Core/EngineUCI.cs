@@ -77,16 +77,17 @@ public class EngineUCI
                     }
                 }
                 break;
-            case "tweak":
+            case "pv":
                 if (args.Length == 1)
                 {
-                    //Console.WriteLine(MoveOrdering.kingAttackBias);
+                    Console.WriteLine(Search.logFullPV);
                     break;
                 }
 
-                int value = int.Parse(args[1]);
-                //MoveOrdering.kingAttackBias = value;
-                //Console.WriteLine(nameof(MoveOrdering.kingAttackBias) + " set to: " + value);
+                bool value = bool.Parse(args[1]);
+                Search.logFullPV = value;
+
+                Console.WriteLine("Logging Full PV " + (value ? "Enabled" : "Disabled"));
                 break;
 
 

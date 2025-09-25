@@ -12,7 +12,8 @@ public static class Search
     //private static int quiescenseCount = 0;
     //private static int ttHits = 0;
 
-    private static Move bestMove; //TODO: Could just convert to array indexed by depth to store PV
+    //private static Move[] principledVariation = new Move[100]; //TODOne: Could just convert to array indexed by depth to store PV
+    private static Move bestMove;
     private static int bestEval;
 
     private static RepetitionTable repetitionTable = new RepetitionTable();
@@ -29,6 +30,9 @@ public static class Search
     {
         //return AlphaBeta(depth, negativeInfinity, positiveInfinity);
         cancelSearch = false;
+
+
+        //for (int i = 0; i < principledVariation.Length; i++) principledVariation[i] = Move.nullMove; //Clear PV
 
         bestMove = Move.nullMove;
         bestEval = negativeInfinity;
@@ -142,11 +146,6 @@ public static class Search
         }
     }
 
-
-    private static void LogSearchInfo(int depth, int nodeCount, bool isPartial)
-    {
-        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv " + BoardHelper.GetMoveNameUCI(bestMove) + " nodes " + nodeCount + (isPartial ? " string partial" : ""));
-    }
 
     // public static float Eval(int depth, bool test) //FIXMEn't:
     // {
@@ -356,6 +355,45 @@ public static class Search
 
     #region Helpers
 
+    public static bool logFullPV = false;
+
+    private static void LogSearchInfo(int depth, int nodeCount, bool isPartial)
+    {
+        string pv = logFullPV ? GetPVFromTranspositionTable() : GetBasicPVString();
+
+        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv" + pv + " nodes " + nodeCount + (isPartial ? " string partial" : ""));
+    }
+
+    private static string GetBasicPVString()
+    {
+        return ' ' + BoardHelper.GetMoveNameUCI(bestMove);
+    }
+
+    private static string GetPVFromTranspositionTable()
+    {
+        string result = "";
+
+        int tableResult = transpositionTable.LookupEvaluation(0, 0, 0, 0);
+
+        if (tableResult == TranspositionTable.LookupFailed) return result;
+
+
+        Move move = transpositionTable.GetStoredMove();
+
+        if (move.data != 0)
+        {
+            result += ' ' + BoardHelper.GetMoveNameUCI(move);
+
+            Board.MakeMove(move, true);
+            result += GetPVFromTranspositionTable();
+            Board.UnMakeMove(move, true);
+        }
+
+        return result;
+    }
+
+
+
     public static bool IsMateScore(int score)
     {
         if (score == int.MinValue)
@@ -365,7 +403,7 @@ public static class Search
         return Math.Abs(score) > immediateMateScore - 1000;
     }
 
-    public static string GetScoreLogString(int score)
+    private static string GetScoreLogString(int score)
     {
         if (!IsMateScore(score)) return "cp " + score.ToString();
 
