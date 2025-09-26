@@ -130,8 +130,8 @@ public class TestScript : MonoBehaviour
         Debug.Log("square: " + epSquare);*/
 
         //BoardGraphics.instance.HighlightBitBoard(PrecomputedData.passedPawnMasks[test] & (~PrecomputedData.fileMasks[BoardHelper.IndexToFile(test)]));
-        if (test > 0) BoardGraphics.instance.HighlightBitBoard(PrecomputedData.DarkSquareMask);
-        else BoardGraphics.instance.HighlightBitBoard(PrecomputedData.LightSquareMask);
+        //if (test > 0) BoardGraphics.instance.HighlightBitBoard(PrecomputedData.DarkSquareMask);
+        //else BoardGraphics.instance.HighlightBitBoard(PrecomputedData.LightSquareMask);
         //BoardGraphics.instance.HighlightBitBoard(test);
 
 
@@ -143,7 +143,7 @@ public class TestScript : MonoBehaviour
             doSearch = false;
             System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
-            Debug.Log(BoardHelper.GetMoveNameUCI(Search.StartSearch(depth, -2)));
+            //Debug.Log(BoardHelper.GetMoveNameUCI(Search.StartSearch(depth, -2))); //FIXME: maybe
             stopwatch.Stop();
             Debug.Log("Search Took: " + stopwatch.ElapsedMilliseconds + "ms");
         }

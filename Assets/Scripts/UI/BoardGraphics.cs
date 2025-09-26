@@ -21,6 +21,8 @@ public class BoardGraphics : MonoBehaviour
     [SerializeField] private float pieceDepth;
     [SerializeField] private bool whiteIsBottom = true;
 
+    [SerializeField] private Transform arrow;
+
     private MeshRenderer[] squareRenderers;
     private SpriteRenderer[] squarePieceRenderers;
 
@@ -185,6 +187,21 @@ public class BoardGraphics : MonoBehaviour
             }
         }
     }
+
+    public void ShowMove(Move move)
+    {
+        int startSquare = move.startSquare;
+        int targetSquare = move.targetSquare;
+
+        Vector3 startPos = PositionFromCoord(BoardHelper.IndexToFile(startSquare), BoardHelper.IndexToRank(startSquare), -1f);
+        Vector3 targetPos = PositionFromCoord(BoardHelper.IndexToFile(targetSquare), BoardHelper.IndexToRank(targetSquare), -1f);
+
+        arrow.position = startPos;
+
+        arrow.localScale = new Vector3(1f, Vector3.Distance(startPos, targetPos), 1f);
+        arrow.eulerAngles = new Vector3(0f, 0f, Vector3.SignedAngle(Vector3.up, targetPos - startPos, Vector3.forward));
+    }
+
 
     private Vector3 PositionFromCoord(int file, int rank, float depth = 0)
     {

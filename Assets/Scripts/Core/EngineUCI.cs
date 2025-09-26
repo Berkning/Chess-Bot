@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 public class EngineUCI
 {
+    private Thread searchThread;
+
     public void RecieveCommand(string command)
     {
         string[] args = command.Split(' ');
@@ -27,7 +27,7 @@ public class EngineUCI
                 playedMoves.Clear();
                 Search.transpositionTable.Clear();
 
-                shouldAdjust = true;
+                hasAdjustedThisGame = false;
                 break;
             case "position":
                 InterpretPositionCommand(args);
@@ -72,8 +72,6 @@ public class EngineUCI
                     {
                         autoAdjustTT = bool.Parse(args[2]);
                         Console.WriteLine("info string Auto Adjusting " + (autoAdjustTT ? "Enabled" : "Disabled"));
-
-                        shouldAdjust = true;
                     }
                 }
                 break;
@@ -110,16 +108,44 @@ public class EngineUCI
         }
     }
 
+    Stopwatch searchTimer = new Stopwatch();
+
+    private void InitializeSearch(int depth, int time)
+    {
+        Search.cancelSearch = false;
+
+        Action<Move> callback = result => OnSearchCompleted(result);
+
+        searchThread = new Thread(() => Search.StartSearch(callback, depth, time));
+
+        searchThread.Start();
+        searchTimer.Restart();
+    }
+
+    public void OnSearchCompleted(Move move)
+    {
+        searchTimer.Stop();
+        Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
+        Console.WriteLine("info string Search Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
+
+        AdjustTT(Board.colorToMove == Piece.White ? TimeManagement.whiteTime : TimeManagement.blackTime);
+    }
+
+
+
+
     private bool autoAdjustTT = true;
-    private bool shouldAdjust = true; //Whether the table need to be adjusted on the next go
+    private bool hasAdjustedThisGame = false;
+    private bool shouldAdjust = false; //Whether the table need to be adjusted on the next go
 
     private void AdjustTT(int maxTime)
     {
-        if (autoAdjustTT && shouldAdjust)
+        if (autoAdjustTT && shouldAdjust && !hasAdjustedThisGame)
         {
             //Only here at first move of the game, so maxTime is the games base time - except if auto changed which shouldn't matter
 
             shouldAdjust = false;
+            hasAdjustedThisGame = true;
 
             if (maxTime <= 10000)//if less than 10s   //Sizes just picked arbitrarily or very vaguely based on testing
             {
@@ -143,12 +169,9 @@ public class EngineUCI
 
     private void InterpretGoCommand(string[] args)
     {
-        Move move = Move.nullMove; //For some reason can't declare this multiple times within switch
-
         if (args.Length == 1)
         {
-            move = Search.StartSearch(99, -2);
-            Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
+            InitializeSearch(99, -2);
             return;
         }
 
@@ -156,28 +179,27 @@ public class EngineUCI
         {
             case "depth":
                 int depth = int.Parse(args[2]);
-                move = Search.StartSearch(depth, -2);
-                Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
+                InitializeSearch(depth, -2);
                 return;
             case "infinite":
-                move = Search.StartSearch(int.MaxValue, -2);
-                Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
+                InitializeSearch(int.MaxValue, -2);
                 return;
             case "movetime":
-                move = Search.StartSearch(99, int.Parse(args[2]));
-                Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
+                InitializeSearch(99, int.Parse(args[2]));
                 return;
             case "wtime":
                 int white = int.Parse(args[2]);
                 int black = int.Parse(args[4]);
                 TimeManagement.UpdateTimes(white, black);
+                if (!hasAdjustedThisGame) shouldAdjust = true;
+
                 //TODO: Increments
-                move = Search.StartSearch(99);
-                Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
+                InitializeSearch(99, -1);
 
                 //Adjust TT here bc we will be waiting for opponent to respond anyway
-                if (Board.colorToMove == Piece.White) AdjustTT(white); //If we are playing white
-                else AdjustTT(black);
+                //if (Board.colorToMove == Piece.White) AdjustTT(white); //If we are playing white //FIXedME: fix auto adjust to only run when search thread has returned
+                //else AdjustTT(black);
+
 
                 return;
             case "perft":

@@ -23,7 +23,7 @@ namespace Analysis
 
         public UnityEvent<string> onEngineResponded = new UnityEvent<string>();
 
-        void Start()
+        void Awake()
         {
             StartEngine();
 

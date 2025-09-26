@@ -12,7 +12,7 @@ public static class Benchmark
         ("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ", 8),
     };
 
-    public static void Run()
+    public static void Run() //FIXME:
     {
         long totalTime = 0;
         Stopwatch stopwatch = new Stopwatch();
@@ -23,7 +23,7 @@ public static class Benchmark
             FenUtility.LoadPositionFromFen(positions[i].fen);
 
             stopwatch.Restart();
-            Search.StartSearch(positions[i].depth, -2);
+            //Search.StartSearch(positions[i].depth, -2);
             stopwatch.Stop();
 
             Console.WriteLine("Benchmark " + (i + 1) + '/' + positions.Length + " - Ply: " + positions[i].depth + " Time: " + stopwatch.ElapsedMilliseconds + "ms   Fen: " + positions[i].fen);

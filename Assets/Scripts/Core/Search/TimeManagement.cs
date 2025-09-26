@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 public static class TimeManagement
 {
-    private static int whiteTime = 60000;
-    private static int blackTime = 60000;
+    public static int whiteTime = 60000;
+    public static int blackTime = 60000;
 
     private static CancellationTokenSource source = new CancellationTokenSource();
 

@@ -22,11 +22,11 @@ public static class Search
 
 
 
-    public static bool cancelSearch = false;
+    public static bool cancelSearch = false; //TODO: try marking as volatile to see if performance improves
 
 
 
-    public static Move StartSearch(int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite TODO: Change to enum //TODOne: Killer moves
+    public static void StartSearch(Action<Move> callback, int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite TODO: Change to enum //TODOne: Killer moves
     {
         //return AlphaBeta(depth, negativeInfinity, positiveInfinity);
         cancelSearch = false;
@@ -85,7 +85,7 @@ public static class Search
         //Console.WriteLine(quiescenseCount + " quiescenseCount");
         //Console.WriteLine(ttHits + " ttHits");
         //Debug.Log("Eval: " + result / 100f);
-        return bestMove;
+        callback.Invoke(bestMove);
     }
 
 
