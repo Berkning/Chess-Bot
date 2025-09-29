@@ -15,7 +15,7 @@ public static class MoveOrdering
     public static KillerMove[] killerMoves = new KillerMove[MaxKillerPlys];
 
 
-    //TODO: try penalizing moving very valuable pieces into less valuable enemy attack range - penalize rook in bishop attack range
+    //TODOne: try penalizing moving very valuable pieces into less valuable enemy attack range - penalize rook in bishop attack range
     public static void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove, int ply) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
     {
         for (int i = 0; i < moveCount; i++) //TODOne: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
@@ -27,7 +27,7 @@ public static class MoveOrdering
             int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
             int flag = moves[i].flag; //TODO: try having ref to current move even though prob done by compiler anyway
 
-            //TODOne: guess if opponent cant recapture //TODO: penalize rook and queen movements in early game?
+            //TODOne: guess if opponent cant recapture //TODOne: penalize rook and queen movements in early game?
 
             if (moves[i].data == prevBestMove.data) moveScore += prevBestBias; //TODO: Could optimize checking through all moves to find this one prob
 

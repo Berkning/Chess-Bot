@@ -22,7 +22,7 @@ public static class Search
 
 
 
-    public static bool cancelSearch = false; //TODO: try marking as volatile to see if performance improves
+    public volatile static bool cancelSearch = false; //TODO: try marking as volatile to see if performance improves
 
 
 
