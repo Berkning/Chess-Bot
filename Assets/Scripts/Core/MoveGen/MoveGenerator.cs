@@ -579,7 +579,7 @@ public struct Move //FFFFTTTTTTSSSSSS - F = Flag bit - T = Target square bit - S
     private const ushort TargetMask = 0b0000111111000000;
     private const ushort FlagMask = 0b1111000000000000;
 
-    public static Move nullMove = new Move(0, 0);
+    public static Move nullMove = new Move(0, 0); //TODO: try if setting as const is more performant? Or adding function for IsNull
 
     public Move(int start, int target)
     {

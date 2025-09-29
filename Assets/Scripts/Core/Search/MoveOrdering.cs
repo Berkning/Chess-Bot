@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 public static class MoveOrdering
 {
@@ -28,7 +27,7 @@ public static class MoveOrdering
             int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
             int flag = moves[i].flag; //TODO: try having ref to current move even though prob done by compiler anyway
 
-            //TODOne: guess if opponent cant recapture
+            //TODOne: guess if opponent cant recapture //TODO: penalize rook and queen movements in early game?
 
             if (moves[i].data == prevBestMove.data) moveScore += prevBestBias; //TODO: Could optimize checking through all moves to find this one prob
 
@@ -55,6 +54,13 @@ public static class MoveOrdering
                 // }
 
                 if (ply < MaxKillerPlys && killerMoves[ply].Contains(moves[i])) moveScore += killerBias;
+                //TODO: try with else if
+                //if (movedPieceValue >= Evaluation.RookValue)
+                //{
+                //if (BitBoardHelper.ContainsSquare(MoveGenerator.opponentKnightAttackMap, moves[i].targetSquare)) moveScore -= 150; //TODO: Tweak value and test //Cant do with bishops and rooks bc their attack boards are combined with each other - and the queen
+                //}
+
+                //if (movedPieceType == Piece.Rook) moveScore -= (int)(100f * Evaluation.earlygameMultiplier); //TODO: experiment with moving this into different if statements - also try with else if
             }
 
             if (movedPieceType == Piece.Pawn)
@@ -84,6 +90,7 @@ public static class MoveOrdering
                 {
                     moveScore -= 350;
                 }
+                //else if (movedPieceType == Piece.Rook) moveScore -= (int)(100f * Evaluation.earlygameMultiplier); //Penalize moving rook in early game
             }
 
             moveScores[i] = moveScore;

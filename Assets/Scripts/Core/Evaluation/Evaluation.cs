@@ -22,6 +22,7 @@ public static class Evaluation
 
     public static float gameStage;
     public static float endgameMultiplier;
+    //public static float earlygameMultiplier;
 
     //public static ulong darkPawnBoard;
     //public static ulong lightPawnBoard;
@@ -36,6 +37,7 @@ public static class Evaluation
         EvaluateMaterial();
         gameStage = CalculateGameStage();
         endgameMultiplier = Math.Max(gameStage - 1f, 0f);
+        //earlygameMultiplier = Math.Max(1f - gameStage, 0f);
 
         //ulong darkPawnBoard = (Board.pawnList[0].bitboard | Board.pawnList[1].bitboard) & PrecomputedData.DarkSquareMask;
         //ulong lightPawnBoard = (Board.pawnList[0].bitboard | Board.pawnList[1].bitboard) & PrecomputedData.LightSquareMask;

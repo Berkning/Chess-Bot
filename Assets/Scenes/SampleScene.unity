@@ -554,7 +554,7 @@ MonoBehaviour:
   evalReactionSpeed: 0.5
   evalText: {fileID: 539093996}
   time: 5000
-  position: 3RrR2/1kp5/1p5p/1p4n1/1P6/2P1B3/P5K1/8 w - - 0 47
+  position: r1b4r/ppp1kppp/2n2n2/1B6/4Pb1P/P4N2/2P1K1P1/R7 b - - 0 17
 --- !u!114 &181900137
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1820,7 +1820,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62f0d40ff898c948bbadc37e03efc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customFen: 3RrR2/1kp5/1p5p/1p4n1/1P6/2P1B3/P5K1/8 w - - 0 47
+  customFen: r1b4r/ppp1kppp/2n2n2/1B6/4Pb1P/P4N2/2P1K1P1/R7 b - - 0 17
   runPerft: 0
   perftDepth: 2
   compareToFish: 0
