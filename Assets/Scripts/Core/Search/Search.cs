@@ -2,13 +2,14 @@ using System;
 
 public static class Search
 {
-    private const int immediateMateScore = 100000;
-    private const int positiveInfinity = 9999999;
-    private const int negativeInfinity = -positiveInfinity;
+    private const int ImmediateMateScore = 100000;
+    private const int PositiveInfinity = 9999999;
+    private const int NegativeInfinity = -PositiveInfinity;
 
-    private const int maxExtensions = 8;
+    private const int MaxExtensions = 8;
 
     private static int nodeCount = 0;
+    private const int CancelDelay = 1023; //Amount of nodes to check before next check of cancelSearch value - HAS to be mask - like ending in only ones -> 0b0001111111
     //private static int quiescenseCount = 0;
     //private static int ttHits = 0;
 
@@ -22,7 +23,7 @@ public static class Search
 
 
 
-    public volatile static bool cancelSearch = false; //TODO: try marking as volatile to see if performance improves
+    public volatile static bool cancelSearch = false; //TODOing: try marking as volatile to see if performance improves
 
 
 
@@ -35,7 +36,7 @@ public static class Search
         //for (int i = 0; i < principledVariation.Length; i++) principledVariation[i] = Move.nullMove; //Clear PV
 
         bestMove = Move.nullMove;
-        bestEval = negativeInfinity;
+        bestEval = NegativeInfinity;
         repetitionTable.Copy(Board.repetitionTable);
 
         nodeCount = -1; //Dont want to include start node - bc stockfish doesn't
@@ -51,10 +52,10 @@ public static class Search
         else if (searchTime > 0) TimeManagement.ScheduleSearchCancel(searchTime); //If less than -1, let it go till stop is recieved
 
 
-        int prevResult = negativeInfinity;
+        int prevResult = NegativeInfinity;
 
 
-        int resultFromLastSearch = transpositionTable.LookupEvaluation(1, 0, positiveInfinity, negativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
+        int resultFromLastSearch = transpositionTable.LookupEvaluation(1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
 
         if (resultFromLastSearch != TranspositionTable.LookupFailed)
         {
@@ -69,7 +70,7 @@ public static class Search
 
             //Debug.Log("Depth " + depth + " eval: " + result / 100f + " move: " + BoardHelper.NameMove(bestMove));
 
-            if (cancelSearch)
+            if (cancelSearch) //FIXMEnt?: Currently plays illegal and sometime null moves randomly in partial search
             {
                 //Console.WriteLine("info depth " + depth + " score cp " + result + " string partial search");
                 //Console.WriteLine("info depth " + depth + " string partial");
@@ -91,7 +92,7 @@ public static class Search
 
     public static class AspirationWindow
     {
-        private static int[] windowIncrements = { 25, 100, 400, 1600 };
+        private static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
         private const int InstabilityMargin = 25;
 
         public static int Search(int depth, int prevResult)
@@ -101,10 +102,10 @@ public static class Search
             int alpha = prevResult - windowIncrements[incrementIndex];
             int beta = prevResult + windowIncrements[incrementIndex];
 
-            if (prevResult == negativeInfinity) //If no previous result, we search with a full window
+            if (prevResult == NegativeInfinity) //If no previous result, we search with a full window
             {
-                alpha = negativeInfinity;
-                beta = positiveInfinity;
+                alpha = NegativeInfinity;
+                beta = PositiveInfinity;
             }
 
             int result;
@@ -112,6 +113,11 @@ public static class Search
             while (true)
             {
                 result = AlphaBeta(depth, 0, alpha, beta);
+
+                //if ((nodeCount & CancelDelay) == 0) //Obv don't only check when canceldelay has passed, otherwise if nodecount is off by just 1 we keep running the aspiration search even if search is cancelled
+                //{
+                if (cancelSearch) return 0;
+                //}
 
                 incrementIndex++; //If we fail, we have to increment this index anyway, and if we don't, we won't continue the loop anyway
 
@@ -121,7 +127,7 @@ public static class Search
                     //Console.WriteLine("New Increment: " + windowIncrements[incrementIndex]);
                     if (incrementIndex == windowIncrements.Length) //If we still fail after having gone through all increments
                     {
-                        return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
+                        return AlphaBeta(depth, 0, NegativeInfinity, PositiveInfinity);
                     }
 
                     beta = prevResult + windowIncrements[incrementIndex];
@@ -133,7 +139,7 @@ public static class Search
                     //Console.WriteLine("New Increment: " + windowIncrements[incrementIndex]);
                     if (incrementIndex == windowIncrements.Length) //If we still fail after having gone through all increments
                     {
-                        return AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
+                        return AlphaBeta(depth, 0, NegativeInfinity, PositiveInfinity);
                     }
 
                     alpha = prevResult - windowIncrements[incrementIndex];
@@ -161,7 +167,10 @@ public static class Search
     {
         nodeCount++;
 
-        if (cancelSearch) return 0;
+        if ((nodeCount & CancelDelay) == 0) //TODO: test with removing this
+        {
+            if (cancelSearch) return 0;
+        }
 
         if (plyFromRoot > 0)
         {
@@ -175,8 +184,8 @@ public static class Search
             // the search, which would be shorter than any mate we could find from here.
             // This is done by observing that alpha can't possibly be worse (and likewise
             // beta can't  possibly be better) than being mated in the current position.
-            alpha = Math.Max(alpha, -immediateMateScore + plyFromRoot);
-            beta = Math.Min(beta, immediateMateScore - plyFromRoot);
+            alpha = Math.Max(alpha, -ImmediateMateScore + plyFromRoot);
+            beta = Math.Min(beta, ImmediateMateScore - plyFromRoot);
             if (alpha >= beta)
             {
                 return alpha;
@@ -213,7 +222,7 @@ public static class Search
         if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
         {
             //Debug.Log("Found Mate");
-            if (MoveGenerator.inCheck) return -(immediateMateScore - plyFromRoot); //Checkmate
+            if (MoveGenerator.inCheck) return -(ImmediateMateScore - plyFromRoot); //Checkmate
 
             return 0; //Stalemate
         }
@@ -231,15 +240,15 @@ public static class Search
             Board.MakeMove(moves[i], true); //TODO: test having ref to move instead of accesing array - prob already done by compiler though
 
             int extensions = 0;
-            if (numExtensions < maxExtensions)
+            if (numExtensions < MaxExtensions)
             {
                 //TODO: Search extenstions
                 //if (MoveGenerator.inCheck) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
                 int targetRank = BoardHelper.IndexToRank(moves[i].targetSquare);
-                if (Piece.Type(Board.Squares[moves[i].targetSquare]) == Piece.Pawn && (targetRank == 1 || targetRank == 6)) extensions = 1; //Extend when about to promote
+                if (Piece.Type(Board.Squares[moves[i].targetSquare]) == Piece.Pawn && (targetRank == 1 || targetRank == 6)) extensions = 1; //Extend when about to promote //TODO: test properly
             }
 
-            int evaluation = negativeInfinity;
+            int evaluation = NegativeInfinity;
             bool searchFullDepth = true;
 
             //Late Move Reduction
@@ -249,7 +258,7 @@ public static class Search
 
                 //TODO: if eval jumps, analyse at full depth
                 //If evals better than anything else so far well search to full depth - horizon effect but outweighed by speed
-                searchFullDepth = evaluation > alpha;
+                searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && cancelSearch);
             }
 
             if (searchFullDepth) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);
@@ -258,14 +267,17 @@ public static class Search
             Board.UnMakeMove(moves[i], true);
 
 
-            if (cancelSearch) return 0;
+            if ((nodeCount & CancelDelay) == 0) //Makes perfect sense to have this here now - //Seemingly doesn't work properly without this check, but works fine without the check at the start of the function. Doesn't make any sense - also doesn't work do the correct amount of checks without the check at the start, but still stops in reasonable amount of time
+            {
+                if (cancelSearch) return 0;
+            }
 
             //Move was good opponent will avoid this position
             if (evaluation >= beta)
             {
                 transpositionTable.StoreEvaluation(depth, plyFromRoot, beta, TranspositionTable.LowerBound, moves[i]);
 
-                //TODO: Test without checking for ep for performance maybe
+                //TODO: Test without checking for ep for performance bc we already check if this is the case in the moveordering but this will ofc override the space of a valid killer move with an invalid ep move if possible - maybe too rare?
                 if (Board.Squares[moves[i].targetSquare] == Piece.None && moves[i].flag != Move.Flag.EnPassantCapture) //If not a capture - only add killer moves that aren't captures, bc these are always ranked highly i guess?
                 {
                     if (plyFromRoot < MoveOrdering.MaxKillerPlys)
@@ -303,7 +315,10 @@ public static class Search
 
     private static int SearchAllCaptures(int alpha, int beta) //TODO: maybe try including non-capture promotions - Checks??
     {
-        if (cancelSearch) return 0; //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
+        if ((nodeCount & CancelDelay) == 0) //TODO: Try removing this
+        {
+            if (cancelSearch) return 0; //We are checking in the iterative part im just stupid - //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
+        }
 
         // A player isn't forced to make a capture (typically), so see what the evaluation is without capturing anything.
         // This prevents situations where a player ony has bad captures available from being evaluated as bad,
@@ -334,6 +349,11 @@ public static class Search
             eval = -SearchAllCaptures(-beta, -alpha);
             Board.UnMakeMove(moves[i], true);
             //numQNodes++;
+
+            if ((nodeCount & CancelDelay) == 0)
+            {
+                if (cancelSearch) return 0;
+            }
 
             if (eval >= beta)
             {
@@ -400,14 +420,14 @@ public static class Search
         {
             return false;
         }
-        return Math.Abs(score) > immediateMateScore - 1000;
+        return Math.Abs(score) > ImmediateMateScore - 1000;
     }
 
     private static string GetScoreLogString(int score)
     {
         if (!IsMateScore(score)) return "cp " + score.ToString();
 
-        int absMateScore = immediateMateScore - Math.Abs(score); //FIXME:
+        int absMateScore = ImmediateMateScore - Math.Abs(score); //FIXME:
 
         return "mate " + (absMateScore * Math.Sign(score)).ToString();
     }

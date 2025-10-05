@@ -138,7 +138,7 @@ public class EngineUCI
     private bool hasAdjustedThisGame = false;
     private bool shouldAdjust = false; //Whether the table need to be adjusted on the next go
 
-    private void AdjustTT(int maxTime)
+    private void AdjustTT(int maxTime) //TODO: Should prob check if TT is already optimal size to avoid wasting first results if unnecessary
     {
         if (autoAdjustTT && shouldAdjust && !hasAdjustedThisGame)
         {
