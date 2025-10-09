@@ -315,7 +315,7 @@ public static class Search
 
     private static int SearchAllCaptures(int alpha, int beta) //TODO: maybe try including non-capture promotions - Checks??
     {
-        if ((nodeCount & CancelDelay) == 0)
+        if ((nodeCount & CancelDelay) == 0) //TODO: Try removing this
         {
             if (cancelSearch) return 0; //We are checking in the iterative part im just stupid - //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
         }

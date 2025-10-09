@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Numerics;
+using Unity.Mathematics;
 
 public static class BitBoardHelper
 {
@@ -50,8 +51,8 @@ public static class BitBoardHelper
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PopFirstBit(ref ulong board)
     {
-        int z = BitOperations.TrailingZeroCount(board);
-        //int z = math.tzcnt(board);
+        //int z = BitOperations.TrailingZeroCount(board);
+        int z = math.tzcnt(board);
         board &= board - 1UL;
         return z;
     }
@@ -59,7 +60,6 @@ public static class BitBoardHelper
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int BitCount(ulong board)
     {
-        //return math.countbits(board);
-        return BitOperations.PopCount(board);
+        return math.countbits(board);
     }
 }
