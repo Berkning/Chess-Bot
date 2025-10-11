@@ -237,12 +237,14 @@ public static class Search
 
         for (int i = 0; i < moveCount; i++)
         {
-            Board.MakeMove(moves[i], true); //TODO: test having ref to move instead of accesing array - prob already done by compiler though
+            //Move move = moves[i];
+
+            Board.MakeMove(moves[i], true); //TODOne: test having ref to move instead of accesing array - prob already done by compiler though
 
             int extensions = 0;
             if (numExtensions < MaxExtensions)
             {
-                //TODO: Search extenstions
+                //TODO: Search extensions
                 //if (MoveGenerator.inCheck) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
                 int targetRank = BoardHelper.IndexToRank(moves[i].targetSquare);
                 if (Piece.Type(Board.Squares[moves[i].targetSquare]) == Piece.Pawn && (targetRank == 1 || targetRank == 6)) extensions = 1; //Extend when about to promote //TODO: test properly
@@ -256,9 +258,9 @@ public static class Search
             {
                 evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -beta, -alpha, numExtensions);
 
-                //TODO: if eval jumps, analyse at full depth
+                //TODOne: if eval jumps, analyse at full depth
                 //If evals better than anything else so far well search to full depth - horizon effect but outweighed by speed
-                searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && cancelSearch);
+                searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && cancelSearch); //TODOnt?: Move cancel check to separate if before this
             }
 
             if (searchFullDepth) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);

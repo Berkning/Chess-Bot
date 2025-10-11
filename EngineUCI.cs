@@ -20,7 +20,7 @@ public class EngineUCI
                 Console.WriteLine("uciok");
                 break;
             case "isready":
-                Console.WriteLine("readyok");
+                Console.WriteLine("readyok"); //TODO: Try adjusting TT here
                 break;
             case "ucinewgame":
                 isNewGame = true;
@@ -86,6 +86,10 @@ public class EngineUCI
                 Search.logFullPV = value;
 
                 Console.WriteLine("Logging Full PV " + (value ? "Enabled" : "Disabled"));
+                break;
+            case "version":
+                Console.WriteLine("Currently Running Version 1.14.7 REVERTED");
+                //Console.WriteLine("Currently Running Version 1.14.7 RELEASE");
                 break;
 
 
