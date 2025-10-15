@@ -9,7 +9,7 @@ public static class Evaluation
     public const int RookValue = 500;
     public const int QueenValue = 900;
 
-    private const int TempoBonusBase = 15;
+    private const int TempoBonusBase = 20;
     private const int TempoBonusEndgame = 5;
 
     //private const int DoubledPawnValue = -20; //The value difference comparing a normal pawn to a doubled one
@@ -66,8 +66,22 @@ public static class Evaluation
         return (evaluation) * perspective + GetTempoBonus();
     }
 
+    public static int Blend(int early, int late, float endgameMultiplier)
+    {
+        return (int)Math.Round(early + (late - early) * endgameMultiplier);
+    }
+
+    public static int Blend(int early, int middle, int late, float gameStage)
+    {
+        return int.MaxValue;
+    }
+
+
+
     private static int GetTempoBonus(/*int depth*/)
     {
+        return Blend(TempoBonusBase, TempoBonusEndgame, endgameMultiplier);
+
         if (endgameMultiplier > 0f) return TempoBonusEndgame;
 
         return TempoBonusBase; //TODO: Reduce base on depth and endgame

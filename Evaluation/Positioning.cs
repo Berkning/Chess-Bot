@@ -85,7 +85,7 @@ public static class Positioning //TODOne: endgame tables
                 endgameValue = PassedPawnLateGame[rankFromSide] + supporters * PassedPawnConnectionValue;
             }
 
-            score += Blend(PawnEarlyGame[index], endgameValue, Evaluation.endgameMultiplier);
+            score += Evaluation.Blend(PawnEarlyGame[index], endgameValue, Evaluation.endgameMultiplier);
         }
 
         //Score knight positions
@@ -151,7 +151,7 @@ public static class Positioning //TODOne: endgame tables
 
         //Score king position
         int kingSquare = colorBit == 0 ? Board.whiteKingSquare : BoardHelper.FlipIndex(Board.blackKingSquare);
-        score += Blend(KingEarlyGame[kingSquare], KingEndgame[kingSquare], Evaluation.endgameMultiplier);
+        score += Evaluation.Blend(KingEarlyGame[kingSquare], KingEndgame[kingSquare], Evaluation.endgameMultiplier);
 
 
         //Mopup
@@ -163,16 +163,5 @@ public static class Positioning //TODOne: endgame tables
         //score += Mathf.CeilToInt(10f * (7f - PrecomputedData.kingDistanceLookup[kingSquare][enemyKingSquare]) * endgameMultiplier);
 
         return score;
-    }
-
-
-    private static int Blend(int early, int late, float endgameMultiplier)
-    {
-        return (int)Math.Round(early + (late - early) * endgameMultiplier);
-    }
-
-    private static int Blend(int early, int middle, int late, float gameStage)
-    {
-        return int.MaxValue;
     }
 }
