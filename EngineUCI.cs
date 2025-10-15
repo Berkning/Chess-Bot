@@ -88,7 +88,7 @@ public class EngineUCI
                 Console.WriteLine("Logging Full PV " + (value ? "Enabled" : "Disabled"));
                 break;
             case "version":
-                Console.WriteLine("Currently Running Version 1.14.8 FINAL");
+                Console.WriteLine("Currently Running Version 1.15.1");
                 //Console.WriteLine("Currently Running Version 1.14.7 FINAL");
                 break;
 

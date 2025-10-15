@@ -9,6 +9,9 @@ public static class Evaluation
     public const int RookValue = 500;
     public const int QueenValue = 900;
 
+    private const int TempoBonusBase = 15;
+    private const int TempoBonusEndgame = 5;
+
     //private const int DoubledPawnValue = -20; //The value difference comparing a normal pawn to a doubled one
 
     //TODO: Increase as it moves up board
@@ -53,9 +56,21 @@ public static class Evaluation
 
         int evaluation = whiteEval - blackEval;
 
+        //White: = (white +25)-black
+        //Final: = 1*white + 1*25 - 1*black = white - black + 25
+        //Black: = white - (black + 25)
+        //Final: = white - (-1*black + -1*25) = white - (-black-25) = white + black+25
+
         int perspective = Board.colorToMove == Piece.White ? 1 : -1;
 
-        return evaluation * perspective;
+        return (evaluation) * perspective + GetTempoBonus();
+    }
+
+    private static int GetTempoBonus(/*int depth*/)
+    {
+        if (endgameMultiplier > 0f) return TempoBonusEndgame;
+
+        return TempoBonusBase; //TODO: Reduce base on depth and endgame
     }
 
     private static int EvaluatePawnStructure(int colorBit, int enemyColorBit) //TODO: try giving high score in early to midgame when king can see pawns above him
