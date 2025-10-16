@@ -76,11 +76,15 @@ public static class Evaluation
         return int.MaxValue;
     }
 
-
+    private readonly static int[] bonuses = {25, 20, 20, 20, 20, 20, 15, 15, 15, 15, 15};
 
     private static int GetTempoBonus(int depth)
     {
-        return Blend(TempoBonusBase*(1-depth/(15)), TempoBonusEndgame, endgameMultiplier);
+        int bonus = 15;
+
+        if (depth < bonuses.Length) bonus = bonuses[depth];
+
+        return Blend(bonus, TempoBonusEndgame, endgameMultiplier);
 
         if (endgameMultiplier > 0f) return TempoBonusEndgame;
 
