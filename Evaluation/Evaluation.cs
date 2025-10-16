@@ -9,7 +9,7 @@ public static class Evaluation
     public const int RookValue = 500;
     public const int QueenValue = 900;
 
-    private const int TempoBonusBase = 20;
+    private const int TempoBonusBase = 25;
     private const int TempoBonusEndgame = 5;
 
     //private const int DoubledPawnValue = -20; //The value difference comparing a normal pawn to a doubled one
@@ -35,7 +35,7 @@ public static class Evaluation
     //public static int pawnColorCountDifference; //Darkcount - lightCount
 
 
-    public static int Evaluate() //TODO: https://www.chessprogramming.org/Tempo - tempo bonus to avoid score oscillation - except in endgame
+    public static int Evaluate(int depth) //TODO: https://www.chessprogramming.org/Tempo - tempo bonus to avoid score oscillation - except in endgame
     {
         EvaluateMaterial();
         gameStage = CalculateGameStage();
@@ -63,7 +63,7 @@ public static class Evaluation
 
         int perspective = Board.colorToMove == Piece.White ? 1 : -1;
 
-        return (evaluation) * perspective + GetTempoBonus()*perspective;
+        return (evaluation) * perspective + GetTempoBonus(depth);
     }
 
     public static int Blend(int early, int late, float endgameMultiplier)
@@ -78,9 +78,9 @@ public static class Evaluation
 
 
 
-    private static int GetTempoBonus(/*int depth*/)
+    private static int GetTempoBonus(int depth)
     {
-        return Blend(TempoBonusBase, TempoBonusEndgame, endgameMultiplier);
+        return Blend(TempoBonusBase*(1-depth/(15)), TempoBonusEndgame, endgameMultiplier);
 
         if (endgameMultiplier > 0f) return TempoBonusEndgame;
 

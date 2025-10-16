@@ -93,7 +93,7 @@ public static class Search
     public static class AspirationWindow
     {
         private static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
-        private const int InstabilityMargin = 25;
+        private const int InstabilityMargin = 25; //20 would seemingly be faster
 
         public static int Search(int depth, int prevResult)
         {
@@ -208,7 +208,7 @@ public static class Search
         {
             //quiescenseCount++;
             //return Evaluation.Evaluate();
-            return SearchAllCaptures(alpha, beta);
+            return SearchAllCaptures(alpha, beta, plyFromRoot);
         }
 
 
@@ -315,7 +315,7 @@ public static class Search
 
 
 
-    private static int SearchAllCaptures(int alpha, int beta) //TODO: maybe try including non-capture promotions - Checks??
+    private static int SearchAllCaptures(int alpha, int beta, int depth) //TODO: maybe try including non-capture promotions - Checks??
     {
         if ((nodeCount & CancelDelay) == 0) //TODO: Try removing this
         {
@@ -325,7 +325,7 @@ public static class Search
         // A player isn't forced to make a capture (typically), so see what the evaluation is without capturing anything.
         // This prevents situations where a player ony has bad captures available from being evaluated as bad,
         // when the player might have good non-capture moves available.
-        int eval = Evaluation.Evaluate();
+        int eval = Evaluation.Evaluate(depth);
         //positionCount++;
 
         if (eval >= beta)
@@ -348,7 +348,7 @@ public static class Search
             nodeCount++;
 
             Board.MakeMove(moves[i], true);
-            eval = -SearchAllCaptures(-beta, -alpha);
+            eval = -SearchAllCaptures(-beta, -alpha, depth);
             Board.UnMakeMove(moves[i], true);
             //numQNodes++;
 

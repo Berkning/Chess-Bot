@@ -91,6 +91,14 @@ public class EngineUCI
                 Console.WriteLine("Currently Running Version 1.15.1");
                 //Console.WriteLine("Currently Running Version 1.14.7 FINAL");
                 break;
+            case "instability":
+                //if (args.Length == 1) Console.WriteLine(Search.AspirationWindow.InstabilityMargin);
+                //else
+                //{
+                    //Search.AspirationWindow.InstabilityMargin = int.Parse(args[1]);
+                    //Console.WriteLine("info string Set Instability Margin to " + Search.AspirationWindow.InstabilityMargin);
+                //}
+                break;
 
 
 
