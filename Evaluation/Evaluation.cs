@@ -63,7 +63,7 @@ public static class Evaluation
 
         int perspective = Board.colorToMove == Piece.White ? 1 : -1;
 
-        return (evaluation) * perspective + GetTempoBonus();
+        return (evaluation) * perspective + GetTempoBonus()*perspective;
     }
 
     public static int Blend(int early, int late, float endgameMultiplier)
