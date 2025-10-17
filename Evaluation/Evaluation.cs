@@ -76,11 +76,11 @@ public static class Evaluation
         return int.MaxValue;
     }
 
-    private readonly static int[] bonuses = {25, 20, 20, 20, 20, 20, 15, 15, 15, 15, 15};
+    private readonly static int[] bonuses = {15, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5};
 
     private static int GetTempoBonus(int depth)
     {
-        int bonus = 15;
+        int bonus = 5;
 
         if (depth < bonuses.Length) bonus = bonuses[depth];
 
