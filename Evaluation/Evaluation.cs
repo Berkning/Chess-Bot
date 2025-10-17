@@ -10,7 +10,7 @@ public static class Evaluation
     public const int QueenValue = 900;
 
     private const int TempoBonusBase = 25;
-    private const int TempoBonusEndgame = 5;
+    private const int TempoBonusEndgame = 0;
 
     //private const int DoubledPawnValue = -20; //The value difference comparing a normal pawn to a doubled one
 
