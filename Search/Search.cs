@@ -93,7 +93,7 @@ public static class Search
     public static class AspirationWindow
     {
         private static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
-        private const int InstabilityMargin = 20; //20 would seemingly be faster
+        private const int InstabilityMargin = 15; //20 would seemingly be faster
 
         public static int Search(int depth, int prevResult)
         {
