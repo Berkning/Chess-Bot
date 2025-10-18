@@ -72,7 +72,7 @@ public class Engine
 
             Board threadBoard = threadBoards[i];
 
-            searchThreads[i] = new Thread(() => searcher.StartSearch(callback, depth, i, threadBoard, time));
+            searchThreads[i] = new Thread(() => searcher.StartSearch(callback, depth, i, threadBoard, time)); //TODO: Keep threads persistent?
 
             searchThreads[i].Start();
         }

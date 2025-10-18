@@ -1,8 +1,8 @@
 using System;
 
-public static class MoveOrdering
+public class MoveOrdering
 {
-    private static int[] moveScores = new int[218];
+    private int[] moveScores = new int[218];
 
     const int prevBestBias = 2000000;
     const int killerBias = 500000;
@@ -14,8 +14,18 @@ public static class MoveOrdering
 
     public static KillerMove[] killerMoves = new KillerMove[MaxKillerPlys];
 
+    private Board board;
+    private MoveGenerator moveGenerator;
+
+    public MoveOrdering(Board _board, MoveGenerator _moveGenerator)
+    {
+        board = _board;
+        this.moveGenerator = _moveGenerator;
+    }
+
+
     //TODOne: try penalizing moving very valuable pieces into less valuable enemy attack range - penalize rook in bishop attack range
-    public static void OrderMoves(ref Span<Move> moves, Board board, int moveCount, Move prevBestMove, int ply) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
+    public void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove, int ply) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
     {
         for (int i = 0; i < moveCount; i++) //TODOne: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
         {
@@ -35,7 +45,7 @@ public static class MoveOrdering
                 //moveScore += 10 * Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
                 int valueDelta = Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
 
-                bool canRecaptureGuess = BitBoardHelper.ContainsSquare(MoveGenerator.opponentAttackMap, moves[i].targetSquare);
+                bool canRecaptureGuess = BitBoardHelper.ContainsSquare(moveGenerator.opponentAttackMap, moves[i].targetSquare);
                 if (canRecaptureGuess)
                 {
                     moveScore += valueDelta >= 0 ? goodCaptureBias : badCaptureBias;
@@ -85,7 +95,7 @@ public static class MoveOrdering
             else
             {
                 // Penalize moving piece to a square attacked by opponent pawn
-                if (BitBoardHelper.ContainsSquare(MoveGenerator.oponnentPawnAttackMap, moves[i].targetSquare))
+                if (BitBoardHelper.ContainsSquare(moveGenerator.oponnentPawnAttackMap, moves[i].targetSquare))
                 {
                     moveScore -= 350;
                 }
@@ -100,7 +110,7 @@ public static class MoveOrdering
         //SortMoves(ref moves, moveCount);
     }
 
-    private static void SwapSortMove(ref Span<Move> moves, int i, int score)
+    private void SwapSortMove(ref Span<Move> moves, int i, int score)
     {
         if (i == 0) return;
 
@@ -126,7 +136,7 @@ public static class MoveOrdering
 
 
 
-    private static void SortMoves(ref Span<Move> moves, int moveCount)
+    private void SortMoves(ref Span<Move> moves, int moveCount)
     {
         for (int i = 0; i < moveCount - 1; i++)
         {

@@ -22,8 +22,8 @@ public class Search
     public static TranspositionTable transpositionTable = new TranspositionTable();
 
     private Board board;
-    public MoveGenerator moveGenerator;
-    public MoveOrdering moveOrdering;
+    private MoveGenerator moveGenerator;
+    private MoveOrdering moveOrdering;
 
 
 
@@ -37,6 +37,8 @@ public class Search
         cancelSearch = false;
 
         board = _board;
+        moveGenerator = new MoveGenerator(board);
+        moveOrdering = new MoveOrdering(board, moveGenerator);
 
 
         //for (int i = 0; i < principledVariation.Length; i++) principledVariation[i] = Move.nullMove; //Clear PV
@@ -220,15 +222,15 @@ public class Search
 
         Span<Move> moves = stackalloc Move[256];
 
-        int moveCount = MoveGenerator.GenerateMoves(ref moves, board);
+        int moveCount = moveGenerator.GenerateMoves(ref moves);
 
         /*if (test)*/
-        MoveOrdering.OrderMoves(ref moves, board, moveCount, bestMove, plyFromRoot);
+        moveOrdering.OrderMoves(ref moves, moveCount, bestMove, plyFromRoot);
 
         if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
         {
             //Debug.Log("Found Mate");
-            if (MoveGenerator.inCheck) return -(ImmediateMateScore - plyFromRoot); //Checkmate
+            if (moveGenerator.inCheck) return -(ImmediateMateScore - plyFromRoot); //Checkmate
 
             return 0; //Stalemate
         }
@@ -345,9 +347,9 @@ public class Search
 
         Span<Move> moves = stackalloc Move[256];
 
-        int moveCount = MoveGenerator.GenerateMoves(ref moves, board, true);
+        int moveCount = moveGenerator.GenerateMoves(ref moves, true);
 
-        MoveOrdering.OrderMoves(ref moves, board, moveCount, bestMove, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
+        moveOrdering.OrderMoves(ref moves, moveCount, bestMove, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
 
         for (int i = 0; i < moveCount; i++)
         {

@@ -1,42 +1,49 @@
 using System;
 
-public static class MoveGenerator
+public class MoveGenerator
 {
     public enum PromotionMode { All, KnightAndQueen };
     public static PromotionMode promotionMode = PromotionMode.KnightAndQueen;
 
-    private static ulong allPieces;
+    private ulong allPieces;
 
-    private static ulong friendlyPieces;
-    private static ulong friendlyOrthos;
-    private static ulong friendlyDiags;
+    private ulong friendlyPieces;
+    private ulong friendlyOrthos;
+    private ulong friendlyDiags;
 
-    private static ulong enemyPieces;
-    private static ulong enemyOrthos;
-    private static ulong enemyDiags;
+    private ulong enemyPieces;
+    private ulong enemyOrthos;
+    private ulong enemyDiags;
 
 
-    public static ulong opponentKingAttackMap;
-    public static ulong oponnentPawnAttackMap;
-    public static ulong opponentKnightAttackMap;
-    public static ulong opponentSlidingAttackMap;
-    public static ulong opponentAttackMapNoPawns;
-    public static ulong opponentAttackMap;
+    public ulong opponentKingAttackMap;
+    public ulong oponnentPawnAttackMap;
+    public ulong opponentKnightAttackMap;
+    public ulong opponentSlidingAttackMap;
+    public ulong opponentAttackMapNoPawns;
+    public ulong opponentAttackMap;
 
-    public static ulong checkRayBitMap;
-    public static ulong pinRayBitMap;
-    public static bool inCheck;
-    public static bool inDoubleCheck;
+    public ulong checkRayBitMap;
+    public ulong pinRayBitMap;
+    public bool inCheck;
+    public bool inDoubleCheck;
 
-    private static int friendlyKingSquare;
-    private static int enemyKingSquare;
-    private static int friendlyIndexOffset;
-    private static int opponentIndexOffset;
+    private int friendlyKingSquare;
+    private int enemyKingSquare;
+    private int friendlyIndexOffset;
+    private int opponentIndexOffset;
+
+    private Board board;
+
+    public MoveGenerator(Board _board)
+    {
+        board = _board;
+    }
 
 
     #region LegalityMaps
 
-    private static void GenerateAttackMaps(Board board)
+    private void GenerateAttackMaps()
     {
         GenerateSlidingAttackMap();
 
@@ -128,7 +135,7 @@ public static class MoveGenerator
         if (!inCheck) checkRayBitMap = ulong.MaxValue; //Make all squares available to move to if not in check
     }
 
-    private static void GenerateSlidingAttackMap()
+    private void GenerateSlidingAttackMap()
     {
         opponentSlidingAttackMap = 0;
 
@@ -166,7 +173,7 @@ public static class MoveGenerator
 
     #region PieceBoards
 
-    private static void GeneratePieceBoards(Board board) //TODOne: would be more performant to keep track of these and update them in board on make an unmake move
+    private void GeneratePieceBoards() //TODOne: would be more performant to keep track of these and update them in board on make an unmake move
     {
         int friendlyBit = board.friendlyColorBit;
         int enemyBit = board.opponentColorBit;
@@ -190,19 +197,19 @@ public static class MoveGenerator
 
 
 
-    private static int moveCount = 0;
+    private int moveCount = 0;
 
     #region MoveGeneration
 
-    public static Span<Move> GenerateMovesSlow(Board board)
+    public Span<Move> GenerateMovesSlow()
     {
         Span<Move> moves = new Move[256];
-        GenerateMoves(ref moves, board);
+        GenerateMoves(ref moves);
         return moves;
     }
 
     //TODO: Remove ref here bc unnecessary - span is ref to array anyway so just return a span like normal
-    public static int GenerateMoves(ref Span<Move> moves, Board board, bool genOnlyCaptures = false) //Returns move count
+    public int GenerateMoves(ref Span<Move> moves, bool genOnlyCaptures = false) //Returns move count
     {
         moveCount = 0;
 
@@ -225,22 +232,22 @@ public static class MoveGenerator
         inCheck = false;
         inDoubleCheck = false;
 
-        GeneratePieceBoards(board);
+        GeneratePieceBoards();
 
-        GenerateAttackMaps(board);
+        GenerateAttackMaps();
 
-        GenerateKingMoves(ref moves, board, genOnlyCaptures);
+        GenerateKingMoves(ref moves, genOnlyCaptures);
 
         if (inDoubleCheck) return moveCount; //Only king moves valid when in double check
 
         for (int i = 0; i < board.pawnList[board.friendlyColorBit].Count; i++)
         {
-            GeneratePawnMoves(ref moves, board, board.pawnList[board.friendlyColorBit][i], genOnlyCaptures);
+            GeneratePawnMoves(ref moves, board.pawnList[board.friendlyColorBit][i], genOnlyCaptures);
         }
 
         for (int i = 0; i < board.knightList[board.friendlyColorBit].Count; i++)
         {
-            GenerateKnightMoves(ref moves, board, board.knightList[board.friendlyColorBit][i], genOnlyCaptures);
+            GenerateKnightMoves(ref moves, board.knightList[board.friendlyColorBit][i], genOnlyCaptures);
         }
 
         GenerateSlidingMoves(ref moves, genOnlyCaptures);
@@ -249,7 +256,7 @@ public static class MoveGenerator
         return moveCount;
     }
 
-    private static void GenerateSlidingMoves(ref Span<Move> moves, bool genOnlyCaptures)
+    private void GenerateSlidingMoves(ref Span<Move> moves, bool genOnlyCaptures)
     {
         //            Only if blocks check
         ulong moveMask = checkRayBitMap;
@@ -313,7 +320,7 @@ public static class MoveGenerator
         }
     }
 
-    private static void GenerateKingMoves(ref Span<Move> moves, Board board, bool genOnlyCaptures)
+    private void GenerateKingMoves(ref Span<Move> moves, bool genOnlyCaptures)
     {
         ulong moveBoard = PrecomputedData.kingAttackBitboards[friendlyKingSquare] & (~friendlyPieces);
         ulong safetyMap = ~opponentAttackMap; //All squares not attacked by opponent
@@ -327,14 +334,14 @@ public static class MoveGenerator
 
             ulong shortCastleBoard = PrecomputedData.castleMasks[board.friendlyColorBit] & castleSquares;
 
-            if (ShortCastleAllowed(board) && BitBoardHelper.BitCount(shortCastleBoard) == 2) //If short allowed and both castle squares are safe and empty
+            if (ShortCastleAllowed() && BitBoardHelper.BitCount(shortCastleBoard) == 2) //If short allowed and both castle squares are safe and empty
             {
                 moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.g1 : BoardHelper.g8, Move.Flag.Castling);
             }
 
             ulong longCastleBoard = PrecomputedData.castleMasks[2 + board.friendlyColorBit] & castleSquares;
 
-            if (LongCastleAllowed(board) && BitBoardHelper.BitCount(longCastleBoard) == 2 && (allPieces & PrecomputedData.castleMasks[4 + board.friendlyColorBit]) == 0) //If long allowed and both castle squares are safe and empty and the last one is empty
+            if (LongCastleAllowed() && BitBoardHelper.BitCount(longCastleBoard) == 2 && (allPieces & PrecomputedData.castleMasks[4 + board.friendlyColorBit]) == 0) //If long allowed and both castle squares are safe and empty and the last one is empty
             {
                 moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.c1 : BoardHelper.c8, Move.Flag.Castling);
             }
@@ -350,7 +357,7 @@ public static class MoveGenerator
         }
     }
 
-    private static void GeneratePawnMoves(ref Span<Move> moves, Board board, int startSquare, bool genOnlyCaptures)
+    private void GeneratePawnMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
     {
         int moveDir = board.friendlyColor == Piece.White ? PrecomputedData.Up : PrecomputedData.Down;
         int targetSquare = startSquare + moveDir;//One move up/down
@@ -422,12 +429,12 @@ public static class MoveGenerator
                 int epStartRank = board.friendlyColor == Piece.White ? 4 : 3;
 
 
-                if (!InCheckAfterEnPassant(board, startSquare, epStartRank, capturedPawnSquare)) moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture);
+                if (!InCheckAfterEnPassant(startSquare, epStartRank, capturedPawnSquare)) moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture);
             }
         }
     }
 
-    private static void GenerateKnightMoves(ref Span<Move> moves, Board board, int startSquare, bool genOnlyCaptures)
+    private void GenerateKnightMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
     {
         //TODO: Bitboards
         for (int i = 0; i < PrecomputedData.KnightMoves[startSquare].Length; i++)
@@ -446,7 +453,7 @@ public static class MoveGenerator
     }
 
 
-    private static void AddPromotionMoves(ref Span<Move> moves, int startSquare, int targetSquare)
+    private void AddPromotionMoves(ref Span<Move> moves, int startSquare, int targetSquare)
     {
         moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.PromoteToQueen);
         moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.PromoteToKnight);
@@ -466,41 +473,41 @@ public static class MoveGenerator
     #region Helpers
 
     //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsPinned(int square)
+    private bool IsPinned(int square)
     {
         return BitBoardHelper.ContainsSquare(pinRayBitMap, square);
         //return (pinRayBitMap & (1UL << square)) != 0;
     }
 
     //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsMovingAlongRay(int startSquare, int targetSquare, int directionOffset)
+    private bool IsMovingAlongRay(int startSquare, int targetSquare, int directionOffset)
     {
         int rayDirection = PrecomputedData.directionLookup[targetSquare - startSquare + 63];
         return directionOffset == rayDirection || -directionOffset == rayDirection;
     }
 
-    private static bool SquareIsInCheckRay(int square)
+    private bool SquareIsInCheckRay(int square)
     {
         return BitBoardHelper.ContainsSquare(checkRayBitMap, square);
         //return (checkRayBitMap & (1UL << square)) != 0; //&& inCheck - Included in SebLague's code but don't see why it would be necessary as the bitmaps are reset when we start generating moves
     }
 
-    private static bool SquareIsAttacked(int square)
+    private bool SquareIsAttacked(int square)
     {
         return BitBoardHelper.ContainsSquare(opponentAttackMap, square);
     }
 
-    private static bool ShortCastleAllowed(Board board) //TODO: Move to board class
+    private bool ShortCastleAllowed() //TODO: Move to board class
     {
         return (board.currentGameState & (1U << (9 + board.friendlyColorBit))) > 0;
     }
 
-    private static bool LongCastleAllowed(Board board) //TODO: Move to board class
+    private bool LongCastleAllowed() //TODO: Move to board class
     {
         return (board.currentGameState & (1U << (11 + board.friendlyColorBit))) > 0;
     }
 
-    private static bool InCheckAfterEnPassant(Board board, int square, int startRank, int capturedPawnSquare)
+    private bool InCheckAfterEnPassant(int square, int startRank, int capturedPawnSquare)
     {
         int kingRank = BoardHelper.IndexToRank(friendlyKingSquare);
 
