@@ -30,9 +30,9 @@ public class TranspositionTable
         table = new Transposition[entryCount];
     }
 
-    private ulong Index
+    private ulong Index(ulong zobrist)
     {
-        get { return Board.currentZobrist % entryCount; }
+        return zobrist % entryCount;
     }
 
 
@@ -45,16 +45,16 @@ public class TranspositionTable
     }
 
 
-    public Move GetStoredMove()
+    public Move GetStoredMove(ulong zobrist)
     {
-        return table[Index].move;
+        return table[Index(zobrist)].move;
     }
 
-    public int LookupEvaluation(int depth, int plyFromRoot, int alpha, int beta)
+    public int LookupEvaluation(ulong zobrist, int depth, int plyFromRoot, int alpha, int beta)
     {
-        Transposition transposition = table[Index];
+        Transposition transposition = table[Index(zobrist)];
 
-        if (transposition.key == Board.currentZobrist)
+        if (transposition.key == zobrist)
         {
             // Only use stored evaluation if it has been searched to at least the same depth as would be searched now
             if (transposition.depth >= depth)
@@ -81,10 +81,10 @@ public class TranspositionTable
         return LookupFailed;
     }
 
-    public void StoreEvaluation(int depth, int numPlySearched, int eval, int evalType, Move move)
+    public void StoreEvaluation(ulong zobrist, int depth, int numPlySearched, int eval, int evalType, Move move)
     {
-        Transposition transposition = new Transposition(Board.currentZobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move);
-        table[Index] = transposition;
+        Transposition transposition = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move);
+        table[Index(zobrist)] = transposition;
     }
 
     int CorrectMateScoreForStorage(int score, int numPlySearched)

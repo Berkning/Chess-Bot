@@ -1,58 +1,56 @@
 using System;
 using System.Collections.Generic;
 
-public static class Board
+public class Board
 {
-    public static int[] Squares { get; private set; }
+    public int[] Squares { get; private set; }
 
-    public static int colorToMove { get; private set; } = Piece.White;
+    public int colorToMove { get; private set; } = Piece.White;
 
-    public static int friendlyColor { get; private set; } = Piece.White;
-    public static int enemyColor { get; private set; } = Piece.Black;
+    public int friendlyColor { get; private set; } = Piece.White;
+    public int enemyColor { get; private set; } = Piece.Black;
 
     //0-5 = Captured Piece //TODO: Could be pretty easily reduced by removing the two color bits and infering the color based on colorToMove
     //6-9 = EP file
     //10-13 = Castling Rights - 10 = Wshort, 11 = Bshort, 12 = Wlong, 13 = Blong
     //14-19 = fifty move counter
-    private static Stack<uint> gameStateHistory = new Stack<uint>();
-    public static uint currentGameState = 0;//0b1111000000000; //Castles allowed by default 
+    public Stack<uint> gameStateHistory;
+    public uint currentGameState = 0;//0b1111000000000; //Castles allowed by default 
 
-    public static uint capturedPieceMask = 0b11111;
-    public static uint epFileMask = 0b111100000;
-    public static uint castleRightsMask = 0b1111000000000;
-    public static uint fiftyMoveCounterMask = 0b1111110000000000000;
+    public uint capturedPieceMask = 0b11111;
+    public const uint epFileMask = 0b111100000;
+    public const uint castleRightsMask = 0b1111000000000;
+    public const uint fiftyMoveCounterMask = 0b1111110000000000000;
 
     //Piece lists
-    public static PieceList[] pawnList;
-    public static PieceList[] knightList;
-    public static PieceList[] bishopList;
-    public static PieceList[] rookList;
-    public static PieceList[] queenList;
+    public PieceList[] pawnList;
+    public PieceList[] knightList;
+    public PieceList[] bishopList;
+    public PieceList[] rookList;
+    public PieceList[] queenList;
 
-    public static PieceList[] allPieceList;
+    public PieceList[] allPieceList;
 
-    public static int whiteKingSquare;
-    public static int blackKingSquare;
+    public int whiteKingSquare;
+    public int blackKingSquare;
 
-    public static int opponentColorBit;
-    public static int friendlyColorBit;
+    public int opponentColorBit;
+    public int friendlyColorBit;
 
     //Zobrist
-    public static ulong currentZobrist;
+    public ulong currentZobrist;
 
     //Repetition Table
-    public static RepetitionTable repetitionTable;
+    public RepetitionTable repetitionTable;
 
 
 
-
-
-    public static PieceList GetPieceList(int type, int colorBit)
+    public PieceList GetPieceList(int type, int colorBit)
     {
         return allPieceList[type - 2 + colorBit * 5];
     }
 
-    public static void AddPiece(int square, int piece)
+    public void AddPiece(int square, int piece)
     {
         Squares[square] = piece;
 
@@ -75,7 +73,7 @@ public static class Board
         GetPieceList(type, colorBit).AddPieceAtSquare(square);
     }
 
-    public static void MovePiece(int startSquare, int targetSquare) //WARNING: Target square has to be empty!!!!
+    public void MovePiece(int startSquare, int targetSquare) //WARNING: Target square has to be empty!!!!
     {
         int piece = Squares[startSquare];
         int type = Piece.Type(piece);
@@ -90,7 +88,7 @@ public static class Board
         Squares[startSquare] = Piece.None;
     }
 
-    public static void RemovePiece(int square)
+    public void RemovePiece(int square)
     {
         int piece = Squares[square];
         Squares[square] = Piece.None;
@@ -105,7 +103,7 @@ public static class Board
 
 
 
-    public static void SetColorToMove(int color)
+    public void SetColorToMove(int color)
     {
         colorToMove = color;
         friendlyColor = color;
@@ -114,9 +112,11 @@ public static class Board
         opponentColorBit = friendlyColorBit ^ 1;
     }
 
-    static Board()
+    public Board()
     {
         Squares = new int[64];
+
+        gameStateHistory = new Stack<uint>();
         gameStateHistory.Push(currentGameState);
         repetitionTable = new RepetitionTable();
 
@@ -145,7 +145,7 @@ public static class Board
 
 
 
-    public static void ResetBoard()
+    public void ResetBoard()
     {
         repetitionTable.Clear();
         Array.Clear(Squares, 0, 64);
@@ -158,14 +158,14 @@ public static class Board
         gameStateHistory.Clear();
     }
 
-    public static void SaveGameState()
+    public void SaveGameState()
     {
         gameStateHistory.Push(currentGameState);
     }
 
 
 
-    public static void MakeMove(Move move, bool inSearch = false)
+    public void MakeMove(Move move, bool inSearch = false)
     {
         if (Squares[move.startSquare] == Piece.None) Console.WriteLine("Tried to move null piece " + BoardHelper.GetMoveNameUCI(move) + " " + move.flag); //TODO: remove for performance
 
@@ -365,7 +365,7 @@ public static class Board
 
 
 
-    public static void UnMakeMove(Move move, bool inSearch = false)
+    public void UnMakeMove(Move move, bool inSearch = false)
     {
         SetColorToMove(Piece.OppositeColor(colorToMove));
         int movedPieceType = Piece.Type(Squares[move.targetSquare]);

@@ -25,12 +25,12 @@ public static class BoardHelper
     public const int h8 = 63;
 
 
-    public static Move GetMoveFromUCIName(string moveName)
+    public static Move GetMoveFromUCIName(Board board, string moveName)
     {
         int startSquare = IndexFromString(moveName.Substring(0, 2));
         int targetSquare = IndexFromString(moveName.Substring(2, 2));
 
-        int movedPieceType = Piece.Type(Board.Squares[startSquare]);
+        int movedPieceType = Piece.Type(board.Squares[startSquare]);
         int startRank = IndexToRank(startSquare);
         int startFile = IndexToFile(startSquare);
         int targetRank = IndexToRank(targetSquare);
@@ -59,7 +59,7 @@ public static class BoardHelper
                 flag = Move.Flag.PawnTwoForward;
             }
             // En-passant
-            else if (startFile != targetFile && Board.Squares[targetSquare] == Piece.None)
+            else if (startFile != targetFile && board.Squares[targetSquare] == Piece.None)
             {
                 flag = Move.Flag.EnPassantCapture;
             }

@@ -5,7 +5,7 @@ public static class Program
 
     public static void Main(string[] args)
     {
-        EngineUCI engine = new EngineUCI();
+        EngineUCI engineUCI = new EngineUCI();
         //pipe.InitializePipe();
 
         string message = String.Empty;
@@ -13,7 +13,7 @@ public static class Program
         while (message != "quit")
         {
             message = Console.ReadLine();
-            engine.RecieveCommand(message);
+            engineUCI.RecieveCommand(message);
         }
 
         //pipe.shouldShutDown = true;

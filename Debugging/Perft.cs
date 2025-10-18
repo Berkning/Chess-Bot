@@ -6,13 +6,13 @@ public static class Perft
     private static long[] correctResults = { 1, 20, 400, 8902, 197281, 4865609, 119060324, 3195901860, 84998978956, 2439530234167 };
 
 
-    public static string RunDetailed(int depth)
+    public static string RunDetailed(int depth, Board board)
     {
         MoveGenerator.PromotionMode prevPromotionMode = MoveGenerator.promotionMode; //Save what the promotionmode was set to
         MoveGenerator.promotionMode = MoveGenerator.PromotionMode.All; //Set the promotion mode to all to ensure we get all possible moves
 
         Span<Move> moves = stackalloc Move[256];
-        int moveCountInCurrentPosition = MoveGenerator.GenerateMoves(ref moves);
+        int moveCountInCurrentPosition = MoveGenerator.GenerateMoves(ref moves, board);
 
 
         string results = "";
@@ -21,14 +21,14 @@ public static class Perft
         for (int i = 0; i < moveCountInCurrentPosition; i++)
         {
 
-            ulong before = Board.currentGameState;
+            ulong before = board.currentGameState;
             //Debug.Log("Trying to play " + BoardHelper.NameMove(move));
-            Board.MakeMove(moves[i], true);
-            long result = RunSpecifiedDepth(depth - 1);
+            board.MakeMove(moves[i], true);
+            long result = RunSpecifiedDepth(depth - 1, board);
             Console.WriteLine(BoardHelper.GetMoveNameUCI(moves[i]) + ": " + result);
             results += BoardHelper.GetMoveNameUCI(moves[i]) + ": " + result + "\n";
-            Board.UnMakeMove(moves[i], true);
-            ulong after = Board.currentGameState;
+            board.UnMakeMove(moves[i], true);
+            ulong after = board.currentGameState;
 
             //Debug.Assert(before == after, "State mismatch - Before: " + before + " After:" + after);
             totalCount += result;
@@ -45,7 +45,7 @@ public static class Perft
     }
 
 
-    public static void RunForeachDepth(int depth, bool compareToCorrect = false)
+    /*public static void RunForeachDepth(int depth, bool compareToCorrect = false)
     {
         System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
 
@@ -61,10 +61,10 @@ public static class Perft
             Console.WriteLine("Depth: " + i + " ply   Result: " + result + " Positions   Time: " + timeMS + "ms   NPS: " + nodesPerSecond);
             if (compareToCorrect) Console.WriteLine("Passed: " + (result == correctResults[i]) + "   Off By: " + (correctResults[i] - result));
         }
-    }
+    }*/
 
 
-    public static async Task RunForeachDepthAsync(int depth, bool compareToCorrect = false)
+    /*public static async Task RunForeachDepthAsync(int depth, bool compareToCorrect = false)
     {
         System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
 
@@ -82,9 +82,9 @@ public static class Perft
 
             await Task.Yield();
         }
-    }
+    }*/
 
-    public static long RunSpecifiedDepth(int depth)
+    public static long RunSpecifiedDepth(int depth, Board board)
     {
         if (depth == 0)
         {
@@ -93,15 +93,15 @@ public static class Perft
 
         Span<Move> moves = stackalloc Move[256];
 
-        int moveCount = MoveGenerator.GenerateMoves(ref moves);
+        int moveCount = MoveGenerator.GenerateMoves(ref moves, board);
 
         long numPositions = 0L;
 
         for (int i = 0; i < moveCount; i++)
         {
-            Board.MakeMove(moves[i], true);
-            numPositions += RunSpecifiedDepth(depth - 1);
-            Board.UnMakeMove(moves[i], true);
+            board.MakeMove(moves[i], true);
+            numPositions += RunSpecifiedDepth(depth - 1, board);
+            board.UnMakeMove(moves[i], true);
         }
 
         return numPositions;
@@ -137,12 +137,14 @@ public static class Perft
 
         bool passedAll = true;
 
+        Board board = new Board();
+
         for (int i = 0; i < testSuite.Length; i++)
         {
             SuiteComponent component = testSuite[i];
 
-            FenUtility.LoadPositionFromFen(component.fen);
-            long result = RunSpecifiedDepth(component.depth);
+            FenUtility.LoadPositionFromFen(board, component.fen);
+            long result = RunSpecifiedDepth(component.depth, board);
             bool passed = result == component.correctResult;
 
             if (!passed) passedAll = false;

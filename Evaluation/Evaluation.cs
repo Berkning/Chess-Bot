@@ -32,9 +32,9 @@ public static class Evaluation
     //public static int pawnColorCountDifference; //Darkcount - lightCount
 
 
-    public static int Evaluate() //TODO: https://www.chessprogramming.org/Tempo - tempo bonus to avoid score oscillation - except in endgame
+    public static int Evaluate(Board board) //TODO: https://www.chessprogramming.org/Tempo - tempo bonus to avoid score oscillation - except in endgame
     {
-        EvaluateMaterial();
+        EvaluateMaterial(board);
         gameStage = CalculateGameStage();
         endgameMultiplier = Math.Max(gameStage - 1f, 0f);
         //earlygameMultiplier = Math.Max(1f - gameStage, 0f);
@@ -48,23 +48,23 @@ public static class Evaluation
         //pawnColorCountDifference = darkPawnCount - lightPawnCount;
 
 
-        int whiteEval = whiteMaterialValue + Positioning.GetPositioningScore(0, 1);// + EvaluatePawnStructure(0, 1);
-        int blackEval = blackMaterialValue + Positioning.GetPositioningScore(1, 0);// + EvaluatePawnStructure(1, 0);
+        int whiteEval = whiteMaterialValue + Positioning.GetPositioningScore(0, 1, board);// + EvaluatePawnStructure(0, 1);
+        int blackEval = blackMaterialValue + Positioning.GetPositioningScore(1, 0, board);// + EvaluatePawnStructure(1, 0);
 
         int evaluation = whiteEval - blackEval;
 
-        int perspective = Board.colorToMove == Piece.White ? 1 : -1;
+        int perspective = board.colorToMove == Piece.White ? 1 : -1;
 
         return evaluation * perspective;
     }
 
-    private static int EvaluatePawnStructure(int colorBit, int enemyColorBit) //TODO: try giving high score in early to midgame when king can see pawns above him
+    private static int EvaluatePawnStructure(int colorBit, int enemyColorBit, Board board) //TODO: try giving high score in early to midgame when king can see pawns above him
     {
         int score = 0;
 
-        PieceList friendlyPawns = Board.pawnList[colorBit];
+        PieceList friendlyPawns = board.pawnList[colorBit];
         ulong friendlyPawnBoard = friendlyPawns.bitboard;
-        ulong enemyPawnBoard = Board.pawnList[enemyColorBit].bitboard;
+        ulong enemyPawnBoard = board.pawnList[enemyColorBit].bitboard;
 
         //Doubled Pawns
         // for (int file = 0; file < 8; file++)
@@ -123,25 +123,25 @@ public static class Evaluation
         return score;
     }
 
-    private static void EvaluateMaterial()
+    private static void EvaluateMaterial(Board board)
     {
         whiteMaterialValue = 0;
         blackMaterialValue = 0;
 
         int whiteNonPawn = 0;
-        whiteNonPawn += Board.knightList[0].Count * KnightValue;
-        whiteNonPawn += Board.bishopList[0].Count * BishopValue;
-        whiteNonPawn += Board.rookList[0].Count * RookValue;
-        whiteNonPawn += Board.queenList[0].Count * QueenValue;
+        whiteNonPawn += board.knightList[0].Count * KnightValue;
+        whiteNonPawn += board.bishopList[0].Count * BishopValue;
+        whiteNonPawn += board.rookList[0].Count * RookValue;
+        whiteNonPawn += board.queenList[0].Count * QueenValue;
 
-        whiteMaterialValue = whiteNonPawn + Board.pawnList[0].Count * PawnValue;
+        whiteMaterialValue = whiteNonPawn + board.pawnList[0].Count * PawnValue;
 
         int blackNonPawn = 0;
-        blackNonPawn += Board.knightList[1].Count * KnightValue;
-        blackNonPawn += Board.bishopList[1].Count * BishopValue;
-        blackNonPawn += Board.rookList[1].Count * RookValue;
-        blackNonPawn += Board.queenList[1].Count * QueenValue;
-        blackMaterialValue = blackNonPawn + Board.pawnList[1].Count * PawnValue;
+        blackNonPawn += board.knightList[1].Count * KnightValue;
+        blackNonPawn += board.bishopList[1].Count * BishopValue;
+        blackNonPawn += board.rookList[1].Count * RookValue;
+        blackNonPawn += board.queenList[1].Count * QueenValue;
+        blackMaterialValue = blackNonPawn + board.pawnList[1].Count * PawnValue;
 
         totalMaterialWithoutPawns = whiteNonPawn + blackNonPawn;
     }

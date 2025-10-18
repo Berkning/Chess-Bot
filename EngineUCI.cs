@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 public class EngineUCI
 {
-    private Thread searchThread;
+    private Engine engine = new Engine();
 
     public void RecieveCommand(string command)
     {
@@ -91,6 +91,25 @@ public class EngineUCI
                 Console.WriteLine("Currently Running Version 1.14.8 FINAL");
                 //Console.WriteLine("Currently Running Version 1.14.7 FINAL");
                 break;
+            case "numThreads":
+                if (args.Length == 1) Console.WriteLine(engine.threadCount);
+                else
+                {
+                    int count = int.Parse(args[1]);
+
+                    if (count < 1)
+                    {
+                        Console.WriteLine("numThreads cannot be less than 1");
+                        break;
+                    }
+
+                    engine.SetThreadCount(count);
+                    Console.WriteLine("info string Set numThreads to " + count);
+                }
+                break;
+            case "d":
+                Console.WriteLine("Fen: " + FenUtility.GetCurrentFen(Engine.board));
+                break;
 
 
 
@@ -111,30 +130,6 @@ public class EngineUCI
                     break;*/
         }
     }
-
-    Stopwatch searchTimer = new Stopwatch();
-
-    private void InitializeSearch(int depth, int time)
-    {
-        Search.cancelSearch = false;
-
-        Action<Move> callback = result => OnSearchCompleted(result);
-
-        searchThread = new Thread(() => Search.StartSearch(callback, depth, time));
-
-        searchThread.Start();
-        searchTimer.Restart();
-    }
-
-    public void OnSearchCompleted(Move move)
-    {
-        searchTimer.Stop();
-        Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
-        Console.WriteLine("info string Search Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
-
-        AdjustTT(Board.colorToMove == Piece.White ? TimeManagement.whiteTime : TimeManagement.blackTime);
-    }
-
 
 
 
@@ -175,7 +170,7 @@ public class EngineUCI
     {
         if (args.Length == 1)
         {
-            InitializeSearch(99, -2);
+            engine.InitializeSearch(99, -2);
             return;
         }
 
@@ -183,13 +178,13 @@ public class EngineUCI
         {
             case "depth":
                 int depth = int.Parse(args[2]);
-                InitializeSearch(depth, -2);
+                engine.InitializeSearch(depth, -2);
                 return;
             case "infinite":
-                InitializeSearch(int.MaxValue, -2);
+                engine.InitializeSearch(int.MaxValue, -2);
                 return;
             case "movetime":
-                InitializeSearch(99, int.Parse(args[2]));
+                engine.InitializeSearch(99, int.Parse(args[2]));
                 return;
             case "wtime":
                 int white = int.Parse(args[2]);
@@ -198,7 +193,7 @@ public class EngineUCI
                 if (!hasAdjustedThisGame) shouldAdjust = true;
 
                 //TODO: Increments
-                InitializeSearch(99, -1);
+                engine.InitializeSearch(99, -1);
 
                 //Adjust TT here bc we will be waiting for opponent to respond anyway
                 //if (Board.colorToMove == Piece.White) AdjustTT(white); //If we are playing white //FIXedME: fix auto adjust to only run when search thread has returned
@@ -213,10 +208,10 @@ public class EngineUCI
                     return;
                 }
 
-                Perft.RunDetailed(int.Parse(args[2]));
+                Perft.RunDetailed(int.Parse(args[2]), Engine.board);
                 return;
             case "bench":
-                Benchmark.Run();
+                //Benchmark.Run();
                 return;
         }
     }
@@ -267,7 +262,8 @@ public class EngineUCI
 
             //Console.WriteLine(moveStartIndex);
 
-            FenUtility.LoadPositionFromFen(fen);
+            //FenUtility.LoadPositionFromFen(Engine.board, fen);
+            engine.LoadFen(fen);
 
             if (moveStartIndex == -1)
             {
@@ -299,7 +295,10 @@ public class EngineUCI
             if (playedMoves.Count > playedMovesIndex && playedMoves[playedMovesIndex] == args[i]) continue;
 
             //Console.WriteLine("Found new move to play: " + args[i]);
-            Board.MakeMove(BoardHelper.GetMoveFromUCIName(args[i]));
+            //Engine.board.MakeMove(BoardHelper.GetMoveFromUCIName(Engine.board, args[i]));
+            engine.PlayMove(BoardHelper.GetMoveFromUCIName(Engine.board, args[i]));
+
+
             playedMoves.Add(args[i]);
         }
     }

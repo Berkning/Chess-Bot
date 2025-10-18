@@ -36,7 +36,7 @@ public static class MoveGenerator
 
     #region LegalityMaps
 
-    private static void GenerateAttackMaps()
+    private static void GenerateAttackMaps(Board board)
     {
         GenerateSlidingAttackMap();
 
@@ -81,7 +81,7 @@ public static class MoveGenerator
 
 
         //Knight attacks
-        PieceList enemyKnights = Board.knightList[Board.opponentColorBit];
+        PieceList enemyKnights = board.knightList[board.opponentColorBit];
         opponentKnightAttackMap = 0;
         bool isKnightCheck = false;
 
@@ -101,7 +101,7 @@ public static class MoveGenerator
 
 
         //Pawn attacks
-        PieceList enemyPawns = Board.pawnList[Board.opponentColorBit];
+        PieceList enemyPawns = board.pawnList[board.opponentColorBit];
         oponnentPawnAttackMap = 0;
         bool isPawnCheck = false;
 
@@ -166,21 +166,21 @@ public static class MoveGenerator
 
     #region PieceBoards
 
-    private static void GeneratePieceBoards() //TODOne: would be more performant to keep track of these and update them in board on make an unmake move
+    private static void GeneratePieceBoards(Board board) //TODOne: would be more performant to keep track of these and update them in board on make an unmake move
     {
-        int friendlyBit = Board.friendlyColorBit;
-        int enemyBit = Board.opponentColorBit;
+        int friendlyBit = board.friendlyColorBit;
+        int enemyBit = board.opponentColorBit;
 
-        ulong friendlyQueens = Board.GetPieceList(Piece.Queen, friendlyBit).bitboard;
-        ulong enemyQueens = Board.GetPieceList(Piece.Queen, enemyBit).bitboard;
+        ulong friendlyQueens = board.GetPieceList(Piece.Queen, friendlyBit).bitboard;
+        ulong enemyQueens = board.GetPieceList(Piece.Queen, enemyBit).bitboard;
 
-        friendlyOrthos = Board.GetPieceList(Piece.Rook, friendlyBit).bitboard | friendlyQueens;
-        friendlyDiags = Board.GetPieceList(Piece.Bishop, friendlyBit).bitboard | friendlyQueens;
-        enemyOrthos = Board.GetPieceList(Piece.Rook, enemyBit).bitboard | enemyQueens;
-        enemyDiags = Board.GetPieceList(Piece.Bishop, enemyBit).bitboard | enemyQueens;
+        friendlyOrthos = board.GetPieceList(Piece.Rook, friendlyBit).bitboard | friendlyQueens;
+        friendlyDiags = board.GetPieceList(Piece.Bishop, friendlyBit).bitboard | friendlyQueens;
+        enemyOrthos = board.GetPieceList(Piece.Rook, enemyBit).bitboard | enemyQueens;
+        enemyDiags = board.GetPieceList(Piece.Bishop, enemyBit).bitboard | enemyQueens;
 
-        friendlyPieces = Board.GetPieceList(Piece.Pawn, friendlyBit).bitboard | Board.GetPieceList(Piece.Knight, friendlyBit).bitboard | friendlyDiags | friendlyOrthos | (1UL << friendlyKingSquare);
-        enemyPieces = Board.GetPieceList(Piece.Pawn, enemyBit).bitboard | Board.GetPieceList(Piece.Knight, enemyBit).bitboard | enemyDiags | enemyOrthos | (1UL << enemyKingSquare);
+        friendlyPieces = board.GetPieceList(Piece.Pawn, friendlyBit).bitboard | board.GetPieceList(Piece.Knight, friendlyBit).bitboard | friendlyDiags | friendlyOrthos | (1UL << friendlyKingSquare);
+        enemyPieces = board.GetPieceList(Piece.Pawn, enemyBit).bitboard | board.GetPieceList(Piece.Knight, enemyBit).bitboard | enemyDiags | enemyOrthos | (1UL << enemyKingSquare);
 
         allPieces = friendlyPieces | enemyPieces;
     }
@@ -194,53 +194,53 @@ public static class MoveGenerator
 
     #region MoveGeneration
 
-    public static Span<Move> GenerateMovesSlow()
+    public static Span<Move> GenerateMovesSlow(Board board)
     {
         Span<Move> moves = new Move[256];
-        GenerateMoves(ref moves);
+        GenerateMoves(ref moves, board);
         return moves;
     }
 
     //TODO: Remove ref here bc unnecessary - span is ref to array anyway so just return a span like normal
-    public static int GenerateMoves(ref Span<Move> moves, bool genOnlyCaptures = false) //Returns move count
+    public static int GenerateMoves(ref Span<Move> moves, Board board, bool genOnlyCaptures = false) //Returns move count
     {
         moveCount = 0;
 
-        if (Board.colorToMove == Piece.White)
+        if (board.colorToMove == Piece.White)
         {
-            friendlyKingSquare = Board.whiteKingSquare;
-            enemyKingSquare = Board.blackKingSquare;
+            friendlyKingSquare = board.whiteKingSquare;
+            enemyKingSquare = board.blackKingSquare;
         }
         else
         {
-            friendlyKingSquare = Board.blackKingSquare;
-            enemyKingSquare = Board.whiteKingSquare;
+            friendlyKingSquare = board.blackKingSquare;
+            enemyKingSquare = board.whiteKingSquare;
         }
 
-        friendlyIndexOffset = Board.friendlyColorBit * 64;
-        opponentIndexOffset = Board.opponentColorBit * 64;
+        friendlyIndexOffset = board.friendlyColorBit * 64;
+        opponentIndexOffset = board.opponentColorBit * 64;
 
         pinRayBitMap = 0;
         checkRayBitMap = 0;
         inCheck = false;
         inDoubleCheck = false;
 
-        GeneratePieceBoards();
+        GeneratePieceBoards(board);
 
-        GenerateAttackMaps();
+        GenerateAttackMaps(board);
 
-        GenerateKingMoves(ref moves, genOnlyCaptures);
+        GenerateKingMoves(ref moves, board, genOnlyCaptures);
 
         if (inDoubleCheck) return moveCount; //Only king moves valid when in double check
 
-        for (int i = 0; i < Board.pawnList[Board.friendlyColorBit].Count; i++)
+        for (int i = 0; i < board.pawnList[board.friendlyColorBit].Count; i++)
         {
-            GeneratePawnMoves(ref moves, Board.pawnList[Board.friendlyColorBit][i], genOnlyCaptures);
+            GeneratePawnMoves(ref moves, board, board.pawnList[board.friendlyColorBit][i], genOnlyCaptures);
         }
 
-        for (int i = 0; i < Board.knightList[Board.friendlyColorBit].Count; i++)
+        for (int i = 0; i < board.knightList[board.friendlyColorBit].Count; i++)
         {
-            GenerateKnightMoves(ref moves, Board.knightList[Board.friendlyColorBit][i], genOnlyCaptures);
+            GenerateKnightMoves(ref moves, board, board.knightList[board.friendlyColorBit][i], genOnlyCaptures);
         }
 
         GenerateSlidingMoves(ref moves, genOnlyCaptures);
@@ -313,7 +313,7 @@ public static class MoveGenerator
         }
     }
 
-    private static void GenerateKingMoves(ref Span<Move> moves, bool genOnlyCaptures)
+    private static void GenerateKingMoves(ref Span<Move> moves, Board board, bool genOnlyCaptures)
     {
         ulong moveBoard = PrecomputedData.kingAttackBitboards[friendlyKingSquare] & (~friendlyPieces);
         ulong safetyMap = ~opponentAttackMap; //All squares not attacked by opponent
@@ -325,18 +325,18 @@ public static class MoveGenerator
         {
             ulong castleSquares = safetyMap & (~allPieces); //All safe and empty squares
 
-            ulong shortCastleBoard = PrecomputedData.castleMasks[Board.friendlyColorBit] & castleSquares;
+            ulong shortCastleBoard = PrecomputedData.castleMasks[board.friendlyColorBit] & castleSquares;
 
-            if (ShortCastleAllowed() && BitBoardHelper.BitCount(shortCastleBoard) == 2) //If short allowed and both castle squares are safe and empty
+            if (ShortCastleAllowed(board) && BitBoardHelper.BitCount(shortCastleBoard) == 2) //If short allowed and both castle squares are safe and empty
             {
-                moves[moveCount++] = new Move(friendlyKingSquare, Board.colorToMove == Piece.White ? BoardHelper.g1 : BoardHelper.g8, Move.Flag.Castling);
+                moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.g1 : BoardHelper.g8, Move.Flag.Castling);
             }
 
-            ulong longCastleBoard = PrecomputedData.castleMasks[2 + Board.friendlyColorBit] & castleSquares;
+            ulong longCastleBoard = PrecomputedData.castleMasks[2 + board.friendlyColorBit] & castleSquares;
 
-            if (LongCastleAllowed() && BitBoardHelper.BitCount(longCastleBoard) == 2 && (allPieces & PrecomputedData.castleMasks[4 + Board.friendlyColorBit]) == 0) //If long allowed and both castle squares are safe and empty and the last one is empty
+            if (LongCastleAllowed(board) && BitBoardHelper.BitCount(longCastleBoard) == 2 && (allPieces & PrecomputedData.castleMasks[4 + board.friendlyColorBit]) == 0) //If long allowed and both castle squares are safe and empty and the last one is empty
             {
-                moves[moveCount++] = new Move(friendlyKingSquare, Board.colorToMove == Piece.White ? BoardHelper.c1 : BoardHelper.c8, Move.Flag.Castling);
+                moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.c1 : BoardHelper.c8, Move.Flag.Castling);
             }
         }
 
@@ -350,22 +350,22 @@ public static class MoveGenerator
         }
     }
 
-    private static void GeneratePawnMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
+    private static void GeneratePawnMoves(ref Span<Move> moves, Board board, int startSquare, bool genOnlyCaptures)
     {
-        int moveDir = Board.friendlyColor == Piece.White ? PrecomputedData.Up : PrecomputedData.Down;
+        int moveDir = board.friendlyColor == Piece.White ? PrecomputedData.Up : PrecomputedData.Down;
         int targetSquare = startSquare + moveDir;//One move up/down
 
         int rank = BoardHelper.IndexToRank(startSquare);
-        bool oneStepFromPromotion = rank == (Board.friendlyColor == Piece.White ? 6 : 1);
+        bool oneStepFromPromotion = rank == (board.friendlyColor == Piece.White ? 6 : 1);
 
         if (!genOnlyCaptures) //Only run this code if were not generating captures only
         {
 
-            int startRank = Board.friendlyColor == Piece.White ? 1 : 6;
+            int startRank = board.friendlyColor == Piece.White ? 1 : 6;
 
 
 
-            if (Piece.IsNone(Board.Squares[targetSquare]))
+            if (Piece.IsNone(board.Squares[targetSquare]))
             {
                 if (!IsPinned(startSquare) || IsMovingAlongRay(friendlyKingSquare, startSquare, moveDir))
                 {
@@ -381,7 +381,7 @@ public static class MoveGenerator
                     {
                         int squareTwoForward = targetSquare + moveDir; //One additional move up/down
 
-                        if (Piece.IsNone(Board.Squares[squareTwoForward]) && (!inCheck || SquareIsInCheckRay(squareTwoForward))) moves[moveCount++] = new Move(startSquare, squareTwoForward, Move.Flag.PawnTwoForward); //If no pieces on target square, add move
+                        if (Piece.IsNone(board.Squares[squareTwoForward]) && (!inCheck || SquareIsInCheckRay(squareTwoForward))) moves[moveCount++] = new Move(startSquare, squareTwoForward, Move.Flag.PawnTwoForward); //If no pieces on target square, add move
                     }
                 }
             }
@@ -390,8 +390,8 @@ public static class MoveGenerator
 
 
         int attackIndex = startSquare + friendlyIndexOffset;
-        int epFile = (int)((Board.currentGameState & Board.epFileMask) >> 5) - 1;
-        int epAttackRank = Board.friendlyColor == Piece.White ? 5 : 2;
+        int epFile = (int)((board.currentGameState & Board.epFileMask) >> 5) - 1;
+        int epAttackRank = board.friendlyColor == Piece.White ? 5 : 2;
         int epAttackSquare = epFile != -1 ? BoardHelper.CoordToIndex(epFile, epAttackRank) : -1;
 
         for (int i = 0; i < PrecomputedData.PawnAttackSquares[attackIndex].Length; i++)
@@ -402,9 +402,9 @@ public static class MoveGenerator
             //TODO:                      Can replace this with a simple check for the square being in pinRayBoard bc that will always be true if moving along ray with pawns?
             if (IsPinned(startSquare) && !IsMovingAlongRay(friendlyKingSquare, startSquare, captureDirection)) continue; //Pawn is pinned and cant move in this direction
 
-            int targetPiece = Board.Squares[targetSquare];
+            int targetPiece = board.Squares[targetSquare];
 
-            if (Piece.Color(targetPiece) == Board.enemyColor)
+            if (Piece.Color(targetPiece) == board.enemyColor)
             {
                 if (inCheck && !SquareIsInCheckRay(targetSquare)) continue; //Skip direction if were in check and this move doesn't block it
 
@@ -419,15 +419,15 @@ public static class MoveGenerator
 
                 if (inCheck && !SquareIsInCheckRay(targetSquare) && !SquareIsInCheckRay(capturedPawnSquare)) continue;
 
-                int epStartRank = Board.friendlyColor == Piece.White ? 4 : 3;
+                int epStartRank = board.friendlyColor == Piece.White ? 4 : 3;
 
 
-                if (!InCheckAfterEnPassant(startSquare, epStartRank, capturedPawnSquare)) moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture);
+                if (!InCheckAfterEnPassant(board, startSquare, epStartRank, capturedPawnSquare)) moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture);
             }
         }
     }
 
-    private static void GenerateKnightMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
+    private static void GenerateKnightMoves(ref Span<Move> moves, Board board, int startSquare, bool genOnlyCaptures)
     {
         //TODO: Bitboards
         for (int i = 0; i < PrecomputedData.KnightMoves[startSquare].Length; i++)
@@ -435,9 +435,9 @@ public static class MoveGenerator
             if (IsPinned(startSquare)) return; //Knight cant move at all if pinned
 
             int targetSquare = PrecomputedData.KnightMoves[startSquare][i];
-            int pieceOnTarget = Board.Squares[targetSquare];
+            int pieceOnTarget = board.Squares[targetSquare];
 
-            if (Piece.Color(pieceOnTarget) == Board.friendlyColor) continue;
+            if (Piece.Color(pieceOnTarget) == board.friendlyColor) continue;
 
             bool isCapture = !Piece.IsNone(pieceOnTarget);
 
@@ -490,17 +490,17 @@ public static class MoveGenerator
         return BitBoardHelper.ContainsSquare(opponentAttackMap, square);
     }
 
-    private static bool ShortCastleAllowed()
+    private static bool ShortCastleAllowed(Board board) //TODO: Move to board class
     {
-        return (Board.currentGameState & (1U << (9 + Board.friendlyColorBit))) > 0;
+        return (board.currentGameState & (1U << (9 + board.friendlyColorBit))) > 0;
     }
 
-    private static bool LongCastleAllowed()
+    private static bool LongCastleAllowed(Board board) //TODO: Move to board class
     {
-        return (Board.currentGameState & (1U << (11 + Board.friendlyColorBit))) > 0;
+        return (board.currentGameState & (1U << (11 + board.friendlyColorBit))) > 0;
     }
 
-    private static bool InCheckAfterEnPassant(int square, int startRank, int capturedPawnSquare)
+    private static bool InCheckAfterEnPassant(Board board, int square, int startRank, int capturedPawnSquare)
     {
         int kingRank = BoardHelper.IndexToRank(friendlyKingSquare);
 
@@ -518,11 +518,11 @@ public static class MoveGenerator
         {
             int index = startSquare + i * directionIncrement;
 
-            int pieceOnSquare = Board.Squares[index];
+            int pieceOnSquare = board.Squares[index];
 
             if (pieceOnSquare != Piece.None && index != capturedPawnSquare && index != square)
             {
-                if (Piece.Color(pieceOnSquare) == Board.enemyColor) return Piece.IsRookOrQueen(pieceOnSquare); //Will put us in check if it's a rook or a queen
+                if (Piece.Color(pieceOnSquare) == board.enemyColor) return Piece.IsRookOrQueen(pieceOnSquare); //Will put us in check if it's a rook or a queen
                 else return false; //Ran into a friendly piece which will be blocking any attack
             }
         }

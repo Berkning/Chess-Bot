@@ -12,7 +12,7 @@ public static class Benchmark
         ("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ", 8),
     };
 
-    public static void Run() //FIXME:
+    /*public static void Run() //FIXME:
     {
         long totalTime = 0;
         Stopwatch stopwatch = new Stopwatch();
@@ -31,5 +31,5 @@ public static class Benchmark
         }
 
         Console.WriteLine("Benchmark finished in " + totalTime + "ms");
-    }
+    }*/
 }

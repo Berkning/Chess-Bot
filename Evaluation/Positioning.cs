@@ -45,14 +45,14 @@ public static class Positioning //TODOne: endgame tables
     private static int[] KingEndgame = { -20, -10, -10, -10, -10, -10, -10, -20, -10, 5, 5, 5, 5, 5, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 5, 5, 5, 5, 5, -10, -10, 0, 0, 0, 0, 0, 0, -10 };
 
 
-    public static int GetPositioningScore(int colorBit, int enemyColorBit)
+    public static int GetPositioningScore(int colorBit, int enemyColorBit, Board board)
     {
         int score = 0;
 
-        PieceList currentPieceList = Board.pawnList[colorBit]; //Isn't very readable, but slightly more performant?
+        PieceList currentPieceList = board.pawnList[colorBit]; //Isn't very readable, but slightly more performant?
 
         ulong friendlyPawnBoard = currentPieceList.bitboard;
-        ulong enemyPawnBoard = Board.pawnList[enemyColorBit].bitboard;
+        ulong enemyPawnBoard = board.pawnList[enemyColorBit].bitboard;
 
         //Score pawn positions
         for (int i = 0; i < currentPieceList.Count; i++)
@@ -89,7 +89,7 @@ public static class Positioning //TODOne: endgame tables
         }
 
         //Score knight positions
-        currentPieceList = Board.knightList[colorBit];
+        currentPieceList = board.knightList[colorBit];
 
         for (int i = 0; i < currentPieceList.Count; i++)
         {
@@ -108,7 +108,7 @@ public static class Positioning //TODOne: endgame tables
         //if (darkBishopBoard != 0) score += Evaluation.lightPawnCount * OppositeColorPawnScore;
 
         //if (lightBishopBoard != 0) score += Evaluation.darkPawnCount * OppositeColorPawnScore;
-        currentPieceList = Board.bishopList[colorBit];
+        currentPieceList = board.bishopList[colorBit];
 
         if (currentPieceList.Count > 1) score += BishopPairValue;
 
@@ -128,7 +128,7 @@ public static class Positioning //TODOne: endgame tables
         }
 
         //Score rook positions
-        currentPieceList = Board.rookList[colorBit];
+        currentPieceList = board.rookList[colorBit];
 
         for (int i = 0; i < currentPieceList.Count; i++)
         {
@@ -139,7 +139,7 @@ public static class Positioning //TODOne: endgame tables
         }
 
         //Score queen positions
-        currentPieceList = Board.queenList[colorBit];
+        currentPieceList = board.queenList[colorBit];
 
         for (int i = 0; i < currentPieceList.Count; i++)
         {
@@ -150,12 +150,12 @@ public static class Positioning //TODOne: endgame tables
         }
 
         //Score king position
-        int kingSquare = colorBit == 0 ? Board.whiteKingSquare : BoardHelper.FlipIndex(Board.blackKingSquare);
+        int kingSquare = colorBit == 0 ? board.whiteKingSquare : BoardHelper.FlipIndex(board.blackKingSquare);
         score += Blend(KingEarlyGame[kingSquare], KingEndgame[kingSquare], Evaluation.endgameMultiplier);
 
 
         //Mopup
-        int enemyKingSquare = colorBit == 0 ? Board.blackKingSquare : Board.whiteKingSquare;
+        int enemyKingSquare = colorBit == 0 ? board.blackKingSquare : board.whiteKingSquare;
 
         score += (int)Math.Ceiling(10f * PrecomputedData.manhattanDistanceFromCenter[enemyKingSquare] * Evaluation.endgameMultiplier);
 

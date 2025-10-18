@@ -264,19 +264,19 @@ public static class Zobrist
     }
 
 
-    public static ulong Hash()
+    public static ulong Hash(Board board)
     {
         ulong key = 0;
 
         //Add kings to key
-        key ^= piecesArray[0, 0, Board.whiteKingSquare];
-        key ^= piecesArray[0, 1, Board.blackKingSquare];
+        key ^= piecesArray[0, 0, board.whiteKingSquare];
+        key ^= piecesArray[0, 1, board.blackKingSquare];
 
         //Add pieces to key
         for (int typeIndex = 0; typeIndex < 5; typeIndex++)
         {
-            PieceList whitePieceList = Board.allPieceList[typeIndex];
-            PieceList blackPieceList = Board.allPieceList[typeIndex + 5];
+            PieceList whitePieceList = board.allPieceList[typeIndex];
+            PieceList blackPieceList = board.allPieceList[typeIndex + 5];
 
             for (int i = 0; i < whitePieceList.Count; i++)
             {
@@ -292,14 +292,14 @@ public static class Zobrist
         }
 
         //Add castling rights to key
-        key ^= castlingArray[(Board.currentGameState & Board.castleRightsMask) >> 9];
+        key ^= castlingArray[(board.currentGameState & Board.castleRightsMask) >> 9];
 
         //Add ep file to key
-        int epFile = (int)((Board.currentGameState & Board.epFileMask) >> 5) - 1;
+        int epFile = (int)((board.currentGameState & Board.epFileMask) >> 5) - 1;
         if (epFile != -1) key ^= epArray[epFile]; //Should be conditional on whether an enemy pawn is able to capture the ep pawn
 
         //Add colorToMove to key
-        key ^= sideToMove * (ulong)Board.opponentColorBit;
+        key ^= sideToMove * (ulong)board.opponentColorBit;
 
         return key;
     }
