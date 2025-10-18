@@ -8,25 +8,30 @@ public class MoveOrdering
     const int killerBias = 500000;
     const int goodCaptureBias = 8000;
     const int badCaptureBias = 1100;
+    //const int jitterBias = -100000;
     const int kingAttackBias = -250;
 
     public const int MaxKillerPlys = 32;
 
-    public static KillerMove[] killerMoves = new KillerMove[MaxKillerPlys];
+    public static KillerMove[] killerMoves = new KillerMove[MaxKillerPlys]; //TODO: test making atomic
 
     private Board board;
     private MoveGenerator moveGenerator;
+    private int threadID;
 
-    public MoveOrdering(Board _board, MoveGenerator _moveGenerator)
+    public MoveOrdering(Board _board, MoveGenerator _moveGenerator, int _threadID)
     {
         board = _board;
-        this.moveGenerator = _moveGenerator;
+        moveGenerator = _moveGenerator;
+        threadID = _threadID;
     }
 
 
     //TODOne: try penalizing moving very valuable pieces into less valuable enemy attack range - penalize rook in bishop attack range
     public void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove, int ply) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
     {
+        int jitterIndex = moveCount != 0?threadID % moveCount:0;
+
         for (int i = 0; i < moveCount; i++) //TODOne: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
         {
             int moveScore = 0;
@@ -39,6 +44,8 @@ public class MoveOrdering
             //TODOne: guess if opponent cant recapture //TODOne: penalize rook and queen movements in early game?
 
             if (moves[i].data == prevBestMove.data) moveScore += prevBestBias; //TODO: Could optimize checking through all moves to find this one prob
+
+            //if (i == jitterIndex) moveScore += jitterBias;
 
             if (capturedPieceType != Piece.None)
             {

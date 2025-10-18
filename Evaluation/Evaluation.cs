@@ -1,7 +1,7 @@
 
 using System;
 
-public static class Evaluation
+public class Evaluation
 {
     public const int PawnValue = 100;
     public const int KnightValue = 310;
@@ -16,12 +16,12 @@ public static class Evaluation
     //private const int PassedPawnConnectionValue = 15; //Value increase of passed pawn for every supporting pawn it has beside/behind (but not directly behind) it
     //private const int IsolatedPawnValue = -50;
 
-    private static int totalMaterialWithoutPawns;
-    private static int whiteMaterialValue;
-    private static int blackMaterialValue;
+    private int totalMaterialWithoutPawns;
+    private int whiteMaterialValue;
+    private int blackMaterialValue;
 
-    public static float gameStage;
-    public static float endgameMultiplier;
+    public float gameStage;
+    public float endgameMultiplier;
     //public static float earlygameMultiplier;
 
     //public static ulong darkPawnBoard;
@@ -31,8 +31,15 @@ public static class Evaluation
     //private static int lightPawnCount;
     //public static int pawnColorCountDifference; //Darkcount - lightCount
 
+    private Positioning positioning;
 
-    public static int Evaluate(Board board) //TODO: https://www.chessprogramming.org/Tempo - tempo bonus to avoid score oscillation - except in endgame
+    public Evaluation()
+    {
+        positioning = new Positioning(this);
+    }
+
+
+    public int Evaluate(Board board) //TODO: https://www.chessprogramming.org/Tempo - tempo bonus to avoid score oscillation - except in endgame
     {
         EvaluateMaterial(board);
         gameStage = CalculateGameStage();
@@ -48,8 +55,8 @@ public static class Evaluation
         //pawnColorCountDifference = darkPawnCount - lightPawnCount;
 
 
-        int whiteEval = whiteMaterialValue + Positioning.GetPositioningScore(0, 1, board);// + EvaluatePawnStructure(0, 1);
-        int blackEval = blackMaterialValue + Positioning.GetPositioningScore(1, 0, board);// + EvaluatePawnStructure(1, 0);
+        int whiteEval = whiteMaterialValue + positioning.GetPositioningScore(0, 1, board);// + EvaluatePawnStructure(0, 1);
+        int blackEval = blackMaterialValue + positioning.GetPositioningScore(1, 0, board);// + EvaluatePawnStructure(1, 0);
 
         int evaluation = whiteEval - blackEval;
 
@@ -58,7 +65,7 @@ public static class Evaluation
         return evaluation * perspective;
     }
 
-    private static int EvaluatePawnStructure(int colorBit, int enemyColorBit, Board board) //TODO: try giving high score in early to midgame when king can see pawns above him
+    private int EvaluatePawnStructure(int colorBit, int enemyColorBit, Board board) //TODO: try giving high score in early to midgame when king can see pawns above him
     {
         int score = 0;
 
@@ -123,7 +130,7 @@ public static class Evaluation
         return score;
     }
 
-    private static void EvaluateMaterial(Board board)
+    private void EvaluateMaterial(Board board)
     {
         whiteMaterialValue = 0;
         blackMaterialValue = 0;
@@ -146,7 +153,7 @@ public static class Evaluation
         totalMaterialWithoutPawns = whiteNonPawn + blackNonPawn;
     }
 
-    private static float CalculateGameStage()
+    private float CalculateGameStage()
     {
         float material = totalMaterialWithoutPawns / 100f + 7.5f;
         if (material < 13.3) return 2f;

@@ -110,6 +110,16 @@ public class EngineUCI
             case "d":
                 Console.WriteLine("Fen: " + FenUtility.GetCurrentFen(Engine.board));
                 break;
+            case "jitter":
+                if (args.Length == 1) Console.WriteLine(/*MoveOrdering.jitterBias*/"Disabled");
+                else
+                {
+                    int v = int.Parse(args[1]);
+
+                    //MoveOrdering.jitterBias = v;
+                    //Console.WriteLine("info string Set jiiterbias to " + MoveOrdering.jitterBias);
+                }
+                break;
 
 
 

@@ -358,6 +358,10 @@ public class Board
         gameStateHistory.Push(currentGameState);
         if (!inSearch) repetitionTable.Push(currentZobrist);
         //Debug.Log(Convert.ToString(currentGameState, 2));
+
+
+
+        //if (currentZobrist != Zobrist.Hash(this)) Console.WriteLine("Zobrist incorrect");
     }
 
 
@@ -476,6 +480,10 @@ public class Board
         if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
 
         currentZobrist ^= Zobrist.castlingArray[newCastleRights];
+
+
+
+        //if (currentZobrist != Zobrist.Hash(this)) Console.WriteLine("Zobrist incorrect");
     }
 }
 

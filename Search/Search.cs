@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 public class Search
 {
@@ -24,6 +25,7 @@ public class Search
     private Board board;
     private MoveGenerator moveGenerator;
     private MoveOrdering moveOrdering;
+    private Evaluation evaluator;
 
 
 
@@ -38,7 +40,10 @@ public class Search
 
         board = _board;
         moveGenerator = new MoveGenerator(board);
-        moveOrdering = new MoveOrdering(board, moveGenerator);
+        moveOrdering = new MoveOrdering(board, moveGenerator, threadID);
+        evaluator = new Evaluation();
+
+        //Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} board ref: {RuntimeHelpers.GetHashCode(board)}");
 
 
         //for (int i = 0; i < principledVariation.Length; i++) principledVariation[i] = Move.nullMove; //Clear PV
@@ -82,10 +87,10 @@ public class Search
             {
                 //Console.WriteLine("info depth " + depth + " score cp " + result + " string partial search");
                 //Console.WriteLine("info depth " + depth + " string partial");
-                LogSearchInfo(depth, nodeCount, true);
+                LogSearchInfo(depth, nodeCount, true, threadID);
                 break;
             }
-            else LogSearchInfo(depth, nodeCount, false); //TODO: check if matescore and then exit if were low on time
+            else LogSearchInfo(depth, nodeCount, false, threadID); //TODO: check if matescore and then exit if were low on time
         }
 
         //if (!cancelSearch) TimeManagement.RevokeScheduledCancel();
@@ -306,6 +311,8 @@ public class Search
                 bestMoveInPosition = moves[i];
                 transpositionBound = TranspositionTable.Exact;
 
+                if (evaluation > 1000) Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: suspicious eval={evaluation}, plyFromRoot={plyFromRoot}");
+
                 if (plyFromRoot == 0) //TODO: PV
                 {
                     bestMove = bestMoveInPosition;
@@ -333,7 +340,7 @@ public class Search
         // A player isn't forced to make a capture (typically), so see what the evaluation is without capturing anything.
         // This prevents situations where a player ony has bad captures available from being evaluated as bad,
         // when the player might have good non-capture moves available.
-        int eval = Evaluation.Evaluate(board);
+        int eval = evaluator.Evaluate(board);
         //positionCount++;
 
         if (eval >= beta)
@@ -387,11 +394,11 @@ public class Search
 
     public static bool logFullPV = false;
 
-    private void LogSearchInfo(int depth, int nodeCount, bool isPartial)
+    private void LogSearchInfo(int depth, int nodeCount, bool isPartial, int id)
     {
         string pv = logFullPV ? GetPVFromTranspositionTable() : GetBasicPVString();
 
-        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv" + pv + " nodes " + nodeCount + (isPartial ? " string partial" : ""));
+        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv" + pv + " nodes " + nodeCount + (isPartial ? " string partial" : "") + " id " + id);
     }
 
     private string GetBasicPVString()

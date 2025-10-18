@@ -1,7 +1,7 @@
 
 using System;
 
-public static class Positioning //TODOne: endgame tables
+public class Positioning //TODOne: endgame tables
 {
     //Pawns
     private static int[] PawnEarlyGame = { 0, 0, 0, 0, 0, 0, 0, 0, 5, 15, 10, -10, -10, 10, 15, 5, 5, 0, 15, 15, 15, 15, 0, 5, -5, -10, 25, 30, 30, 25, -10, -5, -15, -15, 15, 20, 20, 15, -15, -15, -20, -15, -10, -5, -5, -10, -15, -20, -25, -25, -25, -25, -25, -25, -25, -25, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -32,7 +32,7 @@ public static class Positioning //TODOne: endgame tables
     //private const int OppositeColorPawnScore = 6; //Value increase of bishop for each pawn on an opposite colored square - bishop is more open
     private const int BishopPairValue = 25; //Extra value added for bishop pair
 
-
+    //TODO: Make all these static arrays readonly
 
     private static int[] RookScores = { 0, 0, 0, 5, 5, 0, 0, 0, -5, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, -5, -5, 0, 0, 0, 0, 0, 0, -5, 5, 10, 10, 10, 10, 10, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -45,7 +45,14 @@ public static class Positioning //TODOne: endgame tables
     private static int[] KingEndgame = { -20, -10, -10, -10, -10, -10, -10, -20, -10, 5, 5, 5, 5, 5, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 15, 15, 15, 15, 5, -10, -10, 5, 5, 5, 5, 5, 5, -10, -10, 0, 0, 0, 0, 0, 0, -10 };
 
 
-    public static int GetPositioningScore(int colorBit, int enemyColorBit, Board board)
+    private Evaluation evaluation;
+
+    public Positioning(Evaluation _evaluation)
+    {
+        evaluation = _evaluation;
+    }
+
+    public int GetPositioningScore(int colorBit, int enemyColorBit, Board board)
     {
         int score = 0;
 
@@ -85,7 +92,7 @@ public static class Positioning //TODOne: endgame tables
                 endgameValue = PassedPawnLateGame[rankFromSide] + supporters * PassedPawnConnectionValue;
             }
 
-            score += Blend(PawnEarlyGame[index], endgameValue, Evaluation.endgameMultiplier);
+            score += Blend(PawnEarlyGame[index], endgameValue, evaluation.endgameMultiplier);
         }
 
         //Score knight positions
@@ -151,13 +158,13 @@ public static class Positioning //TODOne: endgame tables
 
         //Score king position
         int kingSquare = colorBit == 0 ? board.whiteKingSquare : BoardHelper.FlipIndex(board.blackKingSquare);
-        score += Blend(KingEarlyGame[kingSquare], KingEndgame[kingSquare], Evaluation.endgameMultiplier);
+        score += Blend(KingEarlyGame[kingSquare], KingEndgame[kingSquare], evaluation.endgameMultiplier);
 
 
         //Mopup
         int enemyKingSquare = colorBit == 0 ? board.blackKingSquare : board.whiteKingSquare;
 
-        score += (int)Math.Ceiling(10f * PrecomputedData.manhattanDistanceFromCenter[enemyKingSquare] * Evaluation.endgameMultiplier);
+        score += (int)Math.Ceiling(10f * PrecomputedData.manhattanDistanceFromCenter[enemyKingSquare] * evaluation.endgameMultiplier);
 
         //TODO: Move king closer to enemy king in endgame as well
         //score += Mathf.CeilToInt(10f * (7f - PrecomputedData.kingDistanceLookup[kingSquare][enemyKingSquare]) * endgameMultiplier);

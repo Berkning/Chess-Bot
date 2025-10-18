@@ -1,4 +1,6 @@
 
+using System;
+
 public class TranspositionTable
 {
     public static int SizeMB = 16; //TODO: adjust based on game speed - 16mb is WAY too small for 10s think
@@ -23,11 +25,19 @@ public class TranspositionTable
     private Transposition[] table;
     private ulong entryCount;
 
+    private readonly Lock[] locks;
+
     public TranspositionTable()
     {
         entryCount = (ulong)(SizeMB * 1000 * 1000 / Transposition.GetSize());
 
         table = new Transposition[entryCount];
+        locks = new Lock[entryCount/64];
+
+        for (int i = 0; i < locks.Length; i++)
+        {
+            locks[i] = new Lock();
+        }
     }
 
     private ulong Index(ulong zobrist)
@@ -47,12 +57,14 @@ public class TranspositionTable
 
     public Move GetStoredMove(ulong zobrist)
     {
-        return table[Index(zobrist)].move;
+        return Read(Index(zobrist)).move; //TODO: Could just return whole entry to avoid having to lock twice waiting for both eval and move if eval is good
     }
 
     public int LookupEvaluation(ulong zobrist, int depth, int plyFromRoot, int alpha, int beta)
     {
-        Transposition transposition = table[Index(zobrist)];
+        ulong index = Index(zobrist);
+
+        Transposition transposition = Read(index);
 
         if (transposition.key == zobrist)
         {
@@ -81,10 +93,29 @@ public class TranspositionTable
         return LookupFailed;
     }
 
+    private Transposition Read(ulong index)
+    {
+        Lock locker = locks[index / 64];
+
+        lock (locker)
+        {
+            return table[index];
+        }
+    }
+
+
+
     public void StoreEvaluation(ulong zobrist, int depth, int numPlySearched, int eval, int evalType, Move move)
     {
         Transposition transposition = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move);
-        table[Index(zobrist)] = transposition;
+
+        ulong index = Index(zobrist);
+        Lock locker = locks[index / 64];
+
+        lock (locker)
+        { //TODO: Try double checking in lock that transposition didn't get replaced with something better while we were locked out (maybe)
+            table[index] = transposition;
+        }
     }
 
     int CorrectMateScoreForStorage(int score, int numPlySearched)
@@ -114,7 +145,7 @@ public class TranspositionTable
 
     public struct Transposition
     {
-        public readonly ulong key;
+        public readonly ulong key; //TODO: try atomic writes - move everything except key into a ulong - if were overwriting an entry the key might be the same? dont know how to solve - try just removing key and key check
         public readonly int value;
         public readonly Move move;
         public readonly byte depth;
