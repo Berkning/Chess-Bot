@@ -95,6 +95,8 @@ public class TranspositionTable
 
     private Transposition Read(ulong index)
     {
+        return table[index];
+
         Lock locker = locks[index / 64];
 
         lock (locker)
@@ -112,10 +114,10 @@ public class TranspositionTable
         ulong index = Index(zobrist);
         Lock locker = locks[index / 64];
 
-        lock (locker)
-        { //TODO: Try double checking in lock that transposition didn't get replaced with something better while we were locked out (maybe)
+        //lock (locker)
+        //{ //TODO: Try double checking in lock that transposition didn't get replaced with something better while we were locked out (maybe)
             table[index] = transposition;
-        }
+        //}
     }
 
     int CorrectMateScoreForStorage(int score, int numPlySearched)
