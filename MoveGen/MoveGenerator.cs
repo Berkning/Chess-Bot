@@ -588,6 +588,11 @@ public struct Move //FFFFTTTTTTSSSSSS - F = Flag bit - T = Target square bit - S
 
     public static Move nullMove = new Move(0, 0); //TODO: try if setting as const is more performant? Or adding function for IsNull
 
+    public Move (ushort data)
+    {
+        this.data = data;
+    }
+
     public Move(int start, int target)
     {
         data = (ushort)(start | target << 6);

@@ -78,7 +78,7 @@ public class Search
             //Console.WriteLine("Got TT Aspiration Hit");
         }
 
-        for (int depth = 1; depth <= searchDepth; depth++)
+        for (uint depth = 1; depth <= searchDepth; depth++)
         {
             //AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
             prevResult = AspirationWindow.Search(depth, prevResult, this);
@@ -110,7 +110,7 @@ public class Search
         private static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
         private const int InstabilityMargin = 25;
 
-        public static int Search(int depth, int prevResult, Search searcher)
+        public static int Search(uint depth, int prevResult, Search searcher)
         {
             int incrementIndex = 0;
 
@@ -178,7 +178,7 @@ public class Search
 
     #region Search
 
-    private int AlphaBeta(int depth, int plyFromRoot, int alpha, int beta, int numExtensions = 0)//, bool test)
+    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0)//, bool test)
     {
         nodeCount++;
 
@@ -249,7 +249,7 @@ public class Search
 
 
         Move bestMoveInPosition = Move.nullMove;
-        int transpositionBound = TranspositionTable.UpperBound;
+        ulong transpositionBound = TranspositionTable.UpperBound;
 
         if (plyFromRoot > 0) repetitionTable.Push(board.currentZobrist);
 
@@ -260,7 +260,7 @@ public class Search
 
             board.MakeMove(moves[i], true); //TODOne: test having ref to move instead of accesing array - prob already done by compiler though
 
-            int extensions = 0;
+            uint extensions = 0;
             if (numExtensions < MaxExtensions)
             {
                 //TODO: Search extensions
@@ -400,7 +400,7 @@ public class Search
 
     public static bool logFullPV = false;
 
-    private void LogSearchInfo(int depth, int nodeCount, bool isPartial, int id)
+    private void LogSearchInfo(uint depth, int nodeCount, bool isPartial, int id)
     {
         string pv = logFullPV ? GetPVFromTranspositionTable() : GetBasicPVString();
 

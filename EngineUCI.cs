@@ -74,6 +74,10 @@ public class EngineUCI
                         Console.WriteLine("info string Auto Adjusting " + (autoAdjustTT ? "Enabled" : "Disabled"));
                     }
                 }
+                else if (args[1] == "usage")
+                {
+                    Console.WriteLine("Transposition table is " + Search.transpositionTable.GetFilledPercent() + "% full");
+                }
                 break;
             case "pv":
                 if (args.Length == 1)
@@ -110,14 +114,17 @@ public class EngineUCI
             case "d":
                 Console.WriteLine("Fen: " + FenUtility.GetCurrentFen(Engine.board));
                 break;
-            case "jitter":
+            case "test":
                 if (args.Length == 1) Console.WriteLine(/*MoveOrdering.jitterBias*/"Disabled");
                 else
                 {
                     int v = int.Parse(args[1]);
+                    ulong result = (ulong)v;
 
-                    //MoveOrdering.jitterBias = v;
-                    //Console.WriteLine("info string Set jiiterbias to " + MoveOrdering.jitterBias);
+                    Console.WriteLine("Unchecked: " + unchecked((ulong)v));
+                    Console.WriteLine("Checked: " + (ulong)v);
+
+                    Console.WriteLine("Back: " + (int)result);
                 }
                 break;
 
