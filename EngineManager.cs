@@ -73,6 +73,8 @@ public class Engine
             Board threadBoard = threadBoards[i];
             int id = i; //Extremely weird issue where i gets incremented before being passed along to thread if not done like this
 
+            Thread.Sleep(10*id);
+
             searchThreads[i] = new Thread(() => searcher.StartSearch(callback, depth, id, threadBoard, time)); //TODO: Keep threads persistent?
 
             //if (i % 4 == 0) depth++;

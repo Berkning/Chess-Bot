@@ -235,7 +235,7 @@ public class Search
         moveOrdering.OrderMoves(ref moves, moveCount, bestMove, plyFromRoot);
 
         //TODO: Could prob optimize to avoid this if statement
-        if (plyFromRoot == 0) moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
+        //if (plyFromRoot == 0) moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
 
         //TODO: move this above move ordering bc obv no reason to do move ordering if there aren't any moves
         if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
