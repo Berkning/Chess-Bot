@@ -26,6 +26,7 @@ public class Search
     private MoveGenerator moveGenerator;
     private MoveOrdering moveOrdering;
     private Evaluation evaluator;
+    private int threadShuffle;
 
 
 
@@ -42,6 +43,7 @@ public class Search
         moveGenerator = new MoveGenerator(board);
         moveOrdering = new MoveOrdering(board, moveGenerator, threadID);
         evaluator = new Evaluation();
+        threadShuffle = threadID * 917853;
 
         //Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} board ref: {RuntimeHelpers.GetHashCode(board)}");
 
@@ -232,6 +234,10 @@ public class Search
         /*if (test)*/
         moveOrdering.OrderMoves(ref moves, moveCount, bestMove, plyFromRoot);
 
+        //TODO: Could prob optimize to avoid this if statement
+        if (plyFromRoot == 0) moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
+
+        //TODO: move this above move ordering bc obv no reason to do move ordering if there aren't any moves
         if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
         {
             //Debug.Log("Found Mate");
@@ -311,7 +317,7 @@ public class Search
                 bestMoveInPosition = moves[i];
                 transpositionBound = TranspositionTable.Exact;
 
-                if (evaluation > 1000) Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: suspicious eval={evaluation}, plyFromRoot={plyFromRoot}");
+                //if (evaluation > 1000) Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: suspicious eval={evaluation}, plyFromRoot={plyFromRoot}");
 
                 if (plyFromRoot == 0) //TODO: PV
                 {

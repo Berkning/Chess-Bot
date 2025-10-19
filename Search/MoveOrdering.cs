@@ -141,6 +141,22 @@ public class MoveOrdering
         }
     }
 
+    public void ThreadRootShuffle(ref Span<Move> moves, int moveCount, int threadShuffle)
+    {
+        int shuffleIndex = threadShuffle % moveCount;
+
+        //Swap move with first move
+        Move shuffledMove = moves[shuffleIndex];
+        moves[shuffleIndex] = moves[0];
+        moves[0] = shuffledMove;
+
+        shuffleIndex = (threadShuffle * 2) % moveCount;
+
+        shuffledMove = moves[shuffleIndex];
+        moves[shuffleIndex] = moves[1];
+        moves[1] = shuffledMove;
+    }
+
 
 
     private void SortMoves(ref Span<Move> moves, int moveCount)
