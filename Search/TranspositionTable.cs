@@ -24,6 +24,7 @@ public class TranspositionTable
 
     private Transposition[] table;
     private ulong entryCount;
+    //private ulong writeCount = 0;
 
     public TranspositionTable()
     {
@@ -43,6 +44,8 @@ public class TranspositionTable
 
         return (float)entries/entryCount * 100f;
     }
+
+    //public float GetTest() { return (float)writeCount / entryCount * 100f; }
 
     private ulong Index(ulong zobrist)
     {
@@ -96,6 +99,7 @@ public class TranspositionTable
                 }
             }
         }
+
         return LookupFailed;
     }
 
@@ -103,6 +107,7 @@ public class TranspositionTable
 
     public void StoreEvaluation(ulong zobrist, uint depth, int numPlySearched, int eval, ulong evalType, Move move)
     {
+        //writeCount++;
         Transposition transposition = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move); //TODO: try changing casts/removing?
 
         table[Index(zobrist)] = transposition;

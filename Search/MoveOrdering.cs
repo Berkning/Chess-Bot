@@ -13,7 +13,7 @@ public class MoveOrdering
 
     public const int MaxKillerPlys = 32;
 
-    public static KillerMove[] killerMoves = new KillerMove[MaxKillerPlys]; //TODO: test making atomic
+    public /*static*/ KillerMove[] killerMoves = new KillerMove[MaxKillerPlys]; //TODO: test making atomic
 
     private Board board;
     private MoveGenerator moveGenerator;

@@ -303,7 +303,7 @@ public class Search
                 {
                     if (plyFromRoot < MoveOrdering.MaxKillerPlys)
                     {
-                        MoveOrdering.killerMoves[plyFromRoot].Add(moves[i]);
+                        moveOrdering.killerMoves[plyFromRoot].Add(moves[i]);
                     }
                 }
 

@@ -77,6 +77,7 @@ public class EngineUCI
                 else if (args[1] == "usage")
                 {
                     Console.WriteLine("Transposition table is " + Search.transpositionTable.GetFilledPercent() + "% full");
+                    //Console.WriteLine("Transposition table is " + Search.transpositionTable.GetTest() + "% full");
                 }
                 break;
             case "pv":
@@ -124,7 +125,11 @@ public class EngineUCI
                     Console.WriteLine("Unchecked: " + unchecked((ulong)v));
                     Console.WriteLine("Checked: " + (ulong)v);
 
+                    Console.WriteLine("Bits in signed: " + Convert.ToString((int)result, 2));
+                    //Console.WriteLine("Bits in unsigned: " + )
+
                     Console.WriteLine("Back: " + (int)result);
+                    Console.WriteLine(TranspositionTable.Transposition.GetSize());
                 }
                 break;
 
