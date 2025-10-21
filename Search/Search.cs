@@ -28,25 +28,73 @@ public class Search
     private Evaluation evaluator;
     //private int threadShuffle;
     private int threadID;
+    private Action<Move, int> callback;
 
 
 
     public volatile static bool cancelSearch = false; //TODOing: try marking as volatile to see if performance improves
 
 
-
-    public void StartSearch(Action<Move, int> callback, int searchDepth, int threadID, Board _board, int searchTime = -1) //-1 = let search decide, -2 = go infinite TODO: Change to enum //TODOne: Killer moves
+    public Search(Board _board, Action<Move, int> _callback, int _threadID)
     {
-        //return AlphaBeta(depth, negativeInfinity, positiveInfinity);
-        cancelSearch = false;
+        threadID = _threadID;
+        callback = _callback;
+
 
         board = _board;
         moveGenerator = new MoveGenerator(board);
         moveOrdering = new MoveOrdering(board, moveGenerator, threadID);
         evaluator = new Evaluation();
-        //threadShuffle = threadID * 917853;
-        this.threadID = threadID;
+    }
 
+    public int searchDepth = -1;
+    public int searchTime = -1;
+
+    public void StartSearch()
+    {
+
+        bestMove = Move.nullMove;
+        bestEval = NegativeInfinity;
+        repetitionTable.Copy(board.repetitionTable);
+
+        nodeCount = -1; //Dont want to include start node - bc stockfish doesn't
+
+        if (searchTime == -1)
+        {
+            int maxSearchTime = TimeManagement.GetSearchTime(board.colorToMove);
+
+            TimeManagement.ScheduleSearchCancel(maxSearchTime); //TODO: Use stopwatch to manage own time in search
+        }
+        else if (searchTime > 0) TimeManagement.ScheduleSearchCancel(searchTime); //If less than -1, let it go till stop is recieved
+
+
+        int prevResult = NegativeInfinity;
+
+
+        int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
+
+        if (resultFromLastSearch != TranspositionTable.LookupFailed)
+        {
+            prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
+        }
+
+        for (uint depth = 1; depth <= searchDepth; depth++)
+        {
+            prevResult = AspirationWindow.Search(depth, prevResult, this);
+
+            if (cancelSearch) //FIXMEnt?: Currently plays illegal and sometime null moves randomly in partial search
+            {
+                LogSearchInfo(depth, nodeCount, true, threadID);
+                break;
+            }
+            else LogSearchInfo(depth, nodeCount, false, threadID); //TODO: check if matescore and then exit if were low on time
+        }
+        callback.Invoke(bestMove, threadID);
+    }
+
+    //TODO: prob just remove
+    public void StartSearch(int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite TODO: Change to enum //TODOne: Killer moves
+    {
         //Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} board ref: {RuntimeHelpers.GetHashCode(board)}");
 
 
@@ -64,7 +112,7 @@ public class Search
         {
             int maxSearchTime = TimeManagement.GetSearchTime(board.colorToMove);
 
-            TimeManagement.ScheduleSearchCancel(maxSearchTime);
+            TimeManagement.ScheduleSearchCancel(maxSearchTime); //TODO: Use stopwatch to manage own time in search
         }
         else if (searchTime > 0) TimeManagement.ScheduleSearchCancel(searchTime); //If less than -1, let it go till stop is recieved
 

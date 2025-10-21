@@ -113,7 +113,7 @@ public class EngineUCI
                 }
                 break;
             case "d":
-                Console.WriteLine("Fen: " + FenUtility.GetCurrentFen(Engine.board));
+                Console.WriteLine("Fen: " + FenUtility.GetCurrentFen(Engine.mainBoard));
                 break;
             case "test":
                 if (args.Length == 1) Console.WriteLine(/*MoveOrdering.jitterBias*/"Disabled");
@@ -230,7 +230,7 @@ public class EngineUCI
                     return;
                 }
 
-                Perft.RunDetailed(int.Parse(args[2]), Engine.board);
+                Perft.RunDetailed(int.Parse(args[2]), Engine.mainBoard);
                 return;
             case "bench":
                 //Benchmark.Run();
@@ -318,7 +318,7 @@ public class EngineUCI
 
             //Console.WriteLine("Found new move to play: " + args[i]);
             //Engine.board.MakeMove(BoardHelper.GetMoveFromUCIName(Engine.board, args[i]));
-            engine.PlayMove(BoardHelper.GetMoveFromUCIName(Engine.board, args[i]));
+            engine.PlayMove(BoardHelper.GetMoveFromUCIName(Engine.mainBoard, args[i]));
 
 
             playedMoves.Add(args[i]);

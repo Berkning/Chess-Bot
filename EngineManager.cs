@@ -4,53 +4,59 @@ using System.Diagnostics;
 
 public class Engine
 {
-    public static Board board = new Board();
+    public static Board mainBoard = new Board();
 
 
     public int threadCount => searchThreads.Length;
 
-    private Thread[] searchThreads = new Thread[1];
-    private Board[] threadBoards = new Board[1];
+    //private Thread[] searchThreads = new Thread[1];
+    //private Board[] threadBoards = new Board[1];
+    private EngineThread[] searchThreads = new EngineThread[1];
 
 
 
 
     Stopwatch searchTimer = new Stopwatch();
 
+    public Engine()
+    {
+        SetThreadCount(1);
+    }
+
+
     public void SetThreadCount(int count) //TODO: Could technically be optimized by keeping the threadBoards with the already correct state, and only loading the newly created ones
     {
-        searchThreads = new Thread[count];
-        threadBoards = new Board[count];
+        searchThreads = new EngineThread[count];
 
-        string fen = FenUtility.GetCurrentFen(board);
+        Action<Move, int> callback = (result, id) => OnSearchCompleted(result, id);
 
-        for (int i = 0; i < threadBoards.Length; i++)
+        string fen = FenUtility.GetCurrentFen(mainBoard);
+
+        for (int i = 0; i < searchThreads.Length; i++)
         {
-            threadBoards[i] = new Board();
+            searchThreads[i] = new EngineThread(i, callback);
 
-            FenUtility.LoadPositionFromFen(threadBoards[i], fen);
+            FenUtility.LoadPositionFromFen(searchThreads[i].board, fen);
         }
     }
 
     public void LoadFen(string fen)
     {
-        FenUtility.LoadPositionFromFen(board, fen);
+        FenUtility.LoadPositionFromFen(mainBoard, fen);
 
-        for (int i = 0; i < threadBoards.Length; i++)
+        for (int i = 0; i < searchThreads.Length; i++)
         {
-            if (threadBoards[i] == null) threadBoards[i] = new Board();
-
-            FenUtility.LoadPositionFromFen(threadBoards[i], fen);
+            FenUtility.LoadPositionFromFen(searchThreads[i].board, fen);
         }
     }
 
     public void PlayMove(Move move)
     {
-        board.MakeMove(move);
+        mainBoard.MakeMove(move);
 
-        foreach (Board threadBoard in threadBoards)
+        for (int i = 0; i < searchThreads.Length; i++)
         {
-            threadBoard.MakeMove(move);
+            searchThreads[i].board.MakeMove(move);
         }
     }
 
@@ -64,27 +70,24 @@ public class Engine
 
         Action<Move, int> callback = (result, id) => OnSearchCompleted(result, id);
 
+        searchTimer.Restart();
+
         for (int i = 0; i < searchThreads.Length; i++)
         {
             Console.WriteLine("Thread " + i + " Searching...");
 
-            Search searcher = new Search();
-
-            Board threadBoard = threadBoards[i];
-            int id = i; //Extremely weird issue where i gets incremented before being passed along to thread if not done like this
+            int id = i; //Extremely weird issue where i gets incremented before being passed along to thread if not done like this - found out why. everything is passed as a reference to threads apparently
 
             //if (id != 0) Thread.Sleep(100);
-            if (id != 0) Thread.Sleep(10*id); //TODO: Check if id == 0 bc Sleep(0) will yield for other threads
-
-            searchThreads[i] = new Thread(() => searcher.StartSearch(callback, depth, id, threadBoard, time)); //TODO: Keep threads persistent?
+            if (id != 0) Thread.Sleep(10 * id); //TODOne: Check if id == 0 bc Sleep(0) will yield for other threads
 
             //if (i % 4 == 0) depth++;
 
-            searchThreads[i].Start();
+            searchThreads[i].Start(depth, time); //TODOne: Keep thread data persistent?
         }
-
-        searchTimer.Restart();
     }
+
+
 
     private bool jankBool = false;
 
@@ -99,12 +102,12 @@ public class Engine
 
         searchTimer.Stop();
         Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
-        //Console.WriteLine("info string Search Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
+        Console.WriteLine("info string Search Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
 
         //AdjustTT(board.colorToMove == Piece.White ? TimeManagement.whiteTime : TimeManagement.blackTime);
         //FIXME:
 
-        if (jankBool) return;
+        if (jankBool) return; //TODO: obv cant keep this bc if multiple threads it resets TT after first thread is done
 
         jankBool = true;
 
@@ -113,5 +116,30 @@ public class Engine
         Console.WriteLine("info string Table adjusted to " + TranspositionTable.SizeMB + "mb");
 
         Search.transpositionTable = new TranspositionTable();
+    }
+
+
+    public struct EngineThread
+    {
+        public int id;
+        public Thread thread;
+        public Search search;
+        public Board board;
+
+        public EngineThread(int _id, Action<Move, int> callback)
+        {
+            id = _id;
+            board = new Board();
+            search = new Search(board, callback, id);
+            thread = new Thread(search.StartSearch);
+        }
+
+        public void Start(int depth, int time)
+        {
+            search.searchDepth = depth;
+            search.searchTime = time;
+
+            thread.Start();
+        }
     }
 }
