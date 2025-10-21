@@ -122,16 +122,15 @@ public class Engine
     public struct EngineThread
     {
         public int id;
-        public Thread thread;
         public Search search;
         public Board board;
+        private Thread thread;
 
         public EngineThread(int _id, Action<Move, int> callback)
         {
             id = _id;
             board = new Board();
             search = new Search(board, callback, id);
-            thread = new Thread(search.StartSearch);
         }
 
         public void Start(int depth, int time)
@@ -139,6 +138,7 @@ public class Engine
             search.searchDepth = depth;
             search.searchTime = time;
 
+            thread = new Thread(search.StartSearch);
             thread.Start();
         }
     }
