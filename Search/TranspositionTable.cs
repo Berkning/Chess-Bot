@@ -155,7 +155,7 @@ public class TranspositionTable
         private const ulong nodeTypeMask = 0b1111111100000000000000000000000000000000000000000000000000000000;
 
         public int value { get { return (int)(data & valueMask); } } //Could maybe be reduced? TODO: doesn't need valuemask when casting anyway right?
-        public Move move { get { return new Move((ushort)((data & moveMask) >> 32)); } }
+        public Move move { get { return new Move((ushort)((data & moveMask) >> 32)); } } //TODO: Try without move entirely - not necessary unless at root
         public ulong depth { get { return (data & depthMask) >> 48; } } //Could be reduced?
         public ulong nodeType { get { return (data & nodeTypeMask) >> 56; } } //Could also be significantly reduced
 

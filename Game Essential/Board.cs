@@ -17,7 +17,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     public Stack<uint> gameStateHistory;
     public uint currentGameState = 0;//0b1111000000000; //Castles allowed by default 
 
-    public uint capturedPieceMask = 0b11111;
+    public const uint capturedPieceMask = 0b11111;
     public const uint epFileMask = 0b111100000;
     public const uint castleRightsMask = 0b1111000000000;
     public const uint fiftyMoveCounterMask = 0b1111110000000000000;

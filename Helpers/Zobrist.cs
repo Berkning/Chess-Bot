@@ -7,7 +7,7 @@ public static class Zobrist
     public static readonly ulong[] epArray = new ulong[8];
     public static readonly ulong sideToMove;
 
-    private static ulong[] PolyglotRandoms = new ulong[781]{
+    private static readonly ulong[] PolyglotRandoms = new ulong[781]{
    0x9D39247E33776D41, 0x2AF7398005AAA5C7, 0x44DB015024623547, 0x9C15F73E62A76AE2,
    0x75834465489C0C89, 0x3290AC3A203001BF, 0x0FBBAD1F61042279, 0xE83A908FF2FB60CA,
    0x0D7E765D58755C10, 0x1A083822CEAFE02D, 0x9605D5F0E25EC3B0, 0xD021FF5CD13A2ED5,

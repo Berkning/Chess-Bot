@@ -157,7 +157,7 @@ public class Search
 
     public static class AspirationWindow //TODO: Try making non-static
     {
-        private static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
+        private readonly static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
         private const int InstabilityMargin = 25;
 
         public static int Search(uint depth, int prevResult, Search searcher)
