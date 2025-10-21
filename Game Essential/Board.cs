@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public class Board
+public class Board //TODOnt prob: Try maybe changing to struct?
 {
     public int[] Squares { get; private set; }
 

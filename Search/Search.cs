@@ -26,7 +26,8 @@ public class Search
     private MoveGenerator moveGenerator;
     private MoveOrdering moveOrdering;
     private Evaluation evaluator;
-    private int threadShuffle;
+    //private int threadShuffle;
+    private int threadID;
 
 
 
@@ -43,7 +44,8 @@ public class Search
         moveGenerator = new MoveGenerator(board);
         moveOrdering = new MoveOrdering(board, moveGenerator, threadID);
         evaluator = new Evaluation();
-        threadShuffle = threadID * 917853;
+        //threadShuffle = threadID * 917853;
+        this.threadID = threadID;
 
         //Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} board ref: {RuntimeHelpers.GetHashCode(board)}");
 
@@ -235,7 +237,7 @@ public class Search
         moveOrdering.OrderMoves(ref moves, moveCount, bestMove, plyFromRoot);
 
         //TODO: Could prob optimize to avoid this if statement
-        //if (plyFromRoot == 0) moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
+        //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
 
         //TODO: move this above move ordering bc obv no reason to do move ordering if there aren't any moves
         if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move

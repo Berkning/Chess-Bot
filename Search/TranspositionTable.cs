@@ -26,6 +26,7 @@ public class TranspositionTable
     private ulong entryCount;
     //private ulong writeCount = 0;
 
+    //TODO: https://www.chessprogramming.org/Transposition_Table try power of two table - ask chat - can use mask instead of modulo for index
     public TranspositionTable()
     {
         entryCount = (ulong)(SizeMB * 1000 * 1000 / Transposition.GetSize());
@@ -65,6 +66,7 @@ public class TranspositionTable
     public Move GetStoredMove(ulong zobrist)
     {
         //TODO: Should prob store whole data ulong we get from lookupevaluation in search to avoid having to do a secondary lookup for just to get the move data - could also have been changed/(corrupted? but 16 bits?)
+        //Prob not bc getstoredmove is almost never called
         return table[Index(zobrist)].move; //TODOnt anymore: Could just return whole entry to avoid having to lock twice waiting for both eval and move if eval is good
     }
 
@@ -107,7 +109,6 @@ public class TranspositionTable
 
     public void StoreEvaluation(ulong zobrist, uint depth, int numPlySearched, int eval, ulong evalType, Move move)
     {
-        //writeCount++;
         Transposition transposition = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move); //TODO: try changing casts/removing?
 
         table[Index(zobrist)] = transposition;

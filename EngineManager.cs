@@ -73,7 +73,8 @@ public class Engine
             Board threadBoard = threadBoards[i];
             int id = i; //Extremely weird issue where i gets incremented before being passed along to thread if not done like this
 
-            Thread.Sleep(10*id);
+            //if (id != 0) Thread.Sleep(100);
+            if (id != 0) Thread.Sleep(10*id); //TODO: Check if id == 0 bc Sleep(0) will yield for other threads
 
             searchThreads[i] = new Thread(() => searcher.StartSearch(callback, depth, id, threadBoard, time)); //TODO: Keep threads persistent?
 
@@ -85,19 +86,32 @@ public class Engine
         searchTimer.Restart();
     }
 
+    private bool jankBool = false;
+
     private void OnSearchCompleted(Move move, int id)
     {
-        Console.WriteLine("Thread " + id + " Finished");
+        //Console.WriteLine("Thread " + id + " Finished");
 
-        if (!searchTimer.IsRunning)
-        {
-            return;
-        }
+        //if (!searchTimer.IsRunning)
+        //{
+        //    return;
+        //}
 
         searchTimer.Stop();
         Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
-        Console.WriteLine("info string Search Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
+        //Console.WriteLine("info string Search Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
 
         //AdjustTT(board.colorToMove == Piece.White ? TimeManagement.whiteTime : TimeManagement.blackTime);
+        //FIXME:
+
+        if (jankBool) return;
+
+        jankBool = true;
+
+        TranspositionTable.SizeMB = 8;
+
+        Console.WriteLine("info string Table adjusted to " + TranspositionTable.SizeMB + "mb");
+
+        Search.transpositionTable = new TranspositionTable();
     }
 }
