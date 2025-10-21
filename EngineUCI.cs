@@ -124,6 +124,7 @@ public class EngineUCI
 
                     Console.WriteLine("Unchecked: " + unchecked((ulong)v));
                     Console.WriteLine("Checked: " + (ulong)v);
+                    Console.WriteLine("Uint: " + (uint)v);
 
                     Console.WriteLine("Bits in signed: " + Convert.ToString((int)result, 2));
                     //Console.WriteLine("Bits in unsigned: " + )

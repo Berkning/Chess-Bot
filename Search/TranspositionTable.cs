@@ -148,29 +148,22 @@ public class TranspositionTable
         //8 bits depth
         //8 bits nodetype
         public readonly ulong data;
-        //public readonly int value;
-        //public readonly Move move;
-        //public readonly byte depth;
-        //public readonly byte nodeType;
 
-        private const ulong valueMask = 0b11111111111111111111111111111111;
-        private const ulong moveMask = 0b111111111111111100000000000000000000000000000000;
-        private const ulong depthMask = 0b11111111000000000000000000000000000000000000000000000000;
+        private const ulong valueMask =    0b0000000000000000000000000000000011111111111111111111111111111111;
+        private const ulong moveMask =     0b0000000000000000111111111111111100000000000000000000000000000000;
+        private const ulong depthMask =    0b0000000011111111000000000000000000000000000000000000000000000000;
         private const ulong nodeTypeMask = 0b1111111100000000000000000000000000000000000000000000000000000000;
 
-        public int value { get { return (int)(data & valueMask); } } //Could maybe be reduced?
+        public int value { get { return (int)(data & valueMask); } } //Could maybe be reduced? TODO: doesn't need valuemask when casting anyway right?
         public Move move { get { return new Move((ushort)((data & moveMask) >> 32)); } }
-        public ulong depth { get { return (data & depthMask) >> 48; } } //Could be significantly reduced
+        public ulong depth { get { return (data & depthMask) >> 48; } } //Could be reduced?
         public ulong nodeType { get { return (data & nodeTypeMask) >> 56; } } //Could also be significantly reduced
 
         public Transposition(ulong zobrist, int value, byte depth, byte nodeType, Move move) //TODO: make all ulong here in params?
         {
-            data = (ulong)value | (((ulong)move.data) << 32) | (((ulong)depth) << 48) | (((ulong)nodeType) << 56);
+            data = (uint)value | (((ulong)move.data) << 32) | (((ulong)depth) << 48) | (((ulong)nodeType) << 56);
+
             key = zobrist ^ data;
-            //this.value = value;
-            //this.depth = depth; // depth is how many ply were searched ahead from this position
-            //this.nodeType = nodeType;
-            //this.move = move;
         }
 
         public static int GetSize()

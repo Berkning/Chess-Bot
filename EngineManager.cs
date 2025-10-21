@@ -28,7 +28,7 @@ public class Engine
     {
         searchThreads = new EngineThread[count];
 
-        Action<Move, int> callback = (result, id) => OnSearchCompleted(result, id);
+        Action<Move, int> callback = OnSearchCompleted;
 
         string fen = FenUtility.GetCurrentFen(mainBoard);
 
