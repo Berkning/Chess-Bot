@@ -5,28 +5,30 @@ using System.Diagnostics;
 public class Engine
 {
     public static Board mainBoard = new Board();
+    private EngineUCI uci;
 
 
     public int threadCount => searchThreads.Length;
 
-    //private Thread[] searchThreads = new Thread[1];
-    //private Board[] threadBoards = new Board[1];
     private EngineThread[] searchThreads = new EngineThread[1];
-
+    private int availableThreads = 1;
 
 
 
     Stopwatch searchTimer = new Stopwatch();
 
-    public Engine()
+    public Engine(EngineUCI _uci)
     {
+        uci = _uci;
         SetThreadCount(1);
     }
+
 
 
     public void SetThreadCount(int count) //TODO: Could technically be optimized by keeping the threadBoards with the already correct state, and only loading the newly created ones
     {
         searchThreads = new EngineThread[count];
+        availableThreads = count;
 
         Action<Move, int> callback = OnSearchCompleted;
 
@@ -74,7 +76,7 @@ public class Engine
 
         for (int i = 0; i < searchThreads.Length; i++)
         {
-            Console.WriteLine("Thread " + i + " Searching...");
+            Console.WriteLine("info string Thread " + i + " Searching...");
 
             int id = i; //Extremely weird issue where i gets incremented before being passed along to thread if not done like this - found out why. everything is passed as a reference to threads apparently
 
@@ -83,39 +85,29 @@ public class Engine
 
             //if (i % 4 == 0) depth++;
 
+            if (Search.cancelSearch) break; //If search has been cancelled while we are launching threads still
+
             searchThreads[i].Start(depth, time); //TODOne: Keep thread data persistent?
+            availableThreads--;
         }
     }
 
 
-
-    private bool jankBool = false;
-
     private void OnSearchCompleted(Move move, int id)
     {
-        //Console.WriteLine("Thread " + id + " Finished");
+        availableThreads++;
 
-        //if (!searchTimer.IsRunning)
-        //{
-        //    return;
-        //}
+        if (availableThreads == threadCount) Console.WriteLine("info string All Threads Done");
+
+        if (availableThreads > 1) return; //Another thread has already finished so no need to log stuff
 
         searchTimer.Stop();
+
         Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
-        Console.WriteLine("info string Search Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
+        Console.WriteLine("info string Thread " + id + " Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
 
-        //AdjustTT(board.colorToMove == Piece.White ? TimeManagement.whiteTime : TimeManagement.blackTime);
-        //FIXME:
-
-        if (jankBool) return; //TODO: obv cant keep this bc if multiple threads it resets TT after first thread is done
-
-        jankBool = true;
-
-        TranspositionTable.SizeMB = 8;
-
-        Console.WriteLine("info string Table adjusted to " + TranspositionTable.SizeMB + "mb");
-
-        Search.transpositionTable = new TranspositionTable();
+        Search.cancelSearch = true;
+        uci.AdjustTT();
     }
 
 

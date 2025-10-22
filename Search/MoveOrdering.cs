@@ -117,7 +117,7 @@ public class MoveOrdering
         //SortMoves(ref moves, moveCount);
     }
 
-    private void SwapSortMove(ref Span<Move> moves, int i, int score)
+    private void SwapSortMove(ref Span<Move> moves, int i, int score) //TODO: Try better sorting algo
     {
         if (i == 0) return;
 

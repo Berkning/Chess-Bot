@@ -52,7 +52,6 @@ public class Search
 
     public void StartSearch()
     {
-
         bestMove = Move.nullMove;
         bestEval = NegativeInfinity;
         repetitionTable.Copy(board.repetitionTable);

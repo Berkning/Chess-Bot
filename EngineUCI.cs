@@ -6,7 +6,13 @@ using System.Threading.Tasks;
 
 public class EngineUCI
 {
-    private Engine engine = new Engine();
+    private Engine engine;
+
+    public EngineUCI()
+    {
+        engine = new Engine(this);
+    }
+
 
     public void RecieveCommand(string command)
     {
@@ -20,7 +26,8 @@ public class EngineUCI
                 Console.WriteLine("uciok");
                 break;
             case "isready":
-                Console.WriteLine("readyok"); //TODO: Try adjusting TT here
+                //AdjustTT();
+                Console.WriteLine("readyok"); //TODOcant: Try adjusting TT here
                 break;
             case "ucinewgame":
                 isNewGame = true;
@@ -160,7 +167,7 @@ public class EngineUCI
     private bool hasAdjustedThisGame = false;
     private bool shouldAdjust = false; //Whether the table need to be adjusted on the next go
 
-    private void AdjustTT(int maxTime) //TODO: Should prob check if TT is already optimal size to avoid wasting first results if unnecessary
+    public void AdjustTT() //TODO: Should prob check if TT is already optimal size to avoid wasting first results if unnecessary - TODO: When implementing opening book we can just adjust it there and then not waste any of the TT results from first move
     {
         if (autoAdjustTT && shouldAdjust && !hasAdjustedThisGame)
         {
@@ -169,20 +176,26 @@ public class EngineUCI
             shouldAdjust = false;
             hasAdjustedThisGame = true;
 
+            int maxTime = Engine.mainBoard.colorToMove == Piece.White ? TimeManagement.whiteTime : TimeManagement.blackTime; //Does mean we are white because the move we picked hasn't happened on our board yet - TODO: delete comment if not how adjusting works anymore
+
+            float threadMultiplier = 1f + (engine.threadCount-1) * 0.5f; //T : M ||| 1 : 1 ||| 2 : 1.5 ||| 3 : 2 ||| 4 : 2.5 ||| 5 : 3 ||| 6 : 3.5 ||| ... ||| 22 : 11.5 ||| 23 : 12 ||| 24 : 12.5
+
+            //TODO: Prob make continous instead of incremental like this - would also mean float, better mult with threadmult
             if (maxTime <= 10000)//if less than 10s   //Sizes just picked arbitrarily or very vaguely based on testing
             {
                 TranspositionTable.SizeMB = 8;
             }
             else if (maxTime <= 30000) TranspositionTable.SizeMB = 16; //If less than 30s
-            else if (maxTime <= 60000) TranspositionTable.SizeMB = 64; //If less than 60s
+            else if (maxTime <= 60000) TranspositionTable.SizeMB = 64; //If less than 60s //TODO: Try halving this and everything after it
             else if (maxTime <= 120000) TranspositionTable.SizeMB = 128; //If less than 2m
             else if (maxTime <= 240000) TranspositionTable.SizeMB = 256; //If less than 4m
             else if (maxTime <= 480000) TranspositionTable.SizeMB = 512; //If less than 8m
             else if (maxTime <= 900000) TranspositionTable.SizeMB = 1024; //If less than 15m
             else if (maxTime <= 1800000) TranspositionTable.SizeMB = 2048; //If less than 30m
             else TranspositionTable.SizeMB = 4096; //If anywhere above 30m
+            //TODO: longer games should cap at sys ram
 
-            Console.WriteLine("info string Table adjusted to " + TranspositionTable.SizeMB + "mb");
+            Console.WriteLine("info string Table adjusted to " + TranspositionTable.SizeMB + "mb"); //TODO: cap based on available system ram
 
             Search.transpositionTable = new TranspositionTable(); //Adjusting after first move does clear the table but hopefully isn't that bad - could fix but idk if worth it
         }
