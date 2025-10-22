@@ -87,8 +87,8 @@ public class Engine
 
             if (Search.cancelSearch) break; //If search has been cancelled while we are launching threads still
 
-            searchThreads[i].Start(depth, time); //TODOne: Keep thread data persistent?
             availableThreads--;
+            searchThreads[i].Start(depth, time); //TODOne: Keep thread data persistent?
         }
     }
 
@@ -103,8 +103,8 @@ public class Engine
 
         searchTimer.Stop();
 
-        Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
         Console.WriteLine("info string Thread " + id + " Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
+        Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
 
         Search.cancelSearch = true;
         uci.AdjustTT();
