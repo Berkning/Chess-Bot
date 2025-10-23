@@ -1,5 +1,6 @@
 
 using System;
+using System.Numerics;
 
 public class TranspositionTable
 {
@@ -25,11 +26,16 @@ public class TranspositionTable
     private Transposition[] table;
     private ulong entryCount;
     //private ulong writeCount = 0;
+    private readonly ulong indexMask;
 
     //TODO: https://www.chessprogramming.org/Transposition_Table try power of two table - ask chat - can use mask instead of modulo for index
     public TranspositionTable()
     {
-        entryCount = (ulong)(SizeMB * 1000 * 1000 / Transposition.GetSize());
+        entryCount = (ulong)(SizeMB * 1024 * 1024 / Transposition.GetSize());
+
+        if (!BitOperations.IsPow2(entryCount)) throw new NotSupportedException("Table size is not power of two");
+
+        indexMask = entryCount - 1;
 
         table = new Transposition[entryCount];
     }
@@ -48,9 +54,10 @@ public class TranspositionTable
 
     //public float GetTest() { return (float)writeCount / entryCount * 100f; }
 
+    //TODO: Aggressive inlining
     private ulong Index(ulong zobrist)
     {
-        return zobrist % entryCount;
+        return zobrist & indexMask;
     }
 
 

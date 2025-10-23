@@ -2,7 +2,7 @@ using System;
 
 public class MoveOrdering
 {
-    private int[] moveScores = new int[218];
+    private int[] moveScores = new int[218]; //TODOcant: Change to span? Should be way faster in sort especially i think
 
     const int prevBestBias = 2000000;
     const int killerBias = 500000;
@@ -117,7 +117,8 @@ public class MoveOrdering
         //SortMoves(ref moves, moveCount);
     }
 
-    private void SwapSortMove(ref Span<Move> moves, int i, int score) //TODO: Try better sorting algo
+    //TODO: Agressive inlining
+    private void SwapSortMove(ref Span<Move> moves, int i, int score) //TODO: Try other sorting algo
     {
         if (i == 0) return;
 

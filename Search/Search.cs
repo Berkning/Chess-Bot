@@ -453,7 +453,7 @@ public class Search
     {
         string pv = logFullPV ? GetPVFromTranspositionTable() : GetBasicPVString();
 
-        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv" + pv + " nodes " + nodeCount + (isPartial ? " string partial" : "") + " id " + id);
+        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv" + pv + " nodes " + nodeCount + " nps " + (nodeCount*1000/1000) + (isPartial ? " string partial" : "") + " id " + id);
     }
 
     private string GetBasicPVString()

@@ -131,7 +131,7 @@ public class Engine
             search.searchTime = time;
 
             thread = new Thread(search.StartSearch);
-            thread.Start();
+            thread.Start(); //TODO: Try unsafestart
         }
     }
 }

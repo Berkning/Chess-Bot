@@ -23,7 +23,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     public const uint fiftyMoveCounterMask = 0b1111110000000000000;
 
     //Piece lists
-    public PieceList[] pawnList;
+    public PieceList[] pawnList; //TODO: Try not using piecelist for pawns bc can always assume theres max 8 per side
     public PieceList[] knightList;
     public PieceList[] bishopList;
     public PieceList[] rookList;
