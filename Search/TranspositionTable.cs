@@ -57,6 +57,10 @@ public class TranspositionTable
     //TODO: Aggressive inlining
     private ulong Index(ulong zobrist)
     {
+        zobrist ^= zobrist >> 32; //Mix lower bits with upper for more randomness
+
+        zobrist *= 0xBF58476D1CE4E5B9UL;
+
         return zobrist & indexMask;
     }
 

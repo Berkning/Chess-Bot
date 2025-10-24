@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en-us/dotnet/api/system.gc.trystartnogcregion?view=net-9.0
+public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en-us/dotnet/api/system.gc.trystartnogcregion?view=net-9.0 TODO: Adjust GCsettings and stuff on the fly based on the time we have left (time to search) and force collect when its our opponents turn
 {
     private Engine engine;
 
