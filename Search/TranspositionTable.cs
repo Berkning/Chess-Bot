@@ -22,7 +22,7 @@ public class TranspositionTable
     public const ulong UpperBound = 2;
 
 
-
+    //TODO: Try with Memory<T> - makes resizing easier? Don't really see how it would be faster tbh
     private Transposition[] table;
     private ulong entryCount;
     //private ulong writeCount = 0;
@@ -49,7 +49,7 @@ public class TranspositionTable
             if (table[i].key != 0) entries++;
         }
 
-        return (float)entries/entryCount * 100f;
+        return (float)entries / entryCount * 100f;
     }
 
     //public float GetTest() { return (float)writeCount / entryCount * 100f; }
@@ -57,9 +57,9 @@ public class TranspositionTable
     //TODO: Aggressive inlining
     private ulong Index(ulong zobrist)
     {
-        zobrist ^= zobrist >> 32; //Mix lower bits with upper for more randomness
+        //zobrist ^= zobrist >> 32; //Mix lower bits with upper for more randomness
 
-        zobrist *= 0xBF58476D1CE4E5B9UL;
+        //zobrist *= 0xBF58476D1CE4E5B9UL;
 
         return zobrist & indexMask;
     }
@@ -120,8 +120,22 @@ public class TranspositionTable
 
     public void StoreEvaluation(ulong zobrist, uint depth, int numPlySearched, int eval, ulong evalType, Move move)
     {
-        Transposition transposition = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move); //TODO: try changing casts/removing?
+        //ulong index = Index(zobrist);
 
+        //Transposition currentEntry = table[index];
+
+        //TODO: Try with >= bc ig would just save having to write to the table unnecessarily
+        //TODO: Test swapping the two cases --- currentEntry.depth > depth && (currentEntry.key ^ currentEntry.data) == zobrist --- bc maybe first one is more likely
+
+        //Actually seems this is entirely wasted work bc were guarantueed to only get to store eval if there already wasnt an entry at deeper depth. We should also account for nodetypes bc cutoff nodes should also be overriden?
+        //if ((currentEntry.key ^ currentEntry.data) == zobrist && currentEntry.depth > depth) return; //If the entry we are trying to override contains info about the same position at a deeper depth, we don't want to override it
+
+        //TODO: Test perf difference with reassigning fields individually and just using new
+        //currentEntry = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move); //TODO: try changing casts/removing?
+
+        //table[index] = currentEntry;
+
+        Transposition transposition = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move); //TODO: try changing casts/removing?
         table[Index(zobrist)] = transposition;
     }
 
@@ -154,15 +168,16 @@ public class TranspositionTable
     {
         public readonly ulong key; //TODO: try atomic writes - move everything except key into a ulong - if were overwriting an entry the key might be the same? dont know how to solve - try just removing key and key check
 
-        //32 bits eval (value)
-        //16 bits move
-        //8 bits depth
-        //8 bits nodetype
+        //TODO: Some version of this - currently 24 bits
+        //15 bits eval (value)
+        //REMOVED: 16 bits move
+        //7 bits depth //TODO: Should maybe consider cases of depth limit being higher than 128
+        //2 bits nodetype
         public readonly ulong data;
 
-        private const ulong valueMask =    0b0000000000000000000000000000000011111111111111111111111111111111;
-        private const ulong moveMask =     0b0000000000000000111111111111111100000000000000000000000000000000;
-        private const ulong depthMask =    0b0000000011111111000000000000000000000000000000000000000000000000;
+        private const ulong valueMask = 0b0000000000000000000000000000000011111111111111111111111111111111;
+        private const ulong moveMask = 0b0000000000000000111111111111111100000000000000000000000000000000;
+        private const ulong depthMask = 0b0000000011111111000000000000000000000000000000000000000000000000;
         private const ulong nodeTypeMask = 0b1111111100000000000000000000000000000000000000000000000000000000;
 
         public int value { get { return (int)(data & valueMask); } } //Could maybe be reduced? TODO: doesn't need valuemask when casting anyway right?

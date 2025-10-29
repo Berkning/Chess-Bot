@@ -5,7 +5,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <BaseOutputPath>F:\Unity Projects\ChessBot\bin</BaseOutputPath>
+    <BaseOutputPath>/home/berkning/Documents/GitHub/Chess-Bot/bin</BaseOutputPath>
   </PropertyGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime;
 
 public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en-us/dotnet/api/system.gc.trystartnogcregion?view=net-9.0 TODO: Adjust GCsettings and stuff on the fly based on the time we have left (time to search) and force collect when its our opponents turn
 {
@@ -136,6 +137,31 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                     Console.WriteLine(TranspositionTable.Transposition.GetSize());
                 }
                 break;
+            case "gc":
+                if (args.Length == 1) Console.WriteLine(Enum.GetName(typeof(GCLatencyMode), GCSettings.LatencyMode));
+                else
+                {
+                    switch (args[1])
+                    {
+                        case "Toggle":
+                            if (GCSettings.LatencyMode != GCLatencyMode.NoGCRegion) GC.TryStartNoGCRegion(256 * 1000 * 1000);
+                            else GC.EndNoGCRegion();
+                                break;
+                        case "Batch":
+                            GCSettings.LatencyMode = GCLatencyMode.Batch;
+                            break;
+                        case "Interactive":
+                            GCSettings.LatencyMode = GCLatencyMode.Interactive;
+                            break;
+                        case "LowLatency":
+                            GCSettings.LatencyMode = GCLatencyMode.LowLatency;
+                            break;
+                        case "SustainedLowLatency":
+                            GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
+                            break;
+                    }
+                }
+                    break;
 
 
 
