@@ -146,7 +146,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                         case "Toggle":
                             if (GCSettings.LatencyMode != GCLatencyMode.NoGCRegion) GC.TryStartNoGCRegion(256 * 1000 * 1000);
                             else GC.EndNoGCRegion();
-                                break;
+                            break;
                         case "Batch":
                             GCSettings.LatencyMode = GCLatencyMode.Batch;
                             break;
@@ -161,7 +161,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                             break;
                     }
                 }
-                    break;
+                break;
 
 
 
@@ -200,7 +200,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
 
             int maxTime = Engine.mainBoard.colorToMove == Piece.White ? TimeManagement.whiteTime : TimeManagement.blackTime; //Does mean we are white because the move we picked hasn't happened on our board yet - TODO: delete comment if not how adjusting works anymore
 
-            float threadMultiplier = 1f + (engine.threadCount-1) * 0.5f; //T : M ||| 1 : 1 ||| 2 : 1.5 ||| 3 : 2 ||| 4 : 2.5 ||| 5 : 3 ||| 6 : 3.5 ||| ... ||| 22 : 11.5 ||| 23 : 12 ||| 24 : 12.5
+            float threadMultiplier = 1f + (engine.threadCount - 1) * 0.5f; //T : M ||| 1 : 1 ||| 2 : 1.5 ||| 3 : 2 ||| 4 : 2.5 ||| 5 : 3 ||| 6 : 3.5 ||| ... ||| 22 : 11.5 ||| 23 : 12 ||| 24 : 12.5
 
             //TODO: Prob make continous instead of incremental like this - would also mean float, better mult with threadmult
             if (maxTime <= 10000)//if less than 10s   //Sizes just picked arbitrarily or very vaguely based on testing
@@ -267,6 +267,9 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 }
 
                 Perft.RunDetailed(int.Parse(args[2]), Engine.mainBoard);
+                return;
+            case "mate":
+                engine.RunMateSearch();
                 return;
             case "bench":
                 //Benchmark.Run();

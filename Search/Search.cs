@@ -281,7 +281,7 @@ public class Search
         int moveCount = moveGenerator.GenerateMoves(ref moves);
 
         /*if (test)*/
-        moveOrdering.OrderMoves(ref moves, moveCount, bestMove, plyFromRoot);
+        moveOrdering.OrderMoves(ref moves, moveCount, bestMove, plyFromRoot); //TODO: Try this after the mate check
 
         //TODO: Could prob optimize to avoid this if statement
         //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
@@ -453,7 +453,7 @@ public class Search
     {
         string pv = logFullPV ? GetPVFromTranspositionTable() : GetBasicPVString();
 
-        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv" + pv + " nodes " + nodeCount + " nps " + (nodeCount*1000/1000) + (isPartial ? " string partial" : "") + " id " + id);
+        Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv" + pv + " nodes " + nodeCount + " nps " + (nodeCount * 1000 / 1000) + (isPartial ? " string partial" : "") + " id " + id);
     }
 
     private string GetBasicPVString()

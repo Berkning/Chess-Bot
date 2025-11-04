@@ -66,6 +66,23 @@ public class Engine
 
 
 
+    //TODO: Remove janky shit
+    public void RunMateSearch()
+    {
+        Search.cancelSearch = false;
+
+        Action<Move, int> callback = (result, id) => OnSearchCompleted(result, id);
+
+        searchTimer.Restart();
+
+        //                                     Janky
+        MateSearch mateSearch = new MateSearch(searchThreads[0].board, callback, 0);
+
+        availableThreads--;
+
+        mateSearch.StartSearch();
+    }
+
     public void InitializeSearch(int depth, int time)
     {
         Search.cancelSearch = false;
