@@ -1,0 +1,180 @@
+
+using System;
+
+public class Evaluation
+{
+    public const int PawnValue = 100;
+    public const int KnightValue = 310;
+    public const int BishopValue = 330;
+    public const int RookValue = 500;
+    public const int QueenValue = 900;
+
+    //private const int DoubledPawnValue = -20; //The value difference comparing a normal pawn to a doubled one
+
+    //TODO: Increase as it moves up board
+    //private const int PassedPawnValue = 20; //Increase in endgame - maybe wont make a difference since passed pawns are unlikely to arise in early game anyway
+    //private const int PassedPawnConnectionValue = 15; //Value increase of passed pawn for every supporting pawn it has beside/behind (but not directly behind) it
+    //private const int IsolatedPawnValue = -50;
+
+    private int totalMaterialWithoutPawns;
+    private int whiteMaterialValue;
+    private int blackMaterialValue;
+
+    public float gameStage;
+    public float endgameMultiplier;
+    //public static float earlygameMultiplier;
+
+    //public static ulong darkPawnBoard;
+    //public static ulong lightPawnBoard;
+
+    //private static int darkPawnCount;
+    //private static int lightPawnCount;
+    //public static int pawnColorCountDifference; //Darkcount - lightCount
+
+    private Positioning positioning;
+
+    public Evaluation()
+    {
+        positioning = new Positioning(this);
+    }
+
+
+    public int Evaluate(Board board) //TODO: https://www.chessprogramming.org/Tempo - tempo bonus to avoid score oscillation - except in endgame
+    {
+        EvaluateMaterial(board);
+        gameStage = CalculateGameStage();
+        endgameMultiplier = Math.Max(gameStage - 1f, 0f);
+        //earlygameMultiplier = Math.Max(1f - gameStage, 0f);
+
+        //ulong darkPawnBoard = (Board.pawnList[0].bitboard | Board.pawnList[1].bitboard) & PrecomputedData.DarkSquareMask;
+        //ulong lightPawnBoard = (Board.pawnList[0].bitboard | Board.pawnList[1].bitboard) & PrecomputedData.LightSquareMask;
+
+        //int darkPawnCount = BitBoardHelper.BitCount(darkPawnBoard);
+        //int lightPawnCount = BitBoardHelper.BitCount(lightPawnBoard);
+
+        //pawnColorCountDifference = darkPawnCount - lightPawnCount;
+
+
+        int whiteEval = whiteMaterialValue + positioning.GetPositioningScore(0, 1, board);// + EvaluatePawnStructure(0, 1);
+        int blackEval = blackMaterialValue + positioning.GetPositioningScore(1, 0, board);// + EvaluatePawnStructure(1, 0);
+
+        int evaluation = whiteEval - blackEval;
+
+        int perspective = board.colorToMove == Piece.White ? 1 : -1;
+
+        return evaluation * perspective;
+    }
+
+    private int EvaluatePawnStructure(int colorBit, int enemyColorBit, Board board) //TODO: try giving high score in early to midgame when king can see pawns above him
+    {
+        int score = 0;
+
+        PieceList friendlyPawns = board.pawnList[colorBit];
+        ulong friendlyPawnBoard = friendlyPawns.bitboard;
+        ulong enemyPawnBoard = board.pawnList[enemyColorBit].bitboard;
+
+        //Doubled Pawns
+        // for (int file = 0; file < 8; file++)
+        // {
+        //     ulong fileMask = PrecomputedData.fileMasks[file];
+        //     int pawnsOnFile = BitBoardHelper.BitCount(friendlyPawnBoard & fileMask);
+
+        //     if (pawnsOnFile > 1) score += DoubledPawnValue * (pawnsOnFile - 1);
+        // }
+
+        //Connected Pawns
+
+        // for (int i = 0; i < friendlyPawns.Count; i++)
+        // {
+        //     int pawnSquare = friendlyPawns[i];
+        //     ulong attackBoard = PrecomputedData.pawnAttackBitboards[pawnSquare];
+
+        //     ulong connectedPawnBoard = friendlyPawnBoard & attackBoard;
+        //     score += BitBoardHelper.BitCount(connectedPawnBoard) * PawnConnectionValue;
+        // }
+
+        //Passed pawns
+        // for (int i = 0; i < friendlyPawns.Count; i++)
+        // {
+        //     int square = friendlyPawns[i];
+        //     ulong opposingPawnBoard = PrecomputedData.passedPawnMasks[square + colorBit * 64] & enemyPawnBoard;
+
+        //     int opposingPawnCount = BitBoardHelper.BitCount(opposingPawnBoard);
+
+        //     if (opposingPawnCount == 0) score += PassedPawnValue;
+        // }
+
+        //Combined pawn eval
+        // for (int i = 0; i < friendlyPawns.Count; i++)
+        // {
+        //     int square = friendlyPawns[i];
+        //     int file = BoardHelper.IndexToFile(square);
+
+        //     ulong opposingPawnBoard = PrecomputedData.passedPawnMasks[square + colorBit * 64] & enemyPawnBoard;
+        //     int opposers = BitBoardHelper.BitCount(opposingPawnBoard); //If this is zero this is a passed pawn
+
+
+        //     //TODO: do doubled pawn eval in own loop above bc more efficient - tried to do it here but end up counting doubled pawns twice
+        //     //Actually can prob use the reversed passed pawn mask to also detect pawns only directly behind this one - no double counting and no additional loop needed
+
+        //     if (opposers == 0) //If this is a passed pawn
+        //     {
+        //         //TODO: prob also beneficial to give every type of pawn a better score when they have supporters - punish isolated pawns
+        //         ulong supportingPawnBoard = PrecomputedData.passedPawnMasks[square + enemyColorBit * 64] & (~PrecomputedData.fileMasks[file]) & friendlyPawnBoard; //Looks at pawns beside but not directly behind this one
+        //         int supporters = BitBoardHelper.BitCount(supportingPawnBoard);
+
+        //         score += (int)((PassedPawnValue + supporters * PassedPawnConnectionValue) * endgameMultiplier); //TODO: Think about maybe having an int version of endgamemultiplier bc were using it in a few spots and seems quite inefficient to keep casting/rounding - Compiler converts all the constants here to floats so the cast is really the only thing to impact performance (i imagine)
+        //     }
+        // }
+
+        return score;
+    }
+
+    private void EvaluateMaterial(Board board)
+    {
+        whiteMaterialValue = 0;
+        blackMaterialValue = 0;
+
+        int whiteNonPawn = 0;
+        whiteNonPawn += board.knightList[0].Count * KnightValue;
+        whiteNonPawn += board.bishopList[0].Count * BishopValue;
+        whiteNonPawn += board.rookList[0].Count * RookValue;
+        whiteNonPawn += board.queenList[0].Count * QueenValue;
+
+        whiteMaterialValue = whiteNonPawn + board.pawnList[0].Count * PawnValue;
+
+        int blackNonPawn = 0;
+        blackNonPawn += board.knightList[1].Count * KnightValue;
+        blackNonPawn += board.bishopList[1].Count * BishopValue;
+        blackNonPawn += board.rookList[1].Count * RookValue;
+        blackNonPawn += board.queenList[1].Count * QueenValue;
+        blackMaterialValue = blackNonPawn + board.pawnList[1].Count * PawnValue;
+
+        totalMaterialWithoutPawns = whiteNonPawn + blackNonPawn;
+    }
+
+    private float CalculateGameStage()
+    {
+        float material = totalMaterialWithoutPawns / 100f + 7.5f;
+        if (material < 13.3) return 2f;
+        //stage = -0.0006f * material * material + 0.0091f * material + 2;
+        //stage = -0.035f * material + 2.645f;
+        return Math.Max(-0.0008f * material * material + 0.0213f * material + 1.7824f, 0f);
+    }
+
+    public static int GetPieceTypeValue(int type)
+    {
+        switch (type) //TODO: Optimize
+        {
+            case Piece.King: return 0; //FIXME: No fucking idea why this keeps happening
+            case Piece.Pawn: return PawnValue;
+            case Piece.Knight: return KnightValue;
+            case Piece.Bishop: return BishopValue;
+            case Piece.Rook: return RookValue;
+            case Piece.Queen: return QueenValue;
+        }
+
+        Console.WriteLine("Invalid Piece Type: " + type);
+        return -1234567;
+    }
+}
