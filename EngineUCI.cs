@@ -24,6 +24,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 break;
             case "isready":
                 //AdjustTT();
+                OpeningBook.Initialize();
                 Console.WriteLine("readyok"); //TODOcant: Try adjusting TT here
                 break;
             case "ucinewgame":
@@ -114,6 +115,18 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
 
                     engine.SetThreadCount(count);
                     Console.WriteLine("info string Set numThreads to " + count);
+                }
+                break;
+            case "book":
+                if (args.Length == 1) Console.WriteLine(OpeningBook.bookPath);
+                else
+                {
+                    string path = args[1];
+                    OpeningBook.bookPath = path;
+
+                    OpeningBook.Initialize();
+
+                    Console.WriteLine("Set book path to " + OpeningBook.bookPath);
                 }
                 break;
             case "d":

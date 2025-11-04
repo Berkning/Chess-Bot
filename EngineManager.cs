@@ -14,6 +14,7 @@ public class Engine
     private int availableThreads = 1;
 
 
+    private bool outOfBook = false; //Whether we have run out of book moves and have to search on our own
 
     Stopwatch searchTimer = new Stopwatch();
 
@@ -21,6 +22,7 @@ public class Engine
     {
         uci = _uci;
         SetThreadCount(1);
+        outOfBook = false;
     }
 
 
@@ -44,6 +46,8 @@ public class Engine
 
     public void LoadFen(string fen)
     {
+        outOfBook = false;
+
         FenUtility.LoadPositionFromFen(mainBoard, fen);
 
         for (int i = 0; i < searchThreads.Length; i++)
@@ -85,6 +89,24 @@ public class Engine
 
     public void InitializeSearch(int depth, int time)
     {
+        if (!outOfBook) //If we aren't yet out of book, check if the position is present in our opening book. If not, mark us as out of book
+        {
+            Move bookMove = OpeningBook.GetMove(mainBoard.currentZobrist);
+
+            if (bookMove.data == 0)
+            {
+                Console.WriteLine("Book move was empty");
+                outOfBook = true;
+            }
+            else
+            {
+                Console.WriteLine("info string Found book move");
+                Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(bookMove));
+                return;
+            }
+        }
+
+
         Search.cancelSearch = false;
 
         Action<Move, int> callback = (result, id) => OnSearchCompleted(result, id);

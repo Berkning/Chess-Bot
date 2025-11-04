@@ -528,7 +528,7 @@ public class Piece
         return (piece & TypeMask) > 3;
     }
 
-    public static bool IsNone(int piece)
+    public static bool IsNone(int piece) //TODO: Try just comparing to zero - only meant to get rid of bugs anyway
     {
         return (piece & TypeMask) == None;
     }
