@@ -135,8 +135,7 @@ public class TranspositionTable
 
         //table[index] = currentEntry;
 
-        Transposition transposition = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move); //TODO: try changing casts/removing?
-        table[Index(zobrist)] = transposition;
+        table[Index(zobrist)] = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move);
     }
 
     int CorrectMateScoreForStorage(int score, int numPlySearched)
