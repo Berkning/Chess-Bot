@@ -66,13 +66,23 @@ public class MateSearch //TODO: Should def have some special move ordering like 
 
         if (depth == 0) return 0;
 
+        //if (plyFromRoot > 0)
+        //{
+        //    if (moveCount > 7) return 0; //We have a large enough available move count to assume we wont be mated
+        //}
+
+
+
         bool mateAvoidable = false;
+        Move bestMoveInPos = Move.nullMove;
 
         for (int i = 0; i < moveCount; i++)
         {
             board.MakeMove(moves[i], true);
             int mateEval = -FindMate(depth - 1, plyFromRoot + 1);
             board.UnMakeMove(moves[i], true);
+
+            //TODO: Check for search cancelled
 
             if (mateEval == 1) //If we can force a mate with the current move
             {
@@ -81,10 +91,22 @@ public class MateSearch //TODO: Should def have some special move ordering like 
                 return 1;
             }
 
-            if (mateEval == 0) mateAvoidable = true;
+            if (mateEval == 0)
+            {
+                mateAvoidable = true;
+                bestMoveInPos = moves[i];
+
+                if (plyFromRoot == 0) bestMove = bestMoveInPos;
+
+                //if (score == -1)
+            }
         }
 
-        if (!mateAvoidable) return -1;
+        if (!mateAvoidable)
+        {
+            if (plyFromRoot == 0) bestMove = moves[0];
+            return -1;
+        }
 
         return 0;
     }
