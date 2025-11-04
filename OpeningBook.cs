@@ -10,15 +10,17 @@ public static class OpeningBook
     private static bool isInitialized = false;
 
 
-    public static Move GetMove(ulong zobrist)
+    public static Move GetMove(ulong zobrist) //TODO: http://hgm.nubati.net/book_format.html  "The entries are ordered according to key. Lowest key first. " - Could speed up search an insane amount - doesn't seem to be the case with current book
     {
         int startIndex = random.Next() % bookEntries.Length; //Random starting index to search from
         int direction = random.Next() % 2 == 1 ? -1 : 1; //Randomly picks whether to search up or down from starting index, based on whether the random number turns out even or odd
 
         int checkedEntryCount = 0;
 
-        for (int i = startIndex; i > 0 && i < bookEntries.Length; i += direction)
+        for (int i = 0; i >= 0 && i < bookEntries.Length; i++)
         {
+            Console.WriteLine(bookEntries[i].key);
+
             if (bookEntries[i].key == zobrist)
             {
                 Console.WriteLine("info string Found book move after checking " + checkedEntryCount + " entries");
@@ -111,9 +113,9 @@ public static class OpeningBook
         {
             int entryIndex = i * 16;
 
-            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(book, entryIndex, 8);
+            //ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(book, entryIndex, 8);
 
-            ulong key = BitConverter.ToUInt64(span);
+            ulong key = ((ulong)book[entryIndex]) << 56 | ((ulong)book[entryIndex + 1]) << 48 | ((ulong)book[entryIndex + 2]) << 40 | ((ulong)book[entryIndex + 3]) << 32 | ((ulong)book[entryIndex + 4]) << 24 | ((ulong)book[entryIndex + 5]) << 16 | ((ulong)book[entryIndex + 6]) << 8 | ((ulong)book[entryIndex + 7]);//BitConverter.ToUInt64(span);
             ushort move = (ushort)((book[entryIndex + 8] << 8) | book[entryIndex + 9]);
 
             Entry entry = new Entry(key, move);
