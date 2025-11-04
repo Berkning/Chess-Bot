@@ -159,7 +159,7 @@ public class Search
         private readonly static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
         private const int InstabilityMargin = 25;
 
-        public static int Search(uint depth, int prevResult, Search searcher)
+        public static int Search(uint depth, int prevResult, Search searcher) //TODO: Think maybe the illegal moves and infinite evals come from not getting a proper width search before search is cancelled so we have to use the capped eval???
         {
             int incrementIndex = 0;
 

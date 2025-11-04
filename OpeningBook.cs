@@ -17,17 +17,30 @@ public static class OpeningBook
 
         int checkedEntryCount = 0;
 
-        for (int i = 0; i >= 0 && i < bookEntries.Length; i++)
-        {
-            Console.WriteLine(bookEntries[i].key);
+        int tries = 0;
 
-            if (bookEntries[i].key == zobrist)
+        while (tries < 2)
+        {
+            tries++;
+
+            for (int i = startIndex; i >= 0 && i < bookEntries.Length; i += direction)
             {
-                Console.WriteLine("info string Found book move after checking " + checkedEntryCount + " entries");
-                return TranslatePolyglotMove(bookEntries[i].move);
+                if (bookEntries[i].key == zobrist)
+                {
+                    if (bookEntries[i].move == 0)
+                    {
+                        Console.WriteLine("info string Invalid move in book");
+                        continue;
+                    }
+
+                    Console.WriteLine("info string Found book move after checking " + checkedEntryCount + " entries");
+                    return TranslatePolyglotMove(bookEntries[i].move);
+                }
+
+                checkedEntryCount++;
             }
 
-            checkedEntryCount++;
+            direction *= -1; //Flip direction
         }
 
         Console.WriteLine("info string Couldn't find book move after checking " + checkedEntryCount + " entries");
