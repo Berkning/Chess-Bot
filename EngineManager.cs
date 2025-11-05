@@ -101,7 +101,10 @@ public class Engine
             else
             {
                 Console.WriteLine("info string Found book move");
-                Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(bookMove));
+
+                string name = BoardHelper.GetMoveNameUCI(bookMove);
+                Console.WriteLine("info depth 0 score 0 pv " + name + " nodes 0"); //Can be removed - just to get fastchess to shut up about not having info strings
+                Console.WriteLine("bestmove " + name);
                 return;
             }
         }

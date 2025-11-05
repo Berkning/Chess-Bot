@@ -83,6 +83,13 @@ public class Search
 
             if (cancelSearch) //FIXMEnt?: Currently plays illegal and sometime null moves randomly in partial search
             {
+                //If we haven't found a move to play, and search is being cancelled, run an emergency full width search at a depth of 1
+                if (bestMove.data == 0)
+                {
+                    Console.WriteLine("info string Running emergency search");
+                    AlphaBeta(1, 0, NegativeInfinity, PositiveInfinity);
+                }
+
                 LogSearchInfo(depth, nodeCount, true, threadID);
                 break;
             }
@@ -91,67 +98,7 @@ public class Search
         callback.Invoke(bestMove, threadID);
     }
 
-    //TODO: prob just remove
-    public void StartSearch(int searchDepth, int searchTime = -1) //-1 = let search decide, -2 = go infinite TODO: Change to enum //TODOne: Killer moves
-    {
-        //Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} board ref: {RuntimeHelpers.GetHashCode(board)}");
 
-
-        //for (int i = 0; i < principledVariation.Length; i++) principledVariation[i] = Move.nullMove; //Clear PV
-
-        bestMove = Move.nullMove;
-        bestEval = NegativeInfinity;
-        repetitionTable.Copy(board.repetitionTable);
-
-        nodeCount = -1; //Dont want to include start node - bc stockfish doesn't
-        //quiescenseCount = 0;
-        //ttHits = 0;
-
-        if (searchTime == -1)
-        {
-            int maxSearchTime = TimeManagement.GetSearchTime(board.colorToMove);
-
-            TimeManagement.ScheduleSearchCancel(maxSearchTime); //TODO: Use stopwatch to manage own time in search
-        }
-        else if (searchTime > 0) TimeManagement.ScheduleSearchCancel(searchTime); //If less than -1, let it go till stop is recieved
-
-
-        int prevResult = NegativeInfinity;
-
-
-        int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
-
-        if (resultFromLastSearch != TranspositionTable.LookupFailed)
-        {
-            prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
-            //Console.WriteLine("Got TT Aspiration Hit");
-        }
-
-        for (uint depth = 1; depth <= searchDepth; depth++)
-        {
-            //AlphaBeta(depth, 0, negativeInfinity, positiveInfinity);
-            prevResult = AspirationWindow.Search(depth, prevResult, this);
-
-            //Debug.Log("Depth " + depth + " eval: " + result / 100f + " move: " + BoardHelper.NameMove(bestMove));
-
-            if (cancelSearch) //FIXMEnt?: Currently plays illegal and sometime null moves randomly in partial search
-            {
-                //Console.WriteLine("info depth " + depth + " score cp " + result + " string partial search");
-                //Console.WriteLine("info depth " + depth + " string partial");
-                LogSearchInfo(depth, nodeCount, true, threadID);
-                break;
-            }
-            else LogSearchInfo(depth, nodeCount, false, threadID); //TODO: check if matescore and then exit if were low on time
-        }
-
-        //if (!cancelSearch) TimeManagement.RevokeScheduledCancel();
-
-        //Console.WriteLine(positionCount + " positions");
-        //Console.WriteLine(quiescenseCount + " quiescenseCount");
-        //Console.WriteLine(ttHits + " ttHits");
-        //Debug.Log("Eval: " + result / 100f);
-        callback.Invoke(bestMove, threadID);
-    }
 
 
     public static class AspirationWindow //TODO: Try making non-static
@@ -451,6 +398,12 @@ public class Search
 
     private void LogSearchInfo(uint depth, int nodeCount, bool isPartial, int id)
     {
+        if (bestMove.data == 0)
+        {
+            Console.WriteLine("bestmove " + FenUtility.GetCurrentFen(board) + " GHU#EGWHOIBHVDUBWRUBGUJOBJCBJOBNOWJRNOJNJNCBJNWUIORNBJUHBNWONRFIOBNWROJBNOJCNSOJBNRJOWNORJNBJUONBJONWERJONB");
+            return;
+        }
+
         string pv = logFullPV ? GetPVFromTranspositionTable() : GetBasicPVString();
 
         Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv" + pv + " nodes " + nodeCount + " nps " + (nodeCount * 1000 / 1000) + (isPartial ? " string partial" : "") + " id " + id);

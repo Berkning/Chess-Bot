@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-public static class Perft 
+public static class Perft
 {
     private static long[] correctResults = { 1, 20, 400, 8902, 197281, 4865609, 119060324, 3195901860, 84998978956, 2439530234167 };
 
@@ -131,6 +131,7 @@ public static class Perft
         new SuiteComponent("3k4/3pp3/8/8/8/8/3PP3/3K4 w - - 0 1", 9, 121183847),
         new SuiteComponent("n1n5/1Pk5/8/8/8/8/5Kp1/5N1N w - - 0 1", 7, 690692460),
         new SuiteComponent("8/PPPk4/8/8/8/8/4Kppp/8 b - - 0 1", 7, 614154982),
+        new SuiteComponent("r5k1/1p3p2/p1qb1P2/2p2RP1/2P4p/P2QBp2/1P3Pr1/3R2K1 w - - 1 1", 6, 79809396),
     };
 
     public static void RunFullSuite() //Wont keep current board position
@@ -141,6 +142,7 @@ public static class Perft
         bool passedAll = true;
 
         Board board = new Board();
+        moveGenerator = new MoveGenerator(board);
 
         for (int i = 0; i < testSuite.Length; i++)
         {
