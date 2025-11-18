@@ -89,6 +89,7 @@ public class Engine
 
     public void InitializeSearch(int depth, int time)
     {
+        //TODOne: Adjust TT on first book move
         if (!outOfBook) //If we aren't yet out of book, check if the position is present in our opening book. If not, mark us as out of book
         {
             Move bookMove = OpeningBook.GetMove(mainBoard.currentZobrist);
@@ -97,6 +98,7 @@ public class Engine
             {
                 Console.WriteLine("Book move was empty");
                 outOfBook = true;
+                uci.AdjustTT();
             }
             else
             {
@@ -105,6 +107,8 @@ public class Engine
                 string name = BoardHelper.GetMoveNameUCI(bookMove);
                 Console.WriteLine("info depth 0 score 0 pv " + name + " nodes 0"); //Can be removed - just to get fastchess to shut up about not having info strings
                 Console.WriteLine("bestmove " + name);
+
+                uci.AdjustTT();
                 return;
             }
         }
@@ -149,7 +153,6 @@ public class Engine
         Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
 
         Search.cancelSearch = true;
-        uci.AdjustTT();
     }
 
 

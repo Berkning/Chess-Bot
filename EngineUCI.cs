@@ -199,16 +199,14 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
 
 
     private bool autoAdjustTT = true;
-    private bool hasAdjustedThisGame = false;
-    private bool shouldAdjust = false; //Whether the table need to be adjusted on the next go
+    private bool hasAdjustedThisGame = false; //TODO: Just use isnewgame
 
-    public void AdjustTT() //TODO: Should prob check if TT is already optimal size to avoid wasting first results if unnecessary - TODO: When implementing opening book we can just adjust it there and then not waste any of the TT results from first move
+    public void AdjustTT() //TODO: Should prob check if TT is already optimal size to avoid wasting first results if unnecessary - TODOne: When implementing opening book we can just adjust it there and then not waste any of the TT results from first move
     {
-        if (autoAdjustTT && shouldAdjust && !hasAdjustedThisGame)
+        if (autoAdjustTT && !hasAdjustedThisGame)
         {
             //Only here at first move of the game, so maxTime is the games base time - except if auto changed which shouldn't matter
 
-            shouldAdjust = false;
             hasAdjustedThisGame = true;
 
             int maxTime = Engine.mainBoard.colorToMove == Piece.White ? TimeManagement.whiteTime : TimeManagement.blackTime; //Does mean we are white because the move we picked hasn't happened on our board yet - TODO: delete comment if not how adjusting works anymore
@@ -261,7 +259,6 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 int white = int.Parse(args[2]);
                 int black = int.Parse(args[4]);
                 TimeManagement.UpdateTimes(white, black);
-                if (!hasAdjustedThisGame) shouldAdjust = true;
 
                 //TODO: Increments
                 engine.InitializeSearch(99, -1);
