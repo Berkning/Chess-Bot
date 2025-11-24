@@ -9,7 +9,7 @@ public class Evaluation
     public const int RookValue = 500;
     public const int QueenValue = 900;
 
-    //private const int DoubledPawnValue = -20; //The value difference comparing a normal pawn to a doubled one
+    private const int DoubledPawnValue = -20; //The value difference comparing a normal pawn to a doubled one
 
     //TODO: Increase as it moves up board
     //private const int PassedPawnValue = 20; //Increase in endgame - maybe wont make a difference since passed pawns are unlikely to arise in early game anyway
@@ -55,8 +55,8 @@ public class Evaluation
         //pawnColorCountDifference = darkPawnCount - lightPawnCount;
 
 
-        int whiteEval = whiteMaterialValue + positioning.GetPositioningScore(0, 1, board);// + EvaluatePawnStructure(0, 1);
-        int blackEval = blackMaterialValue + positioning.GetPositioningScore(1, 0, board);// + EvaluatePawnStructure(1, 0);
+        int whiteEval = whiteMaterialValue + positioning.GetPositioningScore(0, 1, board) + EvaluatePawnStructure(0, 1, board);
+        int blackEval = blackMaterialValue + positioning.GetPositioningScore(1, 0, board) + EvaluatePawnStructure(1, 0, board);
 
         int evaluation = whiteEval - blackEval;
 
@@ -74,13 +74,13 @@ public class Evaluation
         ulong enemyPawnBoard = board.pawnList[enemyColorBit].bitboard;
 
         //Doubled Pawns
-        // for (int file = 0; file < 8; file++)
-        // {
-        //     ulong fileMask = PrecomputedData.fileMasks[file];
-        //     int pawnsOnFile = BitBoardHelper.BitCount(friendlyPawnBoard & fileMask);
+        for (int file = 0; file < 8; file++)
+        {
+            ulong fileMask = PrecomputedData.fileMasks[file];
+            int friendlyPawnsOnFile = BitBoardHelper.BitCount(friendlyPawnBoard & fileMask);
 
-        //     if (pawnsOnFile > 1) score += DoubledPawnValue * (pawnsOnFile - 1);
-        // }
+            if (friendlyPawnsOnFile > 1) score += DoubledPawnValue * (friendlyPawnsOnFile - 1);
+        }
 
         //Connected Pawns
 
