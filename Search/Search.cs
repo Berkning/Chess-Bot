@@ -79,7 +79,7 @@ public class Search
 
         for (uint depth = 1; depth <= searchDepth; depth++)
         {
-            prevResult = AspirationWindow.Search(depth, prevResult, this);
+            prevResult = AspirationSearch(depth, prevResult);
 
             if (cancelSearch) //FIXMEnt?: Currently plays illegal and sometime null moves randomly in partial search
             {
@@ -100,68 +100,71 @@ public class Search
 
 
 
+    #region Aspiration Window
 
-    public static class AspirationWindow //TODO: Try making non-static
+    //public static class AspirationWindow //TODOne: Try making non-static
+    //{
+    private readonly static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
+    private const int InstabilityMargin = 25;
+
+    private int AspirationSearch(uint depth, int prevResult) //TODO: Think maybe the illegal moves and infinite evals come from not getting a proper width search before search is cancelled so we have to use the capped eval???
     {
-        private readonly static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
-        private const int InstabilityMargin = 25;
+        int incrementIndex = 0;
 
-        public static int Search(uint depth, int prevResult, Search searcher) //TODO: Think maybe the illegal moves and infinite evals come from not getting a proper width search before search is cancelled so we have to use the capped eval???
+        int alpha = prevResult - windowIncrements[incrementIndex];
+        int beta = prevResult + windowIncrements[incrementIndex];
+
+        if (prevResult == NegativeInfinity) //If no previous result, we search with a full window
         {
-            int incrementIndex = 0;
-
-            int alpha = prevResult - windowIncrements[incrementIndex];
-            int beta = prevResult + windowIncrements[incrementIndex];
-
-            if (prevResult == NegativeInfinity) //If no previous result, we search with a full window
-            {
-                alpha = NegativeInfinity;
-                beta = PositiveInfinity;
-            }
-
-            int result;
-
-            while (true)
-            {
-                result = searcher.AlphaBeta(depth, 0, alpha, beta);
-
-                //if ((nodeCount & CancelDelay) == 0) //Obv don't only check when canceldelay has passed, otherwise if nodecount is off by just 1 we keep running the aspiration search even if search is cancelled
-                //{
-                if (cancelSearch) return 0;
-                //}
-
-                incrementIndex++; //If we fail, we have to increment this index anyway, and if we don't, we won't continue the loop anyway
-
-                if (result >= beta)
-                {
-                    //Console.WriteLine("Failed High");
-                    //Console.WriteLine("New Increment: " + windowIncrements[incrementIndex]);
-                    if (incrementIndex == windowIncrements.Length) //If we still fail after having gone through all increments
-                    {
-                        return searcher.AlphaBeta(depth, 0, NegativeInfinity, PositiveInfinity);
-                    }
-
-                    beta = prevResult + windowIncrements[incrementIndex];
-                    alpha = result - InstabilityMargin; //Have to still keep some space for search instability
-                }
-                else if (result <= alpha)
-                {
-                    //Console.WriteLine("Failed Low");
-                    //Console.WriteLine("New Increment: " + windowIncrements[incrementIndex]);
-                    if (incrementIndex == windowIncrements.Length) //If we still fail after having gone through all increments
-                    {
-                        return searcher.AlphaBeta(depth, 0, NegativeInfinity, PositiveInfinity);
-                    }
-
-                    alpha = prevResult - windowIncrements[incrementIndex];
-                    beta = result + InstabilityMargin;
-                }
-                else break; //Result is within window and we can stop re-searching
-            }
-
-            return result;
+            alpha = NegativeInfinity;
+            beta = PositiveInfinity;
         }
+
+        int result;
+
+        while (true)
+        {
+            result = AlphaBeta(depth, 0, alpha, beta);
+
+            //if ((nodeCount & CancelDelay) == 0) //Obv don't only check when canceldelay has passed, otherwise if nodecount is off by just 1 we keep running the aspiration search even if search is cancelled
+            //{
+            if (cancelSearch) return 0;
+            //}
+
+            incrementIndex++; //If we fail, we have to increment this index anyway, and if we don't, we won't continue the loop anyway
+
+            if (result >= beta)
+            {
+                //Console.WriteLine("Failed High");
+                //Console.WriteLine("New Increment: " + windowIncrements[incrementIndex]);
+                if (incrementIndex == windowIncrements.Length) //If we still fail after having gone through all increments
+                {
+                    return AlphaBeta(depth, 0, NegativeInfinity, PositiveInfinity);
+                }
+
+                beta = prevResult + windowIncrements[incrementIndex];
+                alpha = result - InstabilityMargin; //Have to still keep some space for search instability
+            }
+            else if (result <= alpha)
+            {
+                //Console.WriteLine("Failed Low");
+                //Console.WriteLine("New Increment: " + windowIncrements[incrementIndex]);
+                if (incrementIndex == windowIncrements.Length) //If we still fail after having gone through all increments
+                {
+                    return AlphaBeta(depth, 0, NegativeInfinity, PositiveInfinity);
+                }
+
+                alpha = prevResult - windowIncrements[incrementIndex];
+                beta = result + InstabilityMargin;
+            }
+            else break; //Result is within window and we can stop re-searching
+        }
+
+        return result;
     }
+    //}
+
+    #endregion
 
 
     // public static float Eval(int depth, bool test) //FIXMEn't:
