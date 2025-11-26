@@ -48,7 +48,8 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 break;
             case "stop":
                 //TimeManagement.RevokeScheduledCancel();
-                Search.cancelSearch = true; //TODO: move thread
+                //Search.cancelSearch = true; //TODOne: move thread
+                engine.StopSearch();
                 break;
             case "table":
                 if (args.Length == 1)

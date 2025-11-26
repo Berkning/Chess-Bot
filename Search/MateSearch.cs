@@ -27,87 +27,90 @@ public class MateSearch //TODO: Should def have some special move ordering like 
 
     public void StartSearch() //I imagine it would be completely unnecessary to add repetition table bc if we ever repeat moves 3 times there is obv not a way to mate at current depth
     {
-        bestMove = Move.nullMove;
-        bestMateScore = NegativeInfinity;
+        //FIXME:
+        // bestMove = Move.nullMove;
+        // bestMateScore = NegativeInfinity;
 
-        for (uint depth = 1; depth <= 255; depth++)
-        {
-            if (FindMate(depth, 0) != 0)
-            {
-                Console.WriteLine("info string Found mate");
-                break;
-            }
+        // for (uint depth = 1; depth <= 255; depth++)
+        // {
+        //     if (FindMate(depth, 0) != 0)
+        //     {
+        //         Console.WriteLine("info string Found mate");
+        //         break;
+        //     }
 
-            if (Search.cancelSearch)
-            {
-                Console.WriteLine("info string Mate search interrupted");
-                break;
-            }
-        }
-        callback.Invoke(bestMove, threadID);
+        //     if (Search.cancelSearch)
+        //     {
+        //         Console.WriteLine("info string Mate search interrupted");
+        //         break;
+        //     }
+        // }
+        // callback.Invoke(bestMove, threadID);
     }
 
     private int FindMate(uint depth, int plyFromRoot)
     {
-        if (Search.cancelSearch) return 0;
+        return -1;
+        //FIXME:
+        // if (Search.cancelSearch) return 0;
 
-        Span<Move> moves = stackalloc Move[256];
+        // Span<Move> moves = stackalloc Move[256];
 
-        int moveCount = moveGenerator.GenerateMoves(ref moves);
+        // int moveCount = moveGenerator.GenerateMoves(ref moves);
 
-        //TODO: Special move ordering
+        // //TODO: Special move ordering
 
-        if (moveCount == 0)
-        {
-            if (moveGenerator.inCheck) return -1;
+        // if (moveCount == 0)
+        // {
+        //     if (moveGenerator.inCheck) return -1;
 
-            return 0;
-        }
+        //     return 0;
+        // }
 
-        if (depth == 0) return 0;
+        // if (depth == 0) return 0;
 
-        //if (plyFromRoot > 0)
-        //{
-        //    if (moveCount > 7) return 0; //We have a large enough available move count to assume we wont be mated
-        //}
+        // //if (plyFromRoot > 0)
+        // //{
+        // //    if (moveCount > 7) return 0; //We have a large enough available move count to assume we wont be mated
+        // //}
 
 
 
-        bool mateAvoidable = false;
-        Move bestMoveInPos = Move.nullMove;
+        // bool mateAvoidable = false;
+        // Move bestMoveInPos = Move.nullMove;
 
-        for (int i = 0; i < moveCount; i++)
-        {
-            board.MakeMove(moves[i], true);
-            int mateEval = -FindMate(depth - 1, plyFromRoot + 1);
-            board.UnMakeMove(moves[i], true);
+        // for (int i = 0; i < moveCount; i++)
+        // {
+        //     board.MakeMove(moves[i], true);
+        //     int mateEval = -FindMate(depth - 1, plyFromRoot + 1);
+        //     board.UnMakeMove(moves[i], true);
 
-            //TODO: Check for search cancelled
+        //     //TODO: Check for search cancelled
 
-            if (mateEval == 1) //If we can force a mate with the current move
-            {
-                if (plyFromRoot == 0) bestMove = moves[i];
+        //     if (mateEval == 1) //If we can force a mate with the current move
+        //     {
+        //         if (plyFromRoot == 0) bestMove = moves[i];
 
-                return 1;
-            }
+        //         return 1;
+        //     }
 
-            if (mateEval == 0)
-            {
-                mateAvoidable = true;
-                bestMoveInPos = moves[i];
+        //     if (mateEval == 0)
+        //     {
+        //         mateAvoidable = true;
+        //         bestMoveInPos = moves[i];
 
-                if (plyFromRoot == 0) bestMove = bestMoveInPos;
+        //         if (plyFromRoot == 0) bestMove = bestMoveInPos;
 
-                //if (score == -1)
-            }
-        }
+        //         //if (score == -1)
+        //     }
+        // }
 
-        if (!mateAvoidable)
-        {
-            if (plyFromRoot == 0) bestMove = moves[0];
-            return -1;
-        }
+        // if (!mateAvoidable)
+        // {
+        //     if (plyFromRoot == 0) bestMove = moves[0];
+        //     return -1;
+        // }
 
-        return 0;
+        // return 0;
     }
 }

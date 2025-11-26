@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 public class Search
@@ -31,8 +32,7 @@ public class Search
     private Action<Move, int> callback;
 
 
-
-    public volatile static bool cancelSearch = false; //TODOing: try marking as volatile to see if performance improves
+    private Stopwatch clock = new Stopwatch();
 
 
     public Search(Board _board, Action<Move, int> _callback, int _threadID)
@@ -48,7 +48,9 @@ public class Search
     }
 
     public int searchDepth = -1;
-    public int searchTime = -1;
+    //Might be necessary to mark as volatile so it's synced when main thread wants to stop this thread
+    public int searchTime = -1; //-2 : infinite,  -1 : use time management,  x : use x amount of time
+
 
     public void StartSearch()
     {
@@ -56,15 +58,34 @@ public class Search
         bestEval = NegativeInfinity;
         repetitionTable.Copy(board.repetitionTable);
 
-        nodeCount = -1; //Dont want to include start node - bc stockfish doesn't
+        nodeCount = -1; //Dont want to include start node
+
+        clock.Reset();
 
         if (searchTime == -1)
         {
-            int maxSearchTime = TimeManagement.GetSearchTime(board.colorToMove);
+            searchTime = TimeManagement.GetSearchTime(board.colorToMove); //Doesn't matter that other threads will have same search time and are started with delay. Their searchTime will be set to a negative number when first thread finishes anyway
 
-            TimeManagement.ScheduleSearchCancel(maxSearchTime); //TODO: Use stopwatch to manage own time in search
+            clock.Start();
         }
-        else if (searchTime > 0) TimeManagement.ScheduleSearchCancel(searchTime); //If less than -1, let it go till stop is recieved
+        else if (searchTime > 0)
+        {
+            clock.Start();
+        }
+        else if (searchTime == 0)
+        {
+            Console.WriteLine("Searchtime was zero!!");
+            Console.WriteLine("bestmove searchtimewaszero");
+            return;
+        }
+        else //Go forever till stop is recieved
+        {
+            //TODO: Remove
+            //Console.WriteLine("bestmove timeWasUnder-1");
+
+            searchTime = int.MaxValue;
+            clock.Start();
+        }
 
 
         int prevResult = NegativeInfinity;
@@ -81,9 +102,9 @@ public class Search
         {
             prevResult = AspirationSearch(depth, prevResult);
 
-            if (cancelSearch) //FIXMEnt?: Currently plays illegal and sometime null moves randomly in partial search
+            if (clock.ElapsedMilliseconds >= searchTime)
             {
-                //If we haven't found a move to play, and search is being cancelled, run an emergency full width search at a depth of 1
+                //If we haven't found a move to play, and search is being cancelled, run an emergency full width search to a depth of 1
                 if (bestMove.data == 0)
                 {
                     Console.WriteLine("info string Running emergency search");
@@ -95,14 +116,19 @@ public class Search
             }
             else LogSearchInfo(depth, nodeCount, false, threadID); //TODO: check if matescore and then exit if were low on time
         }
+
+
+        clock.Stop();
+
         callback.Invoke(bestMove, threadID);
     }
 
 
 
-    #region Aspiration Window
 
-    //public static class AspirationWindow //TODOne: Try making non-static
+
+    #region Aspiration Window
+    //public static class AspirationWindow //TODO: Try making non-static
     //{
     private readonly static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
     private const int InstabilityMargin = 25;
@@ -128,7 +154,7 @@ public class Search
 
             //if ((nodeCount & CancelDelay) == 0) //Obv don't only check when canceldelay has passed, otherwise if nodecount is off by just 1 we keep running the aspiration search even if search is cancelled
             //{
-            if (cancelSearch) return 0;
+            if (clock.ElapsedMilliseconds >= searchTime) return 0;
             //}
 
             incrementIndex++; //If we fail, we have to increment this index anyway, and if we don't, we won't continue the loop anyway
@@ -183,7 +209,7 @@ public class Search
 
         if ((nodeCount & CancelDelay) == 0) //TODO: test with removing this
         {
-            if (cancelSearch) return 0;
+            if (clock.ElapsedMilliseconds >= searchTime) return 0;
         }
 
         if (plyFromRoot > 0)
@@ -278,7 +304,7 @@ public class Search
 
                 //TODOne: if eval jumps, analyse at full depth
                 //If evals better than anything else so far well search to full depth - horizon effect but outweighed by speed
-                searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && cancelSearch); //TODOnt?: Move cancel check to separate if before this
+                searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime); //TODOnt?: Move cancel check to separate if before this
             }
 
             if (searchFullDepth) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);
@@ -289,7 +315,7 @@ public class Search
 
             if ((nodeCount & CancelDelay) == 0) //Makes perfect sense to have this here now - //Seemingly doesn't work properly without this check, but works fine without the check at the start of the function. Doesn't make any sense - also doesn't work do the correct amount of checks without the check at the start, but still stops in reasonable amount of time
             {
-                if (cancelSearch) return 0;
+                if (clock.ElapsedMilliseconds >= searchTime) return 0;
             }
 
             //Move was good opponent will avoid this position
@@ -339,11 +365,11 @@ public class Search
     {
         if ((nodeCount & CancelDelay) == 0) //TODO: Try removing this
         {
-            if (cancelSearch) return 0; //We are checking in the iterative part im just stupid - //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
+            if (clock.ElapsedMilliseconds >= searchTime) return 0; //We are checking in the iterative part im just stupid - //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
         }
 
         // A player isn't forced to make a capture (typically), so see what the evaluation is without capturing anything.
-        // This prevents situations where a player ony has bad captures available from being evaluated as bad,
+        // This prevents situations where a plcancelSearchayer ony has bad captures available from being evaluated as bad,
         // when the player might have good non-capture moves available.
         int eval = evaluator.Evaluate(board);
         //positionCount++;
@@ -374,7 +400,7 @@ public class Search
 
             if ((nodeCount & CancelDelay) == 0)
             {
-                if (cancelSearch) return 0;
+                if (clock.ElapsedMilliseconds >= searchTime) return 0;
             }
 
             if (eval >= beta)

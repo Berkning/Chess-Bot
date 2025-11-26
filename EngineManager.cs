@@ -16,7 +16,7 @@ public class Engine
 
     private bool outOfBook = false; //Whether we have run out of book moves and have to search on our own
 
-    Stopwatch searchTimer = new Stopwatch();
+    Stopwatch searchTimer = new Stopwatch(); //TODO: Could just use Search.clock now
 
     public Engine(EngineUCI _uci)
     {
@@ -73,7 +73,7 @@ public class Engine
     //TODO: Remove janky shit
     public void RunMateSearch()
     {
-        Search.cancelSearch = false;
+        //Search.cancelSearch = false;
 
         Action<Move, int> callback = (result, id) => OnSearchCompleted(result, id);
 
@@ -113,9 +113,6 @@ public class Engine
             }
         }
 
-
-        Search.cancelSearch = false;
-
         Action<Move, int> callback = (result, id) => OnSearchCompleted(result, id);
 
         searchTimer.Restart();
@@ -131,7 +128,7 @@ public class Engine
 
             //if (i % 4 == 0) depth++;
 
-            if (Search.cancelSearch) break; //If search has been cancelled while we are launching threads still
+            //if (Search.cancelSearch) break; //TODO: stop if search has been cancelled while we are launching threads still - prob use own timer for this
 
             availableThreads--;
             searchThreads[i].Start(depth, time); //TODOne: Keep thread data persistent?
@@ -152,7 +149,13 @@ public class Engine
         Console.WriteLine("info string Thread " + id + " Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
         Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
 
-        Search.cancelSearch = true;
+        //Search.cancelSearch = true;
+        StopSearch();
+    }
+
+    public void StopSearch()
+    {
+        foreach (EngineThread thread in searchThreads) thread.search.searchTime = -999;
     }
 
 
