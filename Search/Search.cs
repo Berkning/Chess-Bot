@@ -81,7 +81,7 @@ public class Search
         else //Go forever till stop is recieved
         {
             //TODO: Remove
-            //Console.WriteLine("bestmove timeWasUnder-1");
+            //Console.WriteLine("bestmove timeWasUnder-1=" + searchTime);
 
             searchTime = int.MaxValue;
             clock.Start();

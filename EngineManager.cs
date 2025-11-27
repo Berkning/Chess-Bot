@@ -145,12 +145,12 @@ public class Engine
         if (availableThreads > 1) return; //Another thread has already finished so no need to log stuff
 
         searchTimer.Stop();
+        StopSearch();
 
         Console.WriteLine("info string Thread " + id + " Finished in: " + searchTimer.ElapsedMilliseconds + "ms");
         Console.WriteLine("bestmove " + BoardHelper.GetMoveNameUCI(move));
 
         //Search.cancelSearch = true;
-        StopSearch();
     }
 
     public void StopSearch()
