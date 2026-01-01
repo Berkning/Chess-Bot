@@ -28,7 +28,7 @@ public class TranspositionTable
     //private ulong writeCount = 0;
     private readonly ulong indexMask;
 
-    //TODO: https://www.chessprogramming.org/Transposition_Table try power of two table - ask chat - can use mask instead of modulo for index
+    //TODOne: https://www.chessprogramming.org/Transposition_Table try power of two table - ask chat - can use mask instead of modulo for index
     public TranspositionTable()
     {
         entryCount = (ulong)(SizeMB * 1024 * 1024 / Transposition.GetSize());
@@ -88,12 +88,13 @@ public class TranspositionTable
         Transposition transposition = table[index];
         //TODO: Test maybe with waiting a tiny bit here if key and data is corrupted instead of just failing the probe?
 
-        if ((transposition.key ^ transposition.data) == zobrist)
+        //if ((transposition.key ^ (uint)transposition.data) == (uint)zobrist) //TODO: guarantee atomic for SMP
+        if (transposition.key == zobrist >> 48)
         {
             // Only use stored evaluation if it has been searched to at least the same depth as would be searched now
             if (transposition.depth >= depth)
             {
-                int correctedScore = CorrectRetrievedMateScore(transposition.value, plyFromRoot);
+                int correctedScore = CorrectRetrievedMateScore(transposition.eval, plyFromRoot);
                 // We have stored the exact evaluation for this position, so return it
                 if (transposition.nodeType == Exact) //TODO: test with caching nodetype maybe?
                 {
@@ -118,7 +119,7 @@ public class TranspositionTable
 
 
 
-    public void StoreEvaluation(ulong zobrist, uint depth, int numPlySearched, int eval, ulong evalType, Move move)
+    public void StoreEvaluation(ulong zobrist, uint depth, int numPlySearched, int eval, ulong evalType, Move move) //TODO: Replacement strategies - if spot already filled we have to figure out whether to replace the entry or not-https://www.chessprogramming.org/Transposition_Table#Table_Entry_Types
     {
         //ulong index = Index(zobrist);
 
@@ -138,21 +139,21 @@ public class TranspositionTable
         table[Index(zobrist)] = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move);
     }
 
-    int CorrectMateScoreForStorage(int score, int numPlySearched)
+    short CorrectMateScoreForStorage(int score, int numPlySearched)
     {
         if (Search.IsMateScore(score))
         {
-            int sign = System.Math.Sign(score);
-            return (score * sign + numPlySearched) * sign;
+            int sign = Math.Sign(score);
+            return (short)((score * sign + numPlySearched) * sign);
         }
-        return score;
+        return (short)score;
     }
 
-    int CorrectRetrievedMateScore(int score, int numPlySearched)
+    int CorrectRetrievedMateScore(short score, int numPlySearched)
     {
         if (Search.IsMateScore(score))
         {
-            int sign = System.Math.Sign(score);
+            int sign = Math.Sign(score);
             return (score * sign - numPlySearched) * sign;
         }
         return score;
@@ -165,30 +166,33 @@ public class TranspositionTable
 
     public struct Transposition
     {
-        public readonly ulong key; //TODO: try atomic writes - move everything except key into a ulong - if were overwriting an entry the key might be the same? dont know how to solve - try just removing key and key check
-
-        //TODO: Some version of this - currently 24 bits
-        //15 bits eval (value)
-        //REMOVED: 16 bits move
-        //7 bits depth //TODO: Should maybe consider cases of depth limit being higher than 128
-        //2 bits nodetype
         public readonly ulong data;
 
-        private const ulong valueMask = 0b0000000000000000000000000000000011111111111111111111111111111111;
-        private const ulong moveMask = 0b0000000000000000111111111111111100000000000000000000000000000000;
-        private const ulong depthMask = 0b0000000011111111000000000000000000000000000000000000000000000000;
-        private const ulong nodeTypeMask = 0b1111111100000000000000000000000000000000000000000000000000000000;
+        private const ulong keyMask = 0b0000000000000000000000000000000000000000000000001111111111111111;
+        private const ulong evalMask = 0b0000000000000000000000000000000011111111111111110000000000000000;
+        private const ulong depthMask = 0b0000000000000000000000000011111100000000000000000000000000000000;
+        private const ulong nodeTypeMask = 0b0000000000000000000000001100000000000000000000000000000000000000;
+        private const ulong moveMask = 0b0000000011111111111111110000000000000000000000000000000000000000;
 
-        public int value { get { return (int)(data & valueMask); } } //Could maybe be reduced? TODO: doesn't need valuemask when casting anyway right?
-        public Move move { get { return new Move((ushort)((data & moveMask) >> 32)); } } //TODO: Try without move entirely - not necessary unless at root
-        public ulong depth { get { return (data & depthMask) >> 48; } } //Could be reduced?
-        public ulong nodeType { get { return (data & nodeTypeMask) >> 56; } } //Could also be significantly reduced
+        public ulong key { get { return data & keyMask; } }
+        public short eval { get { return (short)((data & evalMask) >> 16); } }
+        public byte depth { get { return (byte)((data & depthMask) >> 32); } }
+        public ulong nodeType { get { return (data & nodeTypeMask) >> 38; } }
+        public Move move { get { return new Move((ushort)((data & moveMask) >> 40)); } } //TODO: Try without move entirely - not necessary unless at root - just maintain PV instead
 
-        public Transposition(ulong zobrist, int value, byte depth, byte nodeType, Move move) //TODO: make all ulong here in params?
+        public Transposition(ulong zobrist, short eval, byte depth, byte nodeType, Move move) //TODO: make all ulong here in params?
         {
-            data = (uint)value | (((ulong)move.data) << 32) | (((ulong)depth) << 48) | (((ulong)nodeType) << 56);
+            //TODO: test if depth is bigger than 6 bits - prob no need to check if depth is above 63 as we would prob be winning anyway
+            //TODO: Maybe try testing if eval is larger than 16 bits as this would provide very wrong answers if ever the case
 
-            key = zobrist ^ data;
+            ulong key = zobrist >> 48; //Bc we are using PO2 TT we already now that fx the first 26 bits match for a 64mb table so we use the last 16 bits as the key since the last bits are the ones that will actually differ if the position is different
+
+            data = key | (((ulong)eval) << 16) | (((ulong)depth) << 32) | (((ulong)nodeType) << 38) | (((ulong)move.data) << 40);
+
+
+            //data = (uint)eval | (((ulong)move.data) << 32) | (((ulong)depth) << 48) | (((ulong)nodeType) << 56);
+
+            //key = zobrist ^ data;
         }
 
         public static int GetSize()

@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 public class Search
 {
-    private const int ImmediateMateScore = 100000;
+    private const int ImmediateMateScore = short.MaxValue;
     private const int PositiveInfinity = 9999999;
     private const int NegativeInfinity = -PositiveInfinity;
 
@@ -470,7 +470,7 @@ public class Search
 
     public static bool IsMateScore(int score)
     {
-        if (score == int.MinValue)
+        if (score == short.MinValue)
         {
             return false;
         }
