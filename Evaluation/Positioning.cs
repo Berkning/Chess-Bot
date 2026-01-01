@@ -1,7 +1,7 @@
 
 using System;
 
-public class Positioning //TODOne: endgame tables
+public class Positioning //TODOne: endgame tables //TODO: Combine with evaluation class
 {
     //Pawns
     private static int[] PawnEarlyGame = { 0, 0, 0, 0, 0, 0, 0, 0, 5, 15, 10, -10, -10, 10, 15, 5, 5, 0, 15, 15, 15, 15, 0, 5, -5, -10, 25, 30, 30, 25, -10, -5, -15, -15, 15, 20, 20, 15, -15, -15, -20, -15, -10, -5, -5, -10, -15, -20, -25, -25, -25, -25, -25, -25, -25, -25, 0, 0, 0, 0, 0, 0, 0, 0 };
