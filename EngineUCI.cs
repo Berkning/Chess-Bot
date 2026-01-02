@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime;
+using System.Runtime.CompilerServices;
 
 public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en-us/dotnet/api/system.gc.trystartnogcregion?view=net-9.0 TODO: Adjust GCsettings and stuff on the fly based on the time we have left (time to search) and force collect when its our opponents turn
 {
@@ -149,6 +150,19 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
 
                     Console.WriteLine("Back: " + (int)result);
                     Console.WriteLine(TranspositionTable.Transposition.GetSize());
+                    Console.WriteLine(Unsafe.SizeOf<TranspositionTable.Transposition>());
+
+                    TranspositionTable.Transposition test = new TranspositionTable.Transposition(0b1010111100001111111111100000001111111100000100100100100100100111, -624, 23, 2, new Move(0b1110100010111110));
+
+                    Console.WriteLine(Convert.ToString((long)test.data, 2));
+
+                    Console.WriteLine((ulong)(long)test.key == test.key);
+
+                    Console.WriteLine(Convert.ToString((long)test.key, 2));
+                    Console.WriteLine(test.eval);
+                    Console.WriteLine(test.depth);
+                    Console.WriteLine(test.nodeType);
+                    Console.WriteLine(Convert.ToString(test.move.data, 2));
                 }
                 break;
             case "gc":

@@ -136,6 +136,11 @@ public class TranspositionTable
 
         //table[index] = currentEntry;
 
+        if (Math.Abs(eval) > short.MaxValue)
+        {
+            Console.WriteLine("Eval " + eval + " is outside of short bounds");
+        }
+
         table[Index(zobrist)] = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move);
     }
 
@@ -163,7 +168,7 @@ public class TranspositionTable
 
 
 
-
+    //TODO: Try with [StructLayout(LayoutKind.Explicit, Size = 8)] - shouldn't make a difference bc should already be the case
     public struct Transposition
     {
         public readonly ulong data;
@@ -187,7 +192,7 @@ public class TranspositionTable
 
             ulong key = zobrist >> 48; //Bc we are using PO2 TT we already now that fx the first 26 bits match for a 64mb table so we use the last 16 bits as the key since the last bits are the ones that will actually differ if the position is different
 
-            data = key | (((ulong)eval) << 16) | (((ulong)depth) << 32) | (((ulong)nodeType) << 38) | (((ulong)move.data) << 40);
+            data = key | ((((ulong)eval) << 16) & evalMask) | ((((ulong)depth) << 32) & depthMask) | ((((ulong)nodeType) << 38) & nodeTypeMask) | ((((ulong)move.data) << 40) & moveMask);
 
 
             //data = (uint)eval | (((ulong)move.data) << 32) | (((ulong)depth) << 48) | (((ulong)nodeType) << 56);
