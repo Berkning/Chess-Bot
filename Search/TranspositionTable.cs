@@ -4,7 +4,7 @@ using System.Numerics;
 
 public class TranspositionTable
 {
-    public static int SizeMB = 16; //TODO: adjust based on game speed - 16mb is WAY too small for 10s think
+    public static int SizeMB = 16; //TODOne: adjust based on game speed - 16mb is WAY too small for 10s think
 
     public const int LookupFailed = int.MinValue;
 
@@ -119,14 +119,14 @@ public class TranspositionTable
 
 
 
-    public void StoreEvaluation(ulong zobrist, uint depth, int numPlySearched, int eval, ulong evalType, Move move) //TODO: Replacement strategies - if spot already filled we have to figure out whether to replace the entry or not-https://www.chessprogramming.org/Transposition_Table#Table_Entry_Types
+    public void StoreEvaluation(ulong zobrist, uint depth, int numPlySearched, int eval, ulong evalType, Move move, ulong currentGeneration) //TODO: Replacement strategies - if spot already filled we have to figure out whether to replace the entry or not-https://www.chessprogramming.org/Transposition_Table#Table_Entry_Types - look at "Priority by Move Ordering Position" fx
     {
-        //ulong index = Index(zobrist);
+        ulong index = Index(zobrist);
 
-        //Transposition currentEntry = table[index];
+        Transposition currentEntry = table[index];
 
-        //TODO: Try with >= bc ig would just save having to write to the table unnecessarily
-        //TODO: Test swapping the two cases --- currentEntry.depth > depth && (currentEntry.key ^ currentEntry.data) == zobrist --- bc maybe first one is more likely
+        //TODOne: Try with >= bc ig would just save having to write to the table unnecessarily
+        //TODOne: Test swapping the two cases --- currentEntry.depth > depth && (currentEntry.key ^ currentEntry.data) == zobrist --- bc maybe first one is more likely
 
         //Actually seems this is entirely wasted work bc were guarantueed to only get to store eval if there already wasnt an entry at deeper depth. We should also account for nodetypes bc cutoff nodes should also be overriden?
         //if ((currentEntry.key ^ currentEntry.data) == zobrist && currentEntry.depth > depth) return; //If the entry we are trying to override contains info about the same position at a deeper depth, we don't want to override it
@@ -136,12 +136,14 @@ public class TranspositionTable
 
         //table[index] = currentEntry;
 
+        //TODO: Remove this check
         if (Math.Abs(eval) > short.MaxValue)
         {
             Console.WriteLine("Eval " + eval + " is outside of short bounds");
         }
 
-        table[Index(zobrist)] = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move);
+        //If the entry currently occupying the TT in this position is either from a previous search or has a lower/same depth, we replace it with the new entry
+        if (currentEntry.age != currentGeneration || depth >= currentEntry.depth) table[index] = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move, currentGeneration);
     }
 
     short CorrectMateScoreForStorage(int score, int numPlySearched)
@@ -169,30 +171,35 @@ public class TranspositionTable
 
 
     //TODO: Try with [StructLayout(LayoutKind.Explicit, Size = 8)] - shouldn't make a difference bc should already be the case
+    //TODO: try 2-way (or more) associative TT
     public struct Transposition
     {
         public readonly ulong data;
 
         private const ulong keyMask = 0b0000000000000000000000000000000000000000000000001111111111111111;
-        private const ulong evalMask = 0b0000000000000000000000000000000011111111111111110000000000000000;
+        private const ulong evalMask = 0b0000000000000000000000000000000011111111111111110000000000000000; //TODO:
         private const ulong depthMask = 0b0000000000000000000000000011111100000000000000000000000000000000;
         private const ulong nodeTypeMask = 0b0000000000000000000000001100000000000000000000000000000000000000;
         private const ulong moveMask = 0b0000000011111111111111110000000000000000000000000000000000000000;
+
+        //TODO: try with just 4 bits if incrementing per root search - remember to change the mask used when incrementing currentGeneration in MakeMove - should actually still work perfectly fine as long as we change ageMask here, but still
+        private const ulong ageMask = 0b0011111100000000000000000000000000000000000000000000000000000000;
 
         public ulong key { get { return data & keyMask; } }
         public short eval { get { return (short)((data & evalMask) >> 16); } }
         public byte depth { get { return (byte)((data & depthMask) >> 32); } }
         public ulong nodeType { get { return (data & nodeTypeMask) >> 38; } }
         public Move move { get { return new Move((ushort)((data & moveMask) >> 40)); } } //TODO: Try without move entirely - not necessary unless at root - just maintain PV instead
+        public ulong age { get { return (data & ageMask) >> 56; } }
 
-        public Transposition(ulong zobrist, short eval, byte depth, byte nodeType, Move move) //TODO: make all ulong here in params?
+        public Transposition(ulong zobrist, short eval, byte depth, byte nodeType, Move move, ulong currentGeneration) //TODO: make all ulong here in params?
         {
             //TODO: test if depth is bigger than 6 bits - prob no need to check if depth is above 63 as we would prob be winning anyway
             //TODO: Maybe try testing if eval is larger than 16 bits as this would provide very wrong answers if ever the case
 
             ulong key = zobrist >> 48; //Bc we are using PO2 TT we already now that fx the first 26 bits match for a 64mb table so we use the last 16 bits as the key since the last bits are the ones that will actually differ if the position is different
 
-            data = key | ((((ulong)eval) << 16) & evalMask) | ((((ulong)depth) << 32) & depthMask) | ((((ulong)nodeType) << 38) & nodeTypeMask) | ((((ulong)move.data) << 40) & moveMask);
+            data = key | ((((ulong)eval) << 16) & evalMask) | ((((ulong)depth) << 32) & depthMask) | ((((ulong)nodeType) << 38) & nodeTypeMask) | ((((ulong)move.data) << 40) & moveMask) | ((currentGeneration << 56) & ageMask);
 
 
             //data = (uint)eval | (((ulong)move.data) << 32) | (((ulong)depth) << 48) | (((ulong)nodeType) << 56);

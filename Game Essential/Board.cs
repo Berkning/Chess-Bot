@@ -43,6 +43,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     //Repetition Table
     public RepetitionTable repetitionTable;
 
+    public ulong currentGeneration = 0;
+
 
 
     public PieceList GetPieceList(int type, int colorBit)
@@ -356,7 +358,11 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         if (prevEpFile != -1) currentZobrist ^= Zobrist.epArray[prevEpFile]; //Remove old ep file
 
         gameStateHistory.Push(currentGameState);
-        if (!inSearch) repetitionTable.Push(currentZobrist);
+        if (!inSearch)
+        {
+            repetitionTable.Push(currentZobrist);
+            currentGeneration = (currentGeneration + 1) & 0b00111111;
+        }
         //Debug.Log(Convert.ToString(currentGameState, 2));
 
 
