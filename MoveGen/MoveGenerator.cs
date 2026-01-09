@@ -56,7 +56,7 @@ public class MoveGenerator
         ulong kingDiagMask = MagicData.bishopMasks[friendlyKingSquare] & enemyPieces; //Bitboard of enemy diags attack blcoks by enemy's own pieces
         ulong kingDiagIndex = (kingDiagMask * MagicData.bishopMagics[friendlyKingSquare]) >> MagicData.bishopShifts[friendlyKingSquare];
 
-        ulong kingDiagAttackMask = MagicData.bishopMoveBitboards[friendlyKingSquare][kingDiagIndex]; //Bitboard of potential ortho attack directions
+        ulong kingDiagAttackMask = MagicData.bishopMoveBitboards[friendlyKingSquare][kingDiagIndex]; //Bitboard of potential diag attack directions
 
         ulong kingAttackMask = kingOrthoAttackMask | kingDiagAttackMask; //Bitboard of enemy slider attack blcoks - ignoring slider behind slider
         ulong potentialKingAttackers = (kingOrthoAttackMask & enemyOrthos) | (kingDiagAttackMask & enemyDiags); //Bitboard of all enemy sliders that could be checking or pinning
@@ -126,6 +126,7 @@ public class MoveGenerator
             }
         }
 
+
         //King attacks
         opponentKingAttackMap = PrecomputedData.kingAttackBitboards[enemyKingSquare];
 
@@ -175,11 +176,30 @@ public class MoveGenerator
 
     private void GeneratePieceBoards() //TODOne: would be more performant to keep track of these and update them in board on make an unmake move
     {
+        //TODO: Don't use GetPieceList because we can just access the piecelist we want directly - should just give a tiny free speedup
+
         int friendlyBit = board.friendlyColorBit;
         int enemyBit = board.opponentColorBit;
 
+        // ulong friendlyQueens = board.queenList[friendlyBit].bitboard;
+        // ulong enemyQueens = board.queenList[enemyBit].bitboard;
+
+
+        // friendlyOrthos = board.rookList[friendlyBit].bitboard | friendlyQueens;
+        // friendlyDiags = board.bishopList[friendlyBit].bitboard | friendlyQueens;
+        // enemyOrthos = board.rookList[enemyBit].bitboard | enemyQueens;
+        // enemyDiags = board.bishopList[enemyBit].bitboard | enemyQueens;
+
+        // friendlyPieces = board.pawnList[friendlyBit].bitboard | board.knightList[friendlyBit].bitboard | friendlyDiags | friendlyOrthos | (1UL << friendlyKingSquare);
+        // enemyPieces = board.pawnList[enemyBit].bitboard | board.knightList[enemyBit].bitboard | enemyDiags | enemyOrthos | (1UL << enemyKingSquare);
+
+        // allPieces = friendlyPieces | enemyPieces;
+
+
+
         ulong friendlyQueens = board.GetPieceList(Piece.Queen, friendlyBit).bitboard;
         ulong enemyQueens = board.GetPieceList(Piece.Queen, enemyBit).bitboard;
+
 
         friendlyOrthos = board.GetPieceList(Piece.Rook, friendlyBit).bitboard | friendlyQueens;
         friendlyDiags = board.GetPieceList(Piece.Bishop, friendlyBit).bitboard | friendlyQueens;
@@ -234,6 +254,7 @@ public class MoveGenerator
 
         GeneratePieceBoards();
 
+        //TODOnt: Pass genOnlyCaptures bc we then should also only worry about if the opponent can REcapture our king if he captures a piece bc only his capturing moves are generated - should cause slight speedup bc we don't need to worry about non attacking moves? - can't see any way it could be useful when using magic bitboards
         GenerateAttackMaps();
 
         GenerateKingMoves(ref moves, genOnlyCaptures);
@@ -439,7 +460,7 @@ public class MoveGenerator
         //TODO: Bitboards
         for (int i = 0; i < PrecomputedData.KnightMoves[startSquare].Length; i++)
         {
-            if (IsPinned(startSquare)) return; //Knight cant move at all if pinned
+            if (IsPinned(startSquare)) return; //Knight cant move at all if pinned //TODO: Just move outside loop
 
             int targetSquare = PrecomputedData.KnightMoves[startSquare][i];
             int pieceOnTarget = board.Squares[targetSquare];
@@ -588,7 +609,7 @@ public struct Move //FFFFTTTTTTSSSSSS - F = Flag bit - T = Target square bit - S
 
     public static Move nullMove = new Move(0, 0); //TODO: try if setting as const is more performant? Or adding function for IsNull
 
-    public Move (ushort data)
+    public Move(ushort data)
     {
         this.data = data;
     }

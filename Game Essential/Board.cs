@@ -13,7 +13,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     //0-5 = Captured Piece //TODO: Could be pretty easily reduced by removing the two color bits and infering the color based on colorToMove
     //6-9 = EP file
     //10-13 = Castling Rights - 10 = Wshort, 11 = Bshort, 12 = Wlong, 13 = Blong
-    //14-19 = fifty move counter
+    //14-19 = fifty move counter //TODO:
     public Stack<uint> gameStateHistory;
     public uint currentGameState = 0;//0b1111000000000; //Castles allowed by default 
 
@@ -23,7 +23,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     public const uint fiftyMoveCounterMask = 0b1111110000000000000;
 
     //Piece lists
-    public PieceList[] pawnList; //TODO: Try not using piecelist for pawns bc can always assume theres max 8 per side
+    //TODO: Try getting rid of these and just using GetPieceList bc faster for movegen at least for some reason (guess cache locality from it being used before calling movegen?)
+    public PieceList[] pawnList; //TODO: Try not using piecelist for pawns bc can always assume theres max 8 per side - also works for every other piece just with dif number
     public PieceList[] knightList;
     public PieceList[] bishopList;
     public PieceList[] rookList;
@@ -39,6 +40,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
     //Zobrist
     public ulong currentZobrist;
+    //TODO: Could try having a dedicated stack for Zobrist history to avoid having to do the small zobrist table lookups
 
     //Repetition Table
     public RepetitionTable repetitionTable;
@@ -487,6 +489,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     }
 }
 
+//TODO: Struct instead - store byte and not int for memory
 public class Piece
 {
     public const int None = 0;

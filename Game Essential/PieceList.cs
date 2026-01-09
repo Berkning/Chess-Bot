@@ -1,4 +1,5 @@
 
+//TODO: make this a struct instead
 public class PieceList
 {
     public int[] occupiedSquares; //Long as count
