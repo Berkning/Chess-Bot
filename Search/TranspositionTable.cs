@@ -139,13 +139,11 @@ public class TranspositionTable
         //TODO: Remove this check
         if (Math.Abs(eval) > short.MaxValue)
         {
-            Console.WriteLine("bestmove Eval " + eval + " is outside of short bounds");
+            Console.WriteLine("Eval " + eval + " is outside of short bounds");
         }
 
-        //TODO: Try again with age/generation but with 2-way TT
-
         //If the entry currently occupying the TT in this position is either from a previous search or has a lower/same depth, we replace it with the new entry
-        if (currentEntry.age != currentGeneration || depth > currentEntry.depth || (depth == currentEntry.depth && evalType == Exact)) table[index] = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move, currentGeneration);
+        if (currentEntry.age != currentGeneration || depth >= currentEntry.depth) table[index] = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move, currentGeneration);
     }
 
     short CorrectMateScoreForStorage(int score, int numPlySearched)
