@@ -152,7 +152,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                     Console.WriteLine(TranspositionTable.Transposition.GetSize());
                     Console.WriteLine(Unsafe.SizeOf<TranspositionTable.Transposition>());
 
-                    TranspositionTable.Transposition test = new TranspositionTable.Transposition(0b1010111100001111111111100000001111111100000100100100100100100111, -624, 23, 2, new Move(0b1110100010111110), 45);
+                    TranspositionTable.Transposition test = new TranspositionTable.Transposition(0b1010111100001111111111100000001111111100000100100100100100100111, -624, 23, 2, new Move(0b1110100010111110));
 
                     Console.WriteLine(Convert.ToString((long)test.data, 2));
 
@@ -162,10 +162,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                     Console.WriteLine(test.eval);
                     Console.WriteLine(test.depth);
                     Console.WriteLine(test.nodeType);
-                    Console.WriteLine(test.age);
                     Console.WriteLine(Convert.ToString(test.move.data, 2));
-
-                    Console.WriteLine("CurrentGeneration: " + Engine.mainBoard.currentGeneration);
                 }
                 break;
             case "gc":

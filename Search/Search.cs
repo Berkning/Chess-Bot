@@ -321,7 +321,7 @@ public class Search
             //Move was good opponent will avoid this position
             if (evaluation >= beta)
             {
-                transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, beta, TranspositionTable.LowerBound, moves[i], board.currentGeneration);
+                transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, beta, TranspositionTable.LowerBound, moves[i]);
 
                 //TODO: Test without checking for ep for performance bc we already check if this is the case in the moveordering but this will ofc override the space of a valid killer move with an invalid ep move if possible - maybe too rare?
                 if (board.Squares[moves[i].targetSquare] == Piece.None && moves[i].flag != Move.Flag.EnPassantCapture) //If not a capture - only add killer moves that aren't captures, bc these are always ranked highly i guess?
@@ -354,7 +354,7 @@ public class Search
 
         if (plyFromRoot > 0) repetitionTable.PopNoRtn();
 
-        transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition, board.currentGeneration);
+        transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);
 
         return alpha;
     }
