@@ -123,6 +123,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         repetitionTable = new RepetitionTable();
 
         currentZobrist = 0;
+        currentGeneration = 0;
 
         pawnList = new PieceList[2] { new PieceList(8), new PieceList(8) };
         knightList = new PieceList[2] { new PieceList(10), new PieceList(10) };
@@ -476,7 +477,11 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         gameStateHistory.Pop();
 
-        if (!inSearch) repetitionTable.PopNoRtn();
+        if (!inSearch)
+        {
+            repetitionTable.PopNoRtn();
+            currentGeneration = (currentGeneration - 1) & 0b00111111; //TODO: Don't think this works if the makemove function maes generation wrap around but not used anyway right now
+        }
 
         currentGameState = gameStateHistory.Peek();
 
