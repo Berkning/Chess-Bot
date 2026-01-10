@@ -24,11 +24,11 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
     //Piece lists
     //TODO: Try getting rid of these and just using GetPieceList bc faster for movegen at least for some reason (guess cache locality from it being used before calling movegen?)
-    public PieceList[] pawnList; //TODO: Try not using piecelist for pawns bc can always assume theres max 8 per side - also works for every other piece just with dif number
-    public PieceList[] knightList;
-    public PieceList[] bishopList;
-    public PieceList[] rookList;
-    public PieceList[] queenList;
+    //public PieceList[] pawnList; //TODO: Try not using piecelist for pawns bc can always assume theres max 8 per side - also works for every other piece just with dif number
+    //public PieceList[] knightList;
+    //public PieceList[] bishopList;
+    //public PieceList[] rookList;
+    //public PieceList[] queenList;
 
     public PieceList[] allPieceList;
 
@@ -49,6 +49,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
     public PieceList GetPieceList(int type, int colorBit)
     {
+        //TODO: Try optimizing index calculation somehow
         return allPieceList[type - 2 + colorBit * 5];
     }
 
@@ -124,24 +125,25 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         currentZobrist = 0;
 
-        pawnList = new PieceList[2] { new PieceList(8), new PieceList(8) };
-        knightList = new PieceList[2] { new PieceList(10), new PieceList(10) };
-        bishopList = new PieceList[2] { new PieceList(10), new PieceList(10) };
-        rookList = new PieceList[2] { new PieceList(10), new PieceList(10) };
-        queenList = new PieceList[2] { new PieceList(9), new PieceList(9) };
+        //pawnList = new PieceList[2] { new PieceList(8), new PieceList(8) };
+        //knightList = new PieceList[2] { new PieceList(10), new PieceList(10) };
+        //bishopList = new PieceList[2] { new PieceList(10), new PieceList(10) };
+        //rookList = new PieceList[2] { new PieceList(10), new PieceList(10) };
+        //queenList = new PieceList[2] { new PieceList(9), new PieceList(9) };
 
         allPieceList = new PieceList[10]
         {
-            pawnList[0],
-            knightList[0],
-            bishopList[0],
-            rookList[0],
-            queenList[0],
-            pawnList[1],
-            knightList[1],
-            bishopList[1],
-            rookList[1],
-            queenList[1],
+            new PieceList(8), //White pawnlist
+            new PieceList(10), //White knightlist
+            new PieceList(10), //White bishoplist
+            new PieceList(10), //White rooklist
+            new PieceList(9), //White queenlist
+
+            new PieceList(8), //Black pawnlist
+            new PieceList(10), //Black knightlist
+            new PieceList(10), //Black bishoplist
+            new PieceList(10), //Black rooklist
+            new PieceList(9), //Black queenlist
         };
     }
 

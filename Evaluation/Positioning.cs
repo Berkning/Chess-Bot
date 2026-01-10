@@ -56,10 +56,10 @@ public class Positioning //TODOne: endgame tables //TODO: Combine with evaluatio
     {
         int score = 0;
 
-        PieceList currentPieceList = board.pawnList[colorBit]; //Isn't very readable, but slightly more performant?
+        PieceList currentPieceList = board.GetPieceList(Piece.Pawn, colorBit); //Isn't very readable, but slightly more performant?
 
         ulong friendlyPawnBoard = currentPieceList.bitboard;
-        ulong enemyPawnBoard = board.pawnList[enemyColorBit].bitboard;
+        ulong enemyPawnBoard = board.GetPieceList(Piece.Pawn, enemyColorBit).bitboard;
 
         //Score pawn positions
         for (int i = 0; i < currentPieceList.Count; i++)
@@ -96,7 +96,7 @@ public class Positioning //TODOne: endgame tables //TODO: Combine with evaluatio
         }
 
         //Score knight positions
-        currentPieceList = board.knightList[colorBit];
+        currentPieceList = board.GetPieceList(Piece.Knight, colorBit);
 
         for (int i = 0; i < currentPieceList.Count; i++)
         {
@@ -115,7 +115,7 @@ public class Positioning //TODOne: endgame tables //TODO: Combine with evaluatio
         //if (darkBishopBoard != 0) score += Evaluation.lightPawnCount * OppositeColorPawnScore;
 
         //if (lightBishopBoard != 0) score += Evaluation.darkPawnCount * OppositeColorPawnScore;
-        currentPieceList = board.bishopList[colorBit];
+        currentPieceList = board.GetPieceList(Piece.Bishop, colorBit);
 
         if (currentPieceList.Count > 1) score += BishopPairValue;
 
@@ -135,7 +135,7 @@ public class Positioning //TODOne: endgame tables //TODO: Combine with evaluatio
         }
 
         //Score rook positions
-        currentPieceList = board.rookList[colorBit];
+        currentPieceList = board.GetPieceList(Piece.Rook, colorBit);
 
         for (int i = 0; i < currentPieceList.Count; i++)
         {
@@ -146,7 +146,7 @@ public class Positioning //TODOne: endgame tables //TODO: Combine with evaluatio
         }
 
         //Score queen positions
-        currentPieceList = board.queenList[colorBit];
+        currentPieceList = board.GetPieceList(Piece.Queen, colorBit);
 
         for (int i = 0; i < currentPieceList.Count; i++)
         {

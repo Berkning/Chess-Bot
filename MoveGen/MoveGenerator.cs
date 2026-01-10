@@ -88,7 +88,7 @@ public class MoveGenerator
 
 
         //Knight attacks
-        PieceList enemyKnights = board.knightList[board.opponentColorBit];
+        PieceList enemyKnights = board.GetPieceList(Piece.Knight, board.opponentColorBit);
         opponentKnightAttackMap = 0;
         bool isKnightCheck = false;
 
@@ -108,7 +108,7 @@ public class MoveGenerator
 
 
         //Pawn attacks
-        PieceList enemyPawns = board.pawnList[board.opponentColorBit];
+        PieceList enemyPawns = board.GetPieceList(Piece.Pawn, board.opponentColorBit);
         oponnentPawnAttackMap = 0;
         bool isPawnCheck = false;
 
@@ -261,14 +261,14 @@ public class MoveGenerator
 
         if (inDoubleCheck) return moveCount; //Only king moves valid when in double check
 
-        for (int i = 0; i < board.pawnList[board.friendlyColorBit].Count; i++)
+        for (int i = 0; i < board.GetPieceList(Piece.Pawn, board.friendlyColorBit).Count; i++)
         {
-            GeneratePawnMoves(ref moves, board.pawnList[board.friendlyColorBit][i], genOnlyCaptures);
+            GeneratePawnMoves(ref moves, board.GetPieceList(Piece.Pawn, board.friendlyColorBit)[i], genOnlyCaptures); //TODO: Cache piecelist ref ofc!!!
         }
 
-        for (int i = 0; i < board.knightList[board.friendlyColorBit].Count; i++)
+        for (int i = 0; i < board.GetPieceList(Piece.Knight, board.friendlyColorBit).Count; i++)
         {
-            GenerateKnightMoves(ref moves, board.knightList[board.friendlyColorBit][i], genOnlyCaptures);
+            GenerateKnightMoves(ref moves, board.GetPieceList(Piece.Knight, board.friendlyColorBit)[i], genOnlyCaptures); //TODO: Cache piecelist ref ofc!!!
         }
 
         GenerateSlidingMoves(ref moves, genOnlyCaptures);

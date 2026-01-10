@@ -69,9 +69,9 @@ public class Evaluation
     {
         int score = 0;
 
-        PieceList friendlyPawns = board.pawnList[colorBit];
+        PieceList friendlyPawns = board.GetPieceList(Piece.Pawn, colorBit);
         ulong friendlyPawnBoard = friendlyPawns.bitboard;
-        ulong enemyPawnBoard = board.pawnList[enemyColorBit].bitboard;
+        ulong enemyPawnBoard = board.GetPieceList(Piece.Pawn, enemyColorBit).bitboard;
 
         //Doubled Pawns
         // for (int file = 0; file < 8; file++)
@@ -130,25 +130,28 @@ public class Evaluation
         return score;
     }
 
+
+    //TODO: seems like an obvious SIMD use case
     private void EvaluateMaterial(Board board)
     {
         whiteMaterialValue = 0;
         blackMaterialValue = 0;
 
         int whiteNonPawn = 0;
-        whiteNonPawn += board.knightList[0].Count * KnightValue;
-        whiteNonPawn += board.bishopList[0].Count * BishopValue;
-        whiteNonPawn += board.rookList[0].Count * RookValue;
-        whiteNonPawn += board.queenList[0].Count * QueenValue;
+        whiteNonPawn += board.allPieceList[1].Count * KnightValue;
+        whiteNonPawn += board.allPieceList[2].Count * BishopValue;
+        whiteNonPawn += board.allPieceList[3].Count * RookValue;
+        whiteNonPawn += board.allPieceList[4].Count * QueenValue;
 
-        whiteMaterialValue = whiteNonPawn + board.pawnList[0].Count * PawnValue;
+        whiteMaterialValue = whiteNonPawn + board.allPieceList[0].Count * PawnValue;
 
         int blackNonPawn = 0;
-        blackNonPawn += board.knightList[1].Count * KnightValue;
-        blackNonPawn += board.bishopList[1].Count * BishopValue;
-        blackNonPawn += board.rookList[1].Count * RookValue;
-        blackNonPawn += board.queenList[1].Count * QueenValue;
-        blackMaterialValue = blackNonPawn + board.pawnList[1].Count * PawnValue;
+        blackNonPawn += board.allPieceList[6].Count * KnightValue;
+        blackNonPawn += board.allPieceList[7].Count * BishopValue;
+        blackNonPawn += board.allPieceList[8].Count * RookValue;
+        blackNonPawn += board.allPieceList[9].Count * QueenValue;
+
+        blackMaterialValue = blackNonPawn + board.allPieceList[5].Count * PawnValue;
 
         totalMaterialWithoutPawns = whiteNonPawn + blackNonPawn;
     }
