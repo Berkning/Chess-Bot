@@ -1,5 +1,5 @@
 
-//TODO: make this a struct instead
+//TODO: make this a struct instead - not sure if even benefitial?
 public class PieceList
 {
     public int[] occupiedSquares; //Long as count

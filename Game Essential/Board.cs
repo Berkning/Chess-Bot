@@ -171,12 +171,12 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
     public void MakeMove(Move move, bool inSearch = false)
     {
-        if (Squares[move.startSquare] == Piece.None) Console.WriteLine("Tried to move null piece " + BoardHelper.GetMoveNameUCI(move) + " " + move.flag); //TODO: remove for performance
+        //if (Squares[move.startSquare] == Piece.None) Console.WriteLine("Tried to move null piece " + BoardHelper.GetMoveNameUCI(move) + " " + move.flag); //TODOne: remove for performance
 
         uint prevGameState = currentGameState;
         uint prevCastleRights = (prevGameState & castleRightsMask) >> 9;
         int prevEpFile = (int)((prevGameState & epFileMask) >> 5) - 1;
-        uint prev50MoveCount = (prevGameState & fiftyMoveCounterMask) >> 13; //TODO: have to implement this differently in search as well
+        uint prev50MoveCount = (prevGameState & fiftyMoveCounterMask) >> 13; //TODO: have to implement this differently in search as well - maybe just don't - rarely ever see draws by 50 move rule anyway
 
         currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Remove previous castling rights
 
