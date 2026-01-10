@@ -233,7 +233,7 @@ public class Search
         }
 
         int tableEval = transpositionTable.LookupEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, beta);
-        if (tableEval != TranspositionTable.LookupFailed)
+        if (transpositionTable.IsSuccessfulLookup(tableEval))
         {
             //ttHits++;
             if (plyFromRoot == 0)
@@ -241,6 +241,7 @@ public class Search
                 bestMove = transpositionTable.GetStoredMove(board.currentZobrist);
                 bestEval = tableEval;
             }
+
             return tableEval;
         }
 
@@ -256,13 +257,19 @@ public class Search
 
         int moveCount = moveGenerator.GenerateMoves(ref moves);
 
+
+        //TODO: Try setting hash move to the global bestmove if plyfromroot == 0
+        Move hashMove = Move.nullMove;
+
+        if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
+
         /*if (test)*/
-        moveOrdering.OrderMoves(ref moves, moveCount, bestMove, plyFromRoot); //TODO: Try this after the mate check
+        moveOrdering.OrderMoves(ref moves, moveCount, hashMove, plyFromRoot); //TODO: Try this after the mate check
 
         //TODO: Could prob optimize to avoid this if statement
         //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
 
-        //TODO: move this above move ordering bc obv no reason to do move ordering if there aren't any moves
+        //TODO: move this above move ordering bc obv no reason to try to do move ordering if there aren't any moves
         if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
         {
             //Debug.Log("Found Mate");

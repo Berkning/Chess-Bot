@@ -1,11 +1,17 @@
 
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 public class TranspositionTable
 {
     public static int SizeMB = 16; //TODO: adjust based on game speed - 16mb is WAY too small for 10s think
 
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsSuccessfulLookup(int eval) { return eval > DepthFailed; }
+
+    public const int DepthFailed = int.MinValue + 1;
     public const int LookupFailed = int.MinValue;
 
     // The value for this position is the exact evaluation
@@ -112,6 +118,8 @@ public class TranspositionTable
                     return correctedScore;
                 }
             }
+
+            return DepthFailed;
         }
 
         return LookupFailed;
