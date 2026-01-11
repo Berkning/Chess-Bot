@@ -23,7 +23,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     public const uint fiftyMoveCounterMask = 0b1111110000000000000;
 
     //Piece lists
-    //TODO: Try getting rid of these and just using GetPieceList bc faster for movegen at least for some reason (guess cache locality from it being used before calling movegen?)
+    //TODOne: Try getting rid of these and just using GetPieceList bc faster for movegen at least for some reason (guess cache locality from it being used before calling movegen?)
     //public PieceList[] pawnList; //TODO: Try not using piecelist for pawns bc can always assume theres max 8 per side - also works for every other piece just with dif number
     //public PieceList[] knightList;
     //public PieceList[] bishopList;
@@ -105,7 +105,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     }
 
 
-
+    //TODO: Could prob optimize
     public void SetColorToMove(int color)
     {
         colorToMove = color;
@@ -491,7 +491,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     }
 }
 
-//TODO: Struct instead - store byte and not int for memory
+//TODOnt: Struct instead - store byte and not int for memory
 public class Piece
 {
     public const int None = 0;

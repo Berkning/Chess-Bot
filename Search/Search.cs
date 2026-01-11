@@ -130,7 +130,7 @@ public class Search
     #region Aspiration Window
     //public static class AspirationWindow //TODO: Try making non-static
     //{
-    private readonly static int[] windowIncrements = { 25, 100, 400, 1600 }; //TODO: Tweak
+    private readonly static int[] windowIncrements = { 25, 50, 100, 200, 400, 800, 1600 }; //TODO: Tweak
     private const int InstabilityMargin = 25;
 
     private int AspirationSearch(uint depth, int prevResult) //TODO: Think maybe the illegal moves and infinite evals come from not getting a proper width search before search is cancelled so we have to use the capped eval???
@@ -264,12 +264,12 @@ public class Search
         if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
 
         /*if (test)*/
-        moveOrdering.OrderMoves(ref moves, moveCount, hashMove, plyFromRoot); //TODO: Try this after the mate check
+        moveOrdering.OrderMoves(ref moves, moveCount, hashMove, plyFromRoot); //TODOnt: Try this after the mate check - somehow basically makes zero to worse difference
 
         //TODO: Could prob optimize to avoid this if statement
         //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
 
-        //TODO: move this above move ordering bc obv no reason to try to do move ordering if there aren't any moves
+        //TODOnt: move this above move ordering bc obv no reason to try to do move ordering if there aren't any moves - somehow basically makes zero to worse difference
         if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
         {
             //Debug.Log("Found Mate");
