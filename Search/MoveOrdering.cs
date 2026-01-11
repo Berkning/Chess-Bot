@@ -17,12 +17,19 @@ public class MoveOrdering
 
     //Indexed by [sideToMove][from][to] //TODO: Try with [piece][to] - would make array a LOT smaller and maybe not have that much of a negative impact either
 
-    private const int HistoryUpperBound = 7000;
+    private const int MaxHistory = 1024;
     public int[][][] history;
-    public void UpdateHistory(int score, int colorBit, int from, int to)
+
+    public void UpdateHistory(int bonus, int colorBit, int from, int to)
     {
-        history[colorBit][from][to] += score;
-        if (history[colorBit][from][to] > HistoryUpperBound) history[colorBit][from][to] = HistoryUpperBound;
+        int clampedBonus = Math.Clamp(bonus, 0, MaxHistory);
+
+        history[colorBit][from][to] += clampedBonus - history[colorBit][from][to] * clampedBonus / MaxHistory;
+
+
+
+        //history[colorBit][from][to] += score;
+        //if (history[colorBit][from][to] > HistoryUpperBound) history[colorBit][from][to] = HistoryUpperBound;
     }
 
     private Board board;
