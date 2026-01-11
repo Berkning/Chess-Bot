@@ -494,13 +494,13 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 //TODOnt: Struct instead - store byte and not int for memory
 public class Piece
 {
-    public const int None = 0;
-    public const int King = 1;
-    public const int Pawn = 2;
-    public const int Knight = 3;
-    public const int Bishop = 4;
-    public const int Rook = 5;
-    public const int Queen = 6;
+    public const int None = 0; //0b000
+    public const int King = 1; //0b001
+    public const int Pawn = 2; //0b010
+    public const int Knight = 3; //0b011
+    public const int Bishop = 4; //0b100
+    public const int Rook = 5; //0b101
+    public const int Queen = 6; //0b110
 
     public const int White = 8;
     public const int Black = 16;

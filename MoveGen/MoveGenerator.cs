@@ -585,16 +585,16 @@ public class MoveGenerator
 
 public struct Move //FFFFTTTTTTSSSSSS - F = Flag bit - T = Target square bit - S = Start square bit
 {
-    public readonly struct Flag
+    public readonly struct Flag //TODO: Use the last flagbit for quiet vs capture maybe - could make a lot of things easier and avoid expensive checks like whether the target square is empty in make/unmake
     {
         public const int None = 0;
-        public const int EnPassantCapture = 1;
-        public const int Castling = 2;
-        public const int PromoteToQueen = 3;
-        public const int PromoteToKnight = 4;
-        public const int PromoteToRook = 5;
-        public const int PromoteToBishop = 6;
-        public const int PawnTwoForward = 7;
+        public const int EnPassantCapture = 1; //0b001
+        public const int Castling = 2; //0b010
+        public const int PromoteToQueen = 3; //0b011
+        public const int PromoteToKnight = 4; //0b100
+        public const int PromoteToRook = 5; //0b101
+        public const int PromoteToBishop = 6; //0b110
+        public const int PawnTwoForward = 7; //0b111
         public const int TestFlag = 8;
     }
 
