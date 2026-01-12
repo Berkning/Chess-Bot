@@ -32,6 +32,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 isNewGame = true;
                 playedMoves.Clear();
                 Search.transpositionTable.Clear();
+                //TODO: reset killers and history as well
 
                 hasAdjustedThisGame = false;
                 break;

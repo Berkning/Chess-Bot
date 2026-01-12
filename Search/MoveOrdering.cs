@@ -32,6 +32,24 @@ public class MoveOrdering
         //if (history[colorBit][from][to] > HistoryUpperBound) history[colorBit][from][to] = HistoryUpperBound;
     }
 
+    //TODO: reset on new game
+    public void DecayHistory()
+    {
+        for (int i = 0; i < 64; i++)
+        {
+            for (int j = 0; j < 64; j++)
+            {
+                //Console.WriteLine("Before: " + history[0][i][j]);
+                history[0][i][j] *= 9;
+                history[0][i][j] /= 10;
+                //Console.WriteLine("After: " + history[0][i][j]);
+                history[1][i][j] *= 9;
+                history[1][i][j] /= 10;
+            }
+        }
+    }
+
+
     private Board board;
     private MoveGenerator moveGenerator;
     private int threadID;

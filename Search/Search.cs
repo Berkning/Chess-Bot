@@ -62,6 +62,10 @@ public class Search
 
         clock.Reset();
 
+
+        moveOrdering.DecayHistory(); //TODO: maybe do after search when it is our opponents turn
+
+
         if (searchTime == -1)
         {
             searchTime = TimeManagement.GetSearchTime(board.colorToMove); //Doesn't matter that other threads will have same search time and are started with delay. Their searchTime will be set to a negative number when first thread finishes anyway
