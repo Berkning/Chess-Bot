@@ -40,10 +40,10 @@ public class MoveOrdering
             for (int j = 0; j < 64; j++)
             {
                 //Console.WriteLine("Before: " + history[0][i][j]);
-                history[0][i][j] *= 9;
+                history[0][i][j] *= 8;
                 history[0][i][j] /= 10;
                 //Console.WriteLine("After: " + history[0][i][j]);
-                history[1][i][j] *= 9;
+                history[1][i][j] *= 8;
                 history[1][i][j] /= 10;
             }
         }
