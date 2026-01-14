@@ -5,12 +5,11 @@ public static class Perft
 {
     private static long[] correctResults = { 1, 20, 400, 8902, 197281, 4865609, 119060324, 3195901860, 84998978956, 2439530234167 };
 
-    private static Board board = new Board();
-    private static MoveGenerator moveGenerator = new MoveGenerator(board);
-
-    //TODO: Fix running perft on specific pos bc currently not passing engine board
+    //TODOne: Fix running perft on specific pos bc currently not passing engine board
     public static string RunDetailed(int depth, Board board)
     {
+        MoveGenerator moveGenerator = new MoveGenerator(board);
+
         MoveGenerator.PromotionMode prevPromotionMode = MoveGenerator.promotionMode; //Save what the promotionmode was set to
         MoveGenerator.promotionMode = MoveGenerator.PromotionMode.All; //Set the promotion mode to all to ensure we get all possible moves
 
@@ -94,6 +93,8 @@ public static class Perft
             return 1L;
         }
 
+        MoveGenerator moveGenerator = new MoveGenerator(board);
+
         Span<Move> moves = stackalloc Move[256];
 
         int moveCount = moveGenerator.GenerateMoves(ref moves);
@@ -142,6 +143,8 @@ public static class Perft
         bool passedAll = true;
 
         Board board = new Board();
+
+        MoveGenerator moveGenerator = new MoveGenerator(board);
         moveGenerator = new MoveGenerator(board);
 
         for (int i = 0; i < testSuite.Length; i++)
