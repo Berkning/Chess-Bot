@@ -62,6 +62,10 @@ public class Search
 
         clock.Reset();
 
+
+        moveOrdering.DecayHistory(); //TODO: maybe do after search when it is our opponents turn
+
+
         if (searchTime == -1)
         {
             searchTime = TimeManagement.GetSearchTime(board.colorToMove); //Doesn't matter that other threads will have same search time and are started with delay. Their searchTime will be set to a negative number when first thread finishes anyway
@@ -333,6 +337,9 @@ public class Search
                 //TODO: Test without checking for ep for performance bc we already check if this is the case in the moveordering but this will ofc override the space of a valid killer move with an invalid ep move if possible - maybe too rare?
                 if (board.Squares[moves[i].targetSquare] == Piece.None && moves[i].flag != Move.Flag.EnPassantCapture) //If not a capture - only add killer moves that aren't captures, bc these are always ranked highly i guess?
                 {
+                    moveOrdering.UpdateHistory((int)(depth * depth), board.friendlyColorBit, moves[i].startSquare, moves[i].targetSquare);
+                    //moveOrdering.history[board.friendlyColorBit][moves[i].startSquare][moves[i].targetSquare] += (int)(depth * depth); //TODO: maybe just store depth as int to avoid this?
+
                     if (plyFromRoot < MoveOrdering.MaxKillerPlys)
                     {
                         moveOrdering.killerMoves[plyFromRoot].Add(moves[i]);

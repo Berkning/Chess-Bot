@@ -5,7 +5,7 @@ public class MoveOrdering
     private int[] moveScores = new int[218]; //TODOcant: Change to span? Should be way faster in sort especially i think
 
     const int prevBestBias = 2000000;
-    const int killerBias = 500000;
+    const int killerBias = 500000; //TODO: try making smaller than goodCaptureBias
     const int goodCaptureBias = 8000;
     const int badCaptureBias = 1100;
     //const int jitterBias = -100000;
@@ -14,6 +14,41 @@ public class MoveOrdering
     public const int MaxKillerPlys = 32;
 
     public /*static*/ KillerMove[] killerMoves = new KillerMove[MaxKillerPlys]; //TODO: test making atomic
+
+    //Indexed by [sideToMove][from][to] //TODO: Try with [piece][to] - would make array a LOT smaller and maybe not have that much of a negative impact either
+
+    private const int MaxHistory = 1024; //800 seems to be exactly the same/extremely slightly better than 1024
+    public int[][][] history;
+
+    public void UpdateHistory(int bonus, int colorBit, int from, int to)
+    {
+        int clampedBonus = Math.Clamp(bonus, 0, MaxHistory);
+
+        history[colorBit][from][to] += clampedBonus - history[colorBit][from][to] * clampedBonus / MaxHistory;
+
+
+
+        //history[colorBit][from][to] += score;
+        //if (history[colorBit][from][to] > HistoryUpperBound) history[colorBit][from][to] = HistoryUpperBound;
+    }
+
+    //TODO: reset on new game
+    public void DecayHistory()
+    {
+        for (int i = 0; i < 64; i++)
+        {
+            for (int j = 0; j < 64; j++)
+            {
+                //Console.WriteLine("Before: " + history[0][i][j]);
+                history[0][i][j] *= 8;
+                history[0][i][j] /= 10;
+                //Console.WriteLine("After: " + history[0][i][j]);
+                history[1][i][j] *= 8;
+                history[1][i][j] /= 10;
+            }
+        }
+    }
+
 
     private Board board;
     private MoveGenerator moveGenerator;
@@ -24,13 +59,21 @@ public class MoveOrdering
         board = _board;
         moveGenerator = _moveGenerator;
         threadID = _threadID;
+
+        history = new int[2][][] { new int[64][], new int[64][] };
+
+        for (int i = 0; i < 64; i++)
+        {
+            history[0][i] = new int[64];
+            history[1][i] = new int[64];
+        }
     }
 
 
     //TODOne: try penalizing moving very valuable pieces into less valuable enemy attack range - penalize rook in bishop attack range
     public void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove, int ply) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
     {
-        int jitterIndex = moveCount != 0?threadID % moveCount:0;
+        int jitterIndex = moveCount != 0 ? threadID % moveCount : 0;
 
         for (int i = 0; i < moveCount; i++) //TODOne: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
         {
@@ -70,6 +113,9 @@ public class MoveOrdering
                 // }
 
                 if (ply < MaxKillerPlys && killerMoves[ply].Contains(moves[i])) moveScore += killerBias;
+                else moveScore += history[board.friendlyColorBit][moves[i].startSquare][moves[i].targetSquare];
+
+
                 //TODO: try with else if
                 //if (movedPieceValue >= Evaluation.RookValue)
                 //{
@@ -177,9 +223,9 @@ public class MoveOrdering
     }
 
 
-    public struct KillerMove //TODO: if only using one killer per ply, try not using struct and these add and contains methods, just pure array
+    public struct KillerMove //TODO: if only using one killer per ply, try not using struct and these add and contains methods, just pure array - don't see why this would make a difference
     {
-        public Move moveA; //TODO: test adding more than 1 per ply - worse apparently
+        public Move moveA; //TODOne: test adding more than 1 per ply - worse apparently
         //public Move moveB;
 
         public void Add(Move move)
