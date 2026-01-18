@@ -90,20 +90,22 @@ public class MoveOrdering
 
             //if (i == jitterIndex) moveScore += jitterBias;
 
-            if (capturedPieceType != Piece.None)
+
+            if (capturedPieceType != Piece.None) //TODO: Not currently accounting for EP here
             {
                 //moveScore += 10 * Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
                 int valueDelta = Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
 
-                bool canRecaptureGuess = BitBoardHelper.ContainsSquare(moveGenerator.opponentAttackMap, moves[i].targetSquare);
-                if (canRecaptureGuess)
-                {
-                    moveScore += valueDelta >= 0 ? goodCaptureBias : badCaptureBias;
-                }
-                else
-                {
-                    moveScore += goodCaptureBias + valueDelta;
-                }
+                //TODO: Try reimplementing with SEE or LVA-MVV
+                //bool canRecaptureGuess = BitBoardHelper.ContainsSquare(moveGenerator.opponentAttackMap, moves[i].targetSquare);
+                //if (canRecaptureGuess)
+                //{
+                //    moveScore += valueDelta >= 0 ? goodCaptureBias : badCaptureBias;
+                //}
+                //else
+                //{
+                //    moveScore += goodCaptureBias + valueDelta;
+                //}
             }
             else if (moves[i].flag != Move.Flag.EnPassantCapture) //If not a capture
             {
@@ -111,6 +113,8 @@ public class MoveOrdering
                 // {
                 //     moveScore += kingAttackBias;
                 // }
+
+                //if (ply == -1) Console.WriteLine("Non Capture in q-search!!! -> " + Piece.Type(movedPieceType));
 
                 if (ply < MaxKillerPlys && killerMoves[ply].Contains(moves[i])) moveScore += killerBias;
                 else moveScore += history[board.friendlyColorBit][moves[i].startSquare][moves[i].targetSquare];
@@ -147,11 +151,12 @@ public class MoveOrdering
             }
             else
             {
+                //TODO: Try readding by just checking if an enemy pawn is to the upper right or upper left
                 // Penalize moving piece to a square attacked by opponent pawn
-                if (BitBoardHelper.ContainsSquare(moveGenerator.oponnentPawnAttackMap, moves[i].targetSquare))
-                {
-                    moveScore -= 350;
-                }
+                //if (BitBoardHelper.ContainsSquare(moveGenerator.oponnentPawnAttackMap, moves[i].targetSquare))
+                //{
+                //    moveScore -= 350;
+                //}
                 //else if (movedPieceType == Piece.Rook) moveScore -= (int)(100f * Evaluation.earlygameMultiplier); //Penalize moving rook in early game
             }
 

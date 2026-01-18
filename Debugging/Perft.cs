@@ -26,6 +26,14 @@ public static class Perft
             ulong before = board.currentGameState;
             //Debug.Log("Trying to play " + BoardHelper.NameMove(move));
             board.MakeMove(moves[i], true);
+            if (board.IllegalPosition())
+            {
+                board.UnMakeMove(moves[i], true);
+                continue;
+            }
+
+
+
             long result = RunSpecifiedDepth(depth - 1, board);
             Console.WriteLine(BoardHelper.GetMoveNameUCI(moves[i]) + ": " + result);
             results += BoardHelper.GetMoveNameUCI(moves[i]) + ": " + result + "\n";
@@ -104,6 +112,12 @@ public static class Perft
         for (int i = 0; i < moveCount; i++)
         {
             board.MakeMove(moves[i], true);
+            if (board.IllegalPosition())
+            {
+                board.UnMakeMove(moves[i], true);
+                continue;
+            }
+
             numPositions += RunSpecifiedDepth(depth - 1, board);
             board.UnMakeMove(moves[i], true);
         }

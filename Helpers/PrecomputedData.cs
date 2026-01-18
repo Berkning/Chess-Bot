@@ -8,8 +8,8 @@ public static class PrecomputedData
     public static readonly int[] DirectionOffsets = { 8, -8, -1, 1, 7, -7, 9, -9 };
     public static readonly int[][] NumSquaresToEdge = new int[64][];
 
-    public static readonly int[][] PawnAttackSquares = new int[128][]; //0-63 for white, 64-127 for black
-    public static readonly ulong[] pawnAttackBitboards = new ulong[128]; //0-63 for white, 64-127 for black
+    public static readonly int[][] PawnAttackSquares = new int[128][]; //0-63 for white, 64-127 for black //TODO: try with [2][64] instead - should makes indexing less expensive
+    public static readonly ulong[] pawnAttackBitboards = new ulong[128]; //0-63 for white, 64-127 for black //TODO: try with [2][64] instead - should make indexing less expensive
 
     public static readonly int[][] KnightMoves = new int[64][];
     public static readonly ulong[] knightAttackBitboards = new ulong[64];
@@ -33,6 +33,8 @@ public static class PrecomputedData
     //Pawn Masks
     public static readonly ulong[] fileMasks = new ulong[8];
     public static readonly ulong[] passedPawnMasks = new ulong[128];
+
+
 
     //Square Colors
     public const ulong DarkSquareMask = 0b1010101001010101101010100101010110101010010101011010101001010101; //Remember these masks are reverse order - bit furthest to right is square 0

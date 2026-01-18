@@ -168,7 +168,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     }
 
 
-
+    //TODO: Could check if position is illegal after moving the piece, and just reverting that instead of having to go through whole function AND call unmake
     public void MakeMove(Move move, bool inSearch = false)
     {
         //if (Squares[move.startSquare] == Piece.None) Console.WriteLine("Tried to move null piece " + BoardHelper.GetMoveNameUCI(move) + " " + move.flag); //TODOne: remove for performance
@@ -489,6 +489,57 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         //if (currentZobrist != Zobrist.Hash(this)) Console.WriteLine("Zobrist incorrect");
     }
+
+
+    public bool IllegalPosition() //TODO: aggressive inlining
+    {
+        //Only called after makemove
+        //It's now "our" turn to move, so we check if our opponent is currently in check, which would mean we could capture their king and the position is therefore illegal
+
+        int kingSquare = opponentColorBit == 0 ? whiteKingSquare : blackKingSquare;
+
+        //TODO: Try in different orders ofc. Most common checking piece should be checked first - should also take into account how expensive checking for a check is
+        ulong checkingKnights = PrecomputedData.knightAttackBitboards[kingSquare] & GetPieceList(Piece.Knight, friendlyColorBit).bitboard;
+
+        if (checkingKnights != 0) return true;
+
+
+        ulong checkingPawns = PrecomputedData.pawnAttackBitboards[kingSquare + opponentColorBit * 64] & GetPieceList(Piece.Pawn, friendlyColorBit).bitboard;
+
+        if (checkingPawns != 0) return true;
+
+
+        if (Math.Abs(whiteKingSquare - blackKingSquare) < 10) return true; //Kings touching
+
+
+        //TODO: Make global bitboard for all piece
+        ulong allPieces = 1UL << (opponentColorBit == 0 ? blackKingSquare : whiteKingSquare); //Add our king to the blocker bitboard
+
+        for (int i = 0; i < allPieceList.Length; i++)
+        {
+            allPieces |= allPieceList[i].bitboard;
+        }
+
+
+
+        ulong blockers = MagicData.bishopMasks[kingSquare] & allPieces;
+        ulong index = (blockers * MagicData.bishopMagics[kingSquare]) >> MagicData.bishopShifts[kingSquare];
+
+        ulong checkingDiags = MagicData.bishopMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Bishop, friendlyColorBit).bitboard | GetPieceList(Piece.Queen, friendlyColorBit).bitboard);
+
+        if (checkingDiags != 0) return true;
+
+
+        blockers = MagicData.rookMasks[kingSquare] & allPieces;
+        index = (blockers * MagicData.rookMagics[kingSquare]) >> MagicData.rookShifts[kingSquare];
+
+        ulong checkingOrthos = MagicData.rookMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Rook, friendlyColorBit).bitboard | GetPieceList(Piece.Queen, friendlyColorBit).bitboard);
+
+        if (checkingOrthos != 0) return true;
+
+        return false;
+    }
+
 }
 
 //TODOnt: Struct instead - store byte and not int for memory

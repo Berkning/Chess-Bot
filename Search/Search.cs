@@ -273,14 +273,16 @@ public class Search
         //TODO: Could prob optimize to avoid this if statement
         //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
 
-        //TODOnt: move this above move ordering bc obv no reason to try to do move ordering if there aren't any moves - somehow basically makes zero to worse difference
-        if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
-        {
-            //Debug.Log("Found Mate");
-            if (moveGenerator.inCheck) return -(ImmediateMateScore - plyFromRoot); //Checkmate
 
-            return 0; //Stalemate
-        }
+        //Can't use this check when generating pseudo legal moves
+        //TODOnt: move this above move ordering bc obv no reason to try to do move ordering if there aren't any moves - somehow basically makes zero to worse difference
+        //if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
+        //{
+        //    //Debug.Log("Found Mate");
+        //    if (moveGenerator.InCheckFriendly()) return -(ImmediateMateScore - plyFromRoot); //Checkmate
+        //
+        //    return 0; //Stalemate
+        //}
 
 
 
@@ -295,6 +297,12 @@ public class Search
             //Move move = moves[i];
 
             board.MakeMove(moves[i], true); //TODOne: test having ref to move instead of accesing array - prob already done by compiler though
+
+            if (board.IllegalPosition())
+            {
+                board.UnMakeMove(moves[i], true);
+                continue;
+            }
 
             uint extensions = 0;
             if (numExtensions < MaxExtensions)
@@ -408,6 +416,12 @@ public class Search
             nodeCount++;
 
             board.MakeMove(moves[i], true);
+            if (board.IllegalPosition())
+            {
+                board.UnMakeMove(moves[i], true);
+                continue;
+            }
+
             eval = -SearchAllCaptures(-beta, -alpha);
             board.UnMakeMove(moves[i], true);
             //numQNodes++;
