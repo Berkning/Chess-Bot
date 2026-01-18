@@ -26,7 +26,7 @@ public static class Perft
             ulong before = board.currentGameState;
             //Debug.Log("Trying to play " + BoardHelper.NameMove(move));
             board.MakeMove(moves[i], true);
-            if (board.IllegalPosition())
+            if (board.IllegalPosition() || (moves[i].flag == Move.Flag.Castling && board.IllegalCastling(moves[i])))
             {
                 board.UnMakeMove(moves[i], true);
                 continue;
@@ -112,7 +112,7 @@ public static class Perft
         for (int i = 0; i < moveCount; i++)
         {
             board.MakeMove(moves[i], true);
-            if (board.IllegalPosition())
+            if (board.IllegalPosition() || (moves[i].flag == Move.Flag.Castling && board.IllegalCastling(moves[i])))
             {
                 board.UnMakeMove(moves[i], true);
                 continue;

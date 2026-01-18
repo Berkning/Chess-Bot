@@ -144,6 +144,7 @@ public class TranspositionTable
 
         //table[index] = currentEntry;
 
+        //TODO: remove
         if (Math.Abs(eval) > short.MaxValue)
         {
             Console.WriteLine("Eval " + eval + " is outside of short bounds");

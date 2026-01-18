@@ -284,7 +284,9 @@ public class Search
         //    return 0; //Stalemate
         //}
 
-
+        //TODO:
+        //bool inCheck =
+        //byte legalMoves = 0;
 
         Move bestMoveInPosition = Move.nullMove;
         ulong transpositionBound = TranspositionTable.UpperBound;
@@ -298,7 +300,7 @@ public class Search
 
             board.MakeMove(moves[i], true); //TODOne: test having ref to move instead of accesing array - prob already done by compiler though
 
-            if (board.IllegalPosition())
+            if (board.IllegalPosition() || (moves[i].flag == Move.Flag.Castling && board.IllegalCastling(moves[i])))
             {
                 board.UnMakeMove(moves[i], true);
                 continue;
@@ -308,7 +310,7 @@ public class Search
             if (numExtensions < MaxExtensions)
             {
                 //TODO: Search extensions
-                //if (MoveGenerator.inCheck) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
+                //if (inCheck) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
                 int targetRank = BoardHelper.IndexToRank(moves[i].targetSquare);
                 if (Piece.Type(board.Squares[moves[i].targetSquare]) == Piece.Pawn && (targetRank == 1 || targetRank == 6)) extensions = 1; //Extend when about to promote //TODO: test properly
             }
@@ -374,6 +376,11 @@ public class Search
             }
         }
 
+        //if (legalMoves == 0)
+        //{
+
+        //}
+
         if (plyFromRoot > 0) repetitionTable.PopNoRtn();
 
         transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);
@@ -416,7 +423,7 @@ public class Search
             nodeCount++;
 
             board.MakeMove(moves[i], true);
-            if (board.IllegalPosition())
+            if (board.IllegalPosition() || (moves[i].flag == Move.Flag.Castling && board.IllegalCastling(moves[i])))
             {
                 board.UnMakeMove(moves[i], true);
                 continue;

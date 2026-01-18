@@ -228,7 +228,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             }
 
         }
-
+        //TODO: else if
         //Add captured piece to gamestate - depends on whether the captured piece is on the square we landed on, or if ep
         if (move.flag == Move.Flag.EnPassantCapture)
         {
@@ -498,6 +498,11 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         int kingSquare = opponentColorBit == 0 ? whiteKingSquare : blackKingSquare;
 
+        return KingUnsafe(kingSquare);
+    }
+
+    private bool KingUnsafe(int kingSquare)
+    {
         //TODO: Try in different orders ofc. Most common checking piece should be checked first - should also take into account how expensive checking for a check is
         ulong checkingKnights = PrecomputedData.knightAttackBitboards[kingSquare] & GetPieceList(Piece.Knight, friendlyColorBit).bitboard;
 
@@ -540,6 +545,17 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         return false;
     }
 
+    public bool IllegalCastling(Move move)
+    {
+        //Already checking whether the target square was safe for the king
+        if (KingUnsafe(move.startSquare)) return true;
+
+        int direction = Math.Sign(move.targetSquare - move.startSquare);
+
+        if (KingUnsafe(move.startSquare + direction)) return true;
+
+        return false;
+    }
 }
 
 //TODOnt: Struct instead - store byte and not int for memory
