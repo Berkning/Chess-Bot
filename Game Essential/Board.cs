@@ -514,7 +514,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         if (checkingPawns != 0) return true;
 
 
-        if (Math.Abs(whiteKingSquare - blackKingSquare) < 10) return true; //Kings touching
+        if ((PrecomputedData.kingAttackBitboards[whiteKingSquare] & (1UL << blackKingSquare)) != 0) return true; //Kings touching
 
 
         //TODO: Make global bitboard for all piece
