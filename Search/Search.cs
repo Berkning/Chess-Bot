@@ -423,7 +423,9 @@ public class Search
             nodeCount++;
 
             board.MakeMove(moves[i], true);
-            if (board.IllegalPosition() || (moves[i].flag == Move.Flag.Castling && board.IllegalCastling(moves[i])))
+
+            //No need to account for castling as that is always a quiet move
+            if (board.IllegalPosition())
             {
                 board.UnMakeMove(moves[i], true);
                 continue;
