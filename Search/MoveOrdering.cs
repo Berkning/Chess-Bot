@@ -157,7 +157,13 @@ public class MoveOrdering
             }
             else
             {
-                //TODO: Try readding by just checking if an enemy pawn is to the upper right or upper left
+                //TODOne: Try readding by just checking if an enemy pawn is to the upper right or upper left
+
+                if ((PrecomputedData.pawnAttackBitboards[moves[i].targetSquare + board.friendlyColorBit * 64] & board.GetPieceList(Piece.Pawn, board.opponentColorBit).bitboard) != 0)
+                {
+                    moveScore -= 350;
+                }
+
                 // Penalize moving piece to a square attacked by opponent pawn
                 //if (BitBoardHelper.ContainsSquare(moveGenerator.oponnentPawnAttackMap, moves[i].targetSquare))
                 //{
