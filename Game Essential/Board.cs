@@ -518,7 +518,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     //     switch (Piece.Type(movedPiece))
     //     {
     //         case Piece.Pawn:
-    //             return false;
+    //             return PawnMoveLegal(move);
     //         case Piece.Knight:
     //             return false;
     //         case Piece.Bishop:
@@ -534,7 +534,9 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
     // private bool PawnMoveLegal(Move move)
     // {
+    //     int kingSquare = opponentColorBit == 0 ? whiteKingSquare : blackKingSquare; //TODO: Prob keep track of this globally in this class
 
+    //     if ()
     // }
 
 

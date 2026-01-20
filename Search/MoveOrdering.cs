@@ -7,7 +7,7 @@ public class MoveOrdering
     const int prevBestBias = 2000000;
     const int killerBias = 500000; //TODO: try making smaller than goodCaptureBias
     const int goodCaptureBias = 8000;
-    const int badCaptureBias = 1100;
+    const int badCaptureBias = 1100; //TODO: try making negative
     //const int jitterBias = -100000;
     const int kingAttackBias = -250;
 
@@ -81,7 +81,7 @@ public class MoveOrdering
             int movedPieceType = Piece.Type(board.Squares[moves[i].startSquare]);
             int capturedPieceType = Piece.Type(board.Squares[moves[i].targetSquare]);
 
-            int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
+            //int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
             int flag = moves[i].flag; //TODO: try having ref to current move even though prob done by compiler anyway
 
             //TODOne: guess if opponent cant recapture //TODOne: penalize rook and queen movements in early game?
@@ -94,9 +94,15 @@ public class MoveOrdering
             if (capturedPieceType != Piece.None) //TODO: Not currently accounting for EP here
             {
                 //moveScore += 10 * Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
-                int valueDelta = Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
+                //int valueDelta = Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
 
-                //TODO: Try reimplementing with SEE or LVA-MVV
+                if (StaticExchangeEvaluation(moves[i], movedPieceType, capturedPieceType) >= 0)
+                {
+                    moveScore += goodCaptureBias;
+                }
+                else moveScore += badCaptureBias;
+
+                //TODOne: Try reimplementing with SEE or LVA-MVV
                 //bool canRecaptureGuess = BitBoardHelper.ContainsSquare(moveGenerator.opponentAttackMap, moves[i].targetSquare);
                 //if (canRecaptureGuess)
                 //{
@@ -192,6 +198,20 @@ public class MoveOrdering
             j--;
         }
     }
+
+
+    //Implements MVV-LVA - https://www.chessprogramming.org/MVV-LVA
+    //TODO: try iterative SEE
+    private int StaticExchangeEvaluation(Move move, int movedPieceType, int capturedPieceType)
+    {
+        int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
+        int capturedValue = Evaluation.GetPieceTypeValue(capturedPieceType);
+
+        //Assume enemy can recapture
+        return capturedPieceType - movedPieceValue;
+    }
+
+
 
     public void ThreadRootShuffle(ref Span<Move> moves, int moveCount, int threadShuffle)
     {

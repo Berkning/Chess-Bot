@@ -66,7 +66,7 @@ public class Positioning //TODOne: endgame tables //TODO: Combine with evaluatio
         {
             int square = currentPieceList[i];
 
-            int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square); //TODO: Check if performant to do if every single time; pretty easy to optimize prob
+            int index = colorBit == 0 ? square : BoardHelper.FlipIndex(square); //TODO: Check if performant to do if every single time; pretty easy to optimize prob - Could easily precompute array to do this - indexed by colorbit and then square
 
             int endgameValue = PawnLateGame[index];
 
