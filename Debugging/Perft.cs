@@ -96,7 +96,7 @@ public static class Perft
 
     public static long RunSpecifiedDepth(int depth, Board board)
     {
-        if (depth == 0)
+        if (depth == 0) //TODO: Bulk counting?
         {
             return 1L;
         }

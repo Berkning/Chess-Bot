@@ -31,6 +31,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     //public PieceList[] queenList;
 
     public PieceList[] allPieceList;
+    public ulong allPieceBoard = 0;
 
     public int whiteKingSquare;
     public int blackKingSquare;
@@ -57,6 +58,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     {
         Squares[square] = piece;
 
+
         int type = Piece.Type(piece);
 
         if (type == Piece.King) //No need to do zobrist stuff here bc only adding king when loading fen
@@ -65,9 +67,14 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             if (color == Piece.White) whiteKingSquare = square;
             else blackKingSquare = square;
 
+            allPieceBoard |= 1UL << square;
+
             return;
         }
-        else if (type == Piece.None) return; //TODO: prob remove somehow, bc performance
+        else if (type == Piece.None) return; //TODO: prob remove somehow, bc performance - would only have to modify allPieceboard at the top
+
+
+        allPieceBoard |= 1UL << square;
 
         int colorBit = Piece.ColorBit(piece);
 
@@ -89,6 +96,9 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         Squares[targetSquare] = piece;
         Squares[startSquare] = Piece.None;
+
+        allPieceBoard ^= 1UL << startSquare;
+        allPieceBoard ^= 1UL << targetSquare;
     }
 
     public void RemovePiece(int square)
@@ -102,6 +112,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, square]; //Remove piece from zobrist
 
         GetPieceList(type, colorBit).RemovePieceAtSquare(square);
+        allPieceBoard ^= 1UL << square;
     }
 
 
@@ -124,6 +135,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         repetitionTable = new RepetitionTable();
 
         currentZobrist = 0;
+        allPieceBoard = 0;
 
         //pawnList = new PieceList[2] { new PieceList(8), new PieceList(8) };
         //knightList = new PieceList[2] { new PieceList(10), new PieceList(10) };
@@ -160,6 +172,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
 
         gameStateHistory.Clear();
+        allPieceBoard = 0;
     }
 
     public void SaveGameState()
@@ -169,6 +182,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
 
     //TODO: Could check if position is illegal after moving the piece, and just reverting that instead of having to go through whole function AND call unmake
+    //TODO: Try a switch based on the piece type moved
     public void MakeMove(Move move, bool inSearch = false)
     {
         //if (Squares[move.startSquare] == Piece.None) Console.WriteLine("Tried to move null piece " + BoardHelper.GetMoveNameUCI(move) + " " + move.flag); //TODOne: remove for performance
@@ -276,6 +290,9 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             Squares[move.targetSquare] = Squares[move.startSquare];
             Squares[move.startSquare] = Piece.None;
 
+            allPieceBoard ^= 1UL << move.startSquare;
+            allPieceBoard ^= 1UL << move.targetSquare;
+
             int pieceColor = Piece.Color(Squares[move.targetSquare]);
             if (pieceColor == Piece.White)
             {
@@ -382,6 +399,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         if (movedPieceType == Piece.King)
         {
             Squares[move.startSquare] = Squares[move.targetSquare];
+            allPieceBoard ^= 1UL << move.startSquare;
+            allPieceBoard ^= 1UL << move.targetSquare;
 
             int pieceColor = Piece.Color(Squares[move.startSquare]);
             if (pieceColor == Piece.White)
@@ -491,6 +510,36 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     }
 
 
+
+    // public bool IsLegal(Move move)
+    // {
+    //     int movedPiece = Squares[move.startSquare];
+
+    //     switch (Piece.Type(movedPiece))
+    //     {
+    //         case Piece.Pawn:
+    //             return false;
+    //         case Piece.Knight:
+    //             return false;
+    //         case Piece.Bishop:
+    //             return false;
+    //         case Piece.Rook:
+    //             return false;
+    //         case Piece.Queen:
+    //             return false;
+    //         case Piece.King:
+    //             return false;
+    //     }
+    // }
+
+    // private bool PawnMoveLegal(Move move)
+    // {
+
+    // }
+
+
+
+    //TODO: rethink completely. Don't try move in search and then check if illegal. Have a IsLegal(Move move) function here to check whether a move is legal. We can do specific checks based on which piece is moved and what it does
     public bool IllegalPosition() //TODO: aggressive inlining
     {
         //Only called after makemove
@@ -516,18 +565,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         if ((PrecomputedData.kingAttackBitboards[whiteKingSquare] & (1UL << blackKingSquare)) != 0) return true; //Kings touching
 
-
-        //TODO: Make global bitboard for all piece
-        ulong allPieces = 1UL << (opponentColorBit == 0 ? blackKingSquare : whiteKingSquare); //Add our king to the blocker bitboard
-
-        for (int i = 0; i < allPieceList.Length; i++)
-        {
-            allPieces |= allPieceList[i].bitboard;
-        }
-
-
-
-        ulong blockers = MagicData.bishopMasks[kingSquare] & allPieces;
+        ulong blockers = MagicData.bishopMasks[kingSquare] & allPieceBoard;
         ulong index = (blockers * MagicData.bishopMagics[kingSquare]) >> MagicData.bishopShifts[kingSquare];
 
         ulong checkingDiags = MagicData.bishopMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Bishop, friendlyColorBit).bitboard | GetPieceList(Piece.Queen, friendlyColorBit).bitboard);
@@ -535,7 +573,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         if (checkingDiags != 0) return true;
 
 
-        blockers = MagicData.rookMasks[kingSquare] & allPieces;
+        blockers = MagicData.rookMasks[kingSquare] & allPieceBoard;
         index = (blockers * MagicData.rookMagics[kingSquare]) >> MagicData.rookShifts[kingSquare];
 
         ulong checkingOrthos = MagicData.rookMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Rook, friendlyColorBit).bitboard | GetPieceList(Piece.Queen, friendlyColorBit).bitboard);

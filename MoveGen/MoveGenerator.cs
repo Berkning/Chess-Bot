@@ -64,7 +64,7 @@ public class MoveGenerator
         friendlyPieces = board.GetPieceList(Piece.Pawn, friendlyBit).bitboard | board.GetPieceList(Piece.Knight, friendlyBit).bitboard | friendlyDiags | friendlyOrthos | (1UL << friendlyKingSquare);
         enemyPieces = board.GetPieceList(Piece.Pawn, enemyBit).bitboard | board.GetPieceList(Piece.Knight, enemyBit).bitboard | enemyDiags | enemyOrthos | (1UL << enemyKingSquare);
 
-        allPieces = friendlyPieces | enemyPieces;
+        allPieces = friendlyPieces | enemyPieces; //TODO: Can use the one in board class
     }
 
 

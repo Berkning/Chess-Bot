@@ -128,7 +128,7 @@ public static class BoardHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int IndexToFile(int index)
+    public static int IndexToFile(int index) //TODO: use and instead
     {
         return index % 8;
     }
