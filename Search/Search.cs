@@ -286,7 +286,7 @@ public class Search
 
         //TODO:
         //bool inCheck =
-        //byte legalMoves = 0;
+        byte legalMoves = 0;
 
         Move bestMoveInPosition = Move.nullMove;
         ulong transpositionBound = TranspositionTable.UpperBound;
@@ -305,6 +305,8 @@ public class Search
                 board.UnMakeMove(moves[i], true);
                 continue;
             }
+
+            legalMoves++;
 
             uint extensions = 0;
             if (numExtensions < MaxExtensions)
@@ -376,12 +378,18 @@ public class Search
             }
         }
 
-        //if (legalMoves == 0)
-        //{
-
-        //}
-
         if (plyFromRoot > 0) repetitionTable.PopNoRtn();
+
+        if (legalMoves == 0)
+        {
+            //If in check => checkmate
+            if (board.InCheck()) return -(ImmediateMateScore - plyFromRoot);
+
+            //Stalemate
+            return 0;
+        }
+
+
 
         transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);
 

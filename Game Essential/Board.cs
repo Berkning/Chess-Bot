@@ -552,7 +552,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         return KingUnsafe(kingSquare);
     }
 
-    private bool KingUnsafe(int kingSquare)
+    public bool KingUnsafe(int kingSquare)
     {
         //TODO: Try in different orders ofc. Most common checking piece should be checked first - should also take into account how expensive checking for a check is
         ulong checkingKnights = PrecomputedData.knightAttackBitboards[kingSquare] & GetPieceList(Piece.Knight, friendlyColorBit).bitboard;
@@ -579,6 +579,38 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         index = (blockers * MagicData.rookMagics[kingSquare]) >> MagicData.rookShifts[kingSquare];
 
         ulong checkingOrthos = MagicData.rookMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Rook, friendlyColorBit).bitboard | GetPieceList(Piece.Queen, friendlyColorBit).bitboard);
+
+        if (checkingOrthos != 0) return true;
+
+        return false;
+    }
+
+    public bool InCheck()
+    {
+        int kingSquare = friendlyColorBit == 0 ? whiteKingSquare : blackKingSquare;
+
+        ulong checkingKnights = PrecomputedData.knightAttackBitboards[kingSquare] & GetPieceList(Piece.Knight, opponentColorBit).bitboard;
+
+        if (checkingKnights != 0) return true;
+
+
+        ulong checkingPawns = PrecomputedData.pawnAttackBitboards[kingSquare + friendlyColorBit * 64] & GetPieceList(Piece.Pawn, opponentColorBit).bitboard;
+
+        if (checkingPawns != 0) return true;
+
+
+        ulong blockers = MagicData.bishopMasks[kingSquare] & allPieceBoard;
+        ulong index = (blockers * MagicData.bishopMagics[kingSquare]) >> MagicData.bishopShifts[kingSquare];
+
+        ulong checkingDiags = MagicData.bishopMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Bishop, opponentColorBit).bitboard | GetPieceList(Piece.Queen, opponentColorBit).bitboard);
+
+        if (checkingDiags != 0) return true;
+
+
+        blockers = MagicData.rookMasks[kingSquare] & allPieceBoard;
+        index = (blockers * MagicData.rookMagics[kingSquare]) >> MagicData.rookShifts[kingSquare];
+
+        ulong checkingOrthos = MagicData.rookMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Rook, opponentColorBit).bitboard | GetPieceList(Piece.Queen, opponentColorBit).bitboard);
 
         if (checkingOrthos != 0) return true;
 
