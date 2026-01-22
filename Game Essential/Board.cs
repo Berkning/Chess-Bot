@@ -552,7 +552,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         return KingUnsafe(kingSquare);
     }
 
-    public bool KingUnsafe(int kingSquare)
+    private bool KingUnsafe(int kingSquare)
     {
         //TODO: Try in different orders ofc. Most common checking piece should be checked first - should also take into account how expensive checking for a check is
         ulong checkingKnights = PrecomputedData.knightAttackBitboards[kingSquare] & GetPieceList(Piece.Knight, friendlyColorBit).bitboard;
