@@ -428,7 +428,7 @@ public class Search
 
         for (int i = 0; i < moveCount; i++)
         {
-            nodeCount++;
+            nodeCount++; //TODO: increment after testing legality ofc
 
             board.MakeMove(moves[i], true);
 
