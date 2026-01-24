@@ -165,7 +165,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                     Console.WriteLine(test.nodeType);
                     Console.WriteLine(Convert.ToString(test.move.data, 2));
 
-                    Console.WriteLine("Position Illegal: " + Engine.mainBoard.IllegalPosition());
+                    //Console.WriteLine("Position Illegal: " + Engine.mainBoard.IllegalPosition());
 
                     Console.WriteLine("AllPieceBoard: " + Engine.mainBoard.allPieceBoard);
                 }

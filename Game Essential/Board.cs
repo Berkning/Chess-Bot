@@ -511,80 +511,269 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
 
 
-    // public bool IsLegal(Move move)
-    // {
-    //     int movedPiece = Squares[move.startSquare];
-
-    //     switch (Piece.Type(movedPiece))
-    //     {
-    //         case Piece.Pawn:
-    //             return PawnMoveLegal(move);
-    //         case Piece.Knight:
-    //             return false;
-    //         case Piece.Bishop:
-    //             return false;
-    //         case Piece.Rook:
-    //             return false;
-    //         case Piece.Queen:
-    //             return false;
-    //         case Piece.King:
-    //             return false;
-    //     }
-    // }
-
-    // private bool PawnMoveLegal(Move move)
-    // {
-    //     int kingSquare = opponentColorBit == 0 ? whiteKingSquare : blackKingSquare; //TODO: Prob keep track of this globally in this class
-
-    //     if ()
-    // }
-
-
-
-    //TODO: rethink completely. Don't try move in search and then check if illegal. Have a IsLegal(Move move) function here to check whether a move is legal. We can do specific checks based on which piece is moved and what it does
-    public bool IllegalPosition() //TODO: aggressive inlining
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsIllegal(Move move)
     {
-        //Only called after makemove
-        //It's now "our" turn to move, so we check if our opponent is currently in check, which would mean we could capture their king and the position is therefore illegal
+        int kingSquare = friendlyColorBit == 0 ? whiteKingSquare : blackKingSquare;
 
-        int kingSquare = opponentColorBit == 0 ? whiteKingSquare : blackKingSquare;
+        int movedPiece = Squares[move.startSquare];
 
-        return KingUnsafe(kingSquare);
+
+
+        if (Piece.Type(movedPiece) == Piece.King)
+        {
+            allPieceBoard ^= 1UL << move.startSquare;
+            //allPieceBoard ^= 1UL << move.targetSquare;
+            if (friendlyColorBit == 0)
+            {
+                whiteKingSquare = move.targetSquare;
+            }
+            else blackKingSquare = move.targetSquare;
+
+
+            if (KingUnsafe(move.targetSquare))
+            {
+                allPieceBoard ^= 1UL << move.startSquare;
+                //allPieceBoard ^= 1UL << move.targetSquare;
+                if (friendlyColorBit == 0)
+                {
+                    whiteKingSquare = move.startSquare;
+                }
+                else blackKingSquare = move.startSquare;
+
+                return true;
+            }
+            else if (move.flag == Move.Flag.Castling)
+            {
+                bool illegal = IllegalCastling(move);
+
+                allPieceBoard ^= 1UL << move.startSquare;
+                //allPieceBoard ^= 1UL << move.targetSquare;
+                if (friendlyColorBit == 0)
+                {
+                    whiteKingSquare = move.startSquare;
+                }
+                else blackKingSquare = move.startSquare;
+
+                return illegal;
+            }
+
+            if (friendlyColorBit == 0)
+            {
+                whiteKingSquare = move.startSquare;
+            }
+            else blackKingSquare = move.startSquare;
+
+            allPieceBoard ^= 1UL << move.startSquare;
+
+            return false;
+        }
+        else
+        {
+            //TODO: Cleanup - Could so easily move all this into one function and just pass ulong.MaxValue as nonCapMask if not capture
+            if (move.flag == Move.Flag.EnPassantCapture)
+            {
+                int epSquare = BoardHelper.CoordToIndex(BoardHelper.IndexToFile(move.targetSquare), BoardHelper.IndexToRank(move.startSquare));
+
+                ulong nonEPMask = ~(1UL << epSquare);
+
+
+                ulong checkingKnights = PrecomputedData.knightAttackBitboards[kingSquare] & GetPieceList(Piece.Knight, opponentColorBit).bitboard;
+
+                if (checkingKnights != 0) return true;
+
+                ulong checkingPawns = PrecomputedData.pawnAttackBitboards[kingSquare + friendlyColorBit * 64] & GetPieceList(Piece.Pawn, opponentColorBit).bitboard & nonEPMask;
+
+                if (checkingPawns != 0) return true;
+
+                if ((PrecomputedData.kingAttackBitboards[whiteKingSquare] & (1UL << blackKingSquare)) != 0) return true; //Kings touching
+
+
+
+                //We use the allPieceBoard to pretend like we have played the move
+                allPieceBoard ^= 1UL << move.startSquare;
+                allPieceBoard ^= 1UL << move.targetSquare;
+                allPieceBoard ^= 1UL << epSquare;
+
+                //Bishops and queens
+                ulong blockers = MagicData.bishopMasks[kingSquare] & allPieceBoard;
+                ulong index = (blockers * MagicData.bishopMagics[kingSquare]) >> MagicData.bishopShifts[kingSquare];
+
+                ulong checkingDiags = MagicData.bishopMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Bishop, opponentColorBit).bitboard | GetPieceList(Piece.Queen, opponentColorBit).bitboard);
+
+                if (checkingDiags != 0)
+                {
+                    allPieceBoard ^= 1UL << move.startSquare;
+                    allPieceBoard ^= 1UL << move.targetSquare;
+                    allPieceBoard ^= 1UL << epSquare;
+                    return true;
+                }
+
+
+                //Rooks and queens
+                blockers = MagicData.rookMasks[kingSquare] & allPieceBoard;
+                index = (blockers * MagicData.rookMagics[kingSquare]) >> MagicData.rookShifts[kingSquare];
+
+                ulong checkingOrthos = MagicData.rookMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Rook, opponentColorBit).bitboard | GetPieceList(Piece.Queen, opponentColorBit).bitboard);
+
+                if (checkingOrthos != 0)
+                {
+                    allPieceBoard ^= 1UL << move.startSquare;
+                    allPieceBoard ^= 1UL << move.targetSquare;
+                    allPieceBoard ^= 1UL << epSquare;
+                    return true;
+                }
+
+                allPieceBoard ^= 1UL << move.startSquare;
+                allPieceBoard ^= 1UL << move.targetSquare;
+                allPieceBoard ^= 1UL << epSquare;
+                return false;
+            }
+            else if (Squares[move.targetSquare] == 0) //If not capture
+            {
+                ulong checkingKnights = PrecomputedData.knightAttackBitboards[kingSquare] & GetPieceList(Piece.Knight, opponentColorBit).bitboard;
+
+                if (checkingKnights != 0) return true;
+
+                ulong checkingPawns = PrecomputedData.pawnAttackBitboards[kingSquare + friendlyColorBit * 64] & GetPieceList(Piece.Pawn, opponentColorBit).bitboard;
+
+                if (checkingPawns != 0) return true;
+
+                if ((PrecomputedData.kingAttackBitboards[whiteKingSquare] & (1UL << blackKingSquare)) != 0) return true; //Kings touching
+
+
+
+                //We use the allPieceBoard to pretend like we have played the move
+                allPieceBoard ^= 1UL << move.startSquare;
+                allPieceBoard ^= 1UL << move.targetSquare;
+
+                //Bishops and queens
+                ulong blockers = MagicData.bishopMasks[kingSquare] & allPieceBoard;
+                ulong index = (blockers * MagicData.bishopMagics[kingSquare]) >> MagicData.bishopShifts[kingSquare];
+
+                ulong checkingDiags = MagicData.bishopMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Bishop, opponentColorBit).bitboard | GetPieceList(Piece.Queen, opponentColorBit).bitboard);
+
+                if (checkingDiags != 0)
+                {
+                    allPieceBoard ^= 1UL << move.startSquare;
+                    allPieceBoard ^= 1UL << move.targetSquare;
+                    return true;
+                }
+
+
+                //Rooks and queens
+                blockers = MagicData.rookMasks[kingSquare] & allPieceBoard;
+                index = (blockers * MagicData.rookMagics[kingSquare]) >> MagicData.rookShifts[kingSquare];
+
+                ulong checkingOrthos = MagicData.rookMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Rook, opponentColorBit).bitboard | GetPieceList(Piece.Queen, opponentColorBit).bitboard);
+
+                if (checkingOrthos != 0)
+                {
+                    allPieceBoard ^= 1UL << move.startSquare;
+                    allPieceBoard ^= 1UL << move.targetSquare;
+                    return true;
+                }
+
+                allPieceBoard ^= 1UL << move.startSquare;
+                allPieceBoard ^= 1UL << move.targetSquare;
+                return false;
+            }
+            else //Is a capture
+            {
+                ulong nonCaptureMask = ~(1UL << move.targetSquare);
+
+
+                ulong checkingKnights = PrecomputedData.knightAttackBitboards[kingSquare] & GetPieceList(Piece.Knight, opponentColorBit).bitboard & nonCaptureMask;
+
+                if (checkingKnights != 0) return true;
+
+                ulong checkingPawns = PrecomputedData.pawnAttackBitboards[kingSquare + friendlyColorBit * 64] & GetPieceList(Piece.Pawn, opponentColorBit).bitboard & nonCaptureMask;
+
+                if (checkingPawns != 0) return true;
+
+                if ((PrecomputedData.kingAttackBitboards[whiteKingSquare] & (1UL << blackKingSquare)) != 0) return true; //Kings touching
+
+
+
+                //We use the allPieceBoard to pretend like we have played the move
+                allPieceBoard ^= 1UL << move.startSquare;
+                //allPieceBoard ^= 1UL << move.targetSquare;
+
+                //Bishops and queens
+                ulong blockers = MagicData.bishopMasks[kingSquare] & allPieceBoard;
+                ulong index = (blockers * MagicData.bishopMagics[kingSquare]) >> MagicData.bishopShifts[kingSquare];
+
+                ulong checkingDiags = MagicData.bishopMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Bishop, opponentColorBit).bitboard | GetPieceList(Piece.Queen, opponentColorBit).bitboard) & nonCaptureMask;
+
+                if (checkingDiags != 0)
+                {
+                    allPieceBoard ^= 1UL << move.startSquare;
+                    //allPieceBoard ^= 1UL << move.targetSquare;
+                    return true;
+                }
+
+
+                //Rooks and queens
+                blockers = MagicData.rookMasks[kingSquare] & allPieceBoard;
+                index = (blockers * MagicData.rookMagics[kingSquare]) >> MagicData.rookShifts[kingSquare];
+
+                ulong checkingOrthos = MagicData.rookMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Rook, opponentColorBit).bitboard | GetPieceList(Piece.Queen, opponentColorBit).bitboard) & nonCaptureMask;
+
+                if (checkingOrthos != 0)
+                {
+                    allPieceBoard ^= 1UL << move.startSquare;
+                    //allPieceBoard ^= 1UL << move.targetSquare;
+                    return true;
+                }
+
+                allPieceBoard ^= 1UL << move.startSquare;
+                //allPieceBoard ^= 1UL << move.targetSquare;
+                return false;
+            }
+        }
     }
 
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool KingUnsafe(int kingSquare)
     {
         //TODO: Try in different orders ofc. Most common checking piece should be checked first - should also take into account how expensive checking for a check is
-        ulong checkingKnights = PrecomputedData.knightAttackBitboards[kingSquare] & GetPieceList(Piece.Knight, friendlyColorBit).bitboard;
+        ulong checkingKnights = PrecomputedData.knightAttackBitboards[kingSquare] & GetPieceList(Piece.Knight, opponentColorBit).bitboard;
 
         if (checkingKnights != 0) return true;
 
-
-        ulong checkingPawns = PrecomputedData.pawnAttackBitboards[kingSquare + opponentColorBit * 64] & GetPieceList(Piece.Pawn, friendlyColorBit).bitboard;
+        ulong checkingPawns = PrecomputedData.pawnAttackBitboards[kingSquare + friendlyColorBit * 64] & GetPieceList(Piece.Pawn, opponentColorBit).bitboard;
 
         if (checkingPawns != 0) return true;
 
-
         if ((PrecomputedData.kingAttackBitboards[whiteKingSquare] & (1UL << blackKingSquare)) != 0) return true; //Kings touching
 
+        //Bishops and queens
         ulong blockers = MagicData.bishopMasks[kingSquare] & allPieceBoard;
         ulong index = (blockers * MagicData.bishopMagics[kingSquare]) >> MagicData.bishopShifts[kingSquare];
 
-        ulong checkingDiags = MagicData.bishopMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Bishop, friendlyColorBit).bitboard | GetPieceList(Piece.Queen, friendlyColorBit).bitboard);
+        ulong checkingDiags = MagicData.bishopMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Bishop, opponentColorBit).bitboard | GetPieceList(Piece.Queen, opponentColorBit).bitboard);
 
-        if (checkingDiags != 0) return true;
+        if (checkingDiags != 0)
+        {
+            return true;
+        }
 
 
+        //Rooks and queens
         blockers = MagicData.rookMasks[kingSquare] & allPieceBoard;
         index = (blockers * MagicData.rookMagics[kingSquare]) >> MagicData.rookShifts[kingSquare];
 
-        ulong checkingOrthos = MagicData.rookMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Rook, friendlyColorBit).bitboard | GetPieceList(Piece.Queen, friendlyColorBit).bitboard);
+        ulong checkingOrthos = MagicData.rookMoveBitboards[kingSquare][index] & (GetPieceList(Piece.Rook, opponentColorBit).bitboard | GetPieceList(Piece.Queen, opponentColorBit).bitboard);
 
-        if (checkingOrthos != 0) return true;
+        if (checkingOrthos != 0)
+        {
+            return true;
+        }
 
         return false;
     }
 
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IllegalCastling(Move move)
     {
         //Already checking whether the target square was safe for the king

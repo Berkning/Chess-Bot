@@ -22,16 +22,11 @@ public static class Perft
         long totalCount = 0;
         for (int i = 0; i < moveCountInCurrentPosition; i++)
         {
+            if (board.IsIllegal(moves[i])) continue;
 
             ulong before = board.currentGameState;
             //Debug.Log("Trying to play " + BoardHelper.NameMove(move));
             board.MakeMove(moves[i], true);
-            if (board.IllegalPosition() || (moves[i].flag == Move.Flag.Castling && board.IllegalCastling(moves[i])))
-            {
-                board.UnMakeMove(moves[i], true);
-                continue;
-            }
-
 
 
             long result = RunSpecifiedDepth(depth - 1, board);
@@ -111,13 +106,9 @@ public static class Perft
 
         for (int i = 0; i < moveCount; i++)
         {
-            board.MakeMove(moves[i], true);
-            if (board.IllegalPosition() || (moves[i].flag == Move.Flag.Castling && board.IllegalCastling(moves[i])))
-            {
-                board.UnMakeMove(moves[i], true);
-                continue;
-            }
+            if (board.IsIllegal(moves[i])) continue;
 
+            board.MakeMove(moves[i], true);
             numPositions += RunSpecifiedDepth(depth - 1, board);
             board.UnMakeMove(moves[i], true);
         }

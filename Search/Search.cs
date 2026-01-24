@@ -297,14 +297,10 @@ public class Search
         for (int i = 0; i < moveCount; i++)
         {
             //Move move = moves[i];
+            if (board.IsIllegal(moves[i])) continue; //TODO: Could assume hash move is always legal
+
 
             board.MakeMove(moves[i], true); //TODOne: test having ref to move instead of accesing array - prob already done by compiler though
-
-            if (board.IllegalPosition() || (moves[i].flag == Move.Flag.Castling && board.IllegalCastling(moves[i])))
-            {
-                board.UnMakeMove(moves[i], true);
-                continue;
-            }
 
             uint extensions = 0;
             if (numExtensions < MaxExtensions)
@@ -420,16 +416,11 @@ public class Search
 
         for (int i = 0; i < moveCount; i++)
         {
+            if (board.IsIllegal(moves[i])) continue;
+
             nodeCount++;
 
             board.MakeMove(moves[i], true);
-
-            //No need to account for castling as that is always a quiet move
-            if (board.IllegalPosition())
-            {
-                board.UnMakeMove(moves[i], true);
-                continue;
-            }
 
             eval = -SearchAllCaptures(-beta, -alpha);
             board.UnMakeMove(moves[i], true);
