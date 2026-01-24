@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 
@@ -21,6 +22,11 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
             case "uci":
                 Console.WriteLine("id name BerkBot");
                 Console.WriteLine("id author Berkning");
+
+                Console.WriteLine("option name Hash type spin default 16 min 1 max 1024");
+                Console.WriteLine("option name Threads type spin default 1 min 1 max 256");
+                Console.WriteLine("option name Ponder type check default false");
+
                 Console.WriteLine("uciok");
                 break;
             case "isready":
@@ -35,6 +41,56 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 //TODO: reset killers and history as well
 
                 hasAdjustedThisGame = false;
+                break;
+            case "setoption":
+                switch (args[2])
+                {
+                    case "Hash":
+                        uint size = uint.Parse(args[4]);
+
+                        if (!BitOperations.IsPow2(size))
+                        {
+                            uint upper = BitOperations.RoundUpToPowerOf2(size);
+                            uint lower = upper >> 1;
+                            uint lowerDif = size - lower;
+                            uint upperDif = upper - size;
+
+                            Console.WriteLine("Hash size not power of two. Value is between bounds: [" + upper + " > " + size + " > " + lower + "] Where " + (upperDif > lowerDif ? "lower is closest" : "upper is closest"));
+
+                            if (upperDif > lowerDif && lower != 0) //If lower is closest and not 0
+                            {
+                                size = lower;
+                            }
+                            else if (upper < 1025) //If upper is closest or the same distance and not more than 2048
+                            {
+                                size = upper;
+                            }
+                            else size = lower; //If upper is closest or the same distance, but is larger than 2048
+                        }
+
+                        TranspositionTable.SizeMB = (int)size;
+                        Search.transpositionTable = new TranspositionTable();
+                        Console.WriteLine("info string Set Transposition Table size to " + TranspositionTable.SizeMB + "MB");
+                        break;
+                    case "Threads":
+                        int count = int.Parse(args[4]);
+
+                        if (count < 1)
+                        {
+                            Console.WriteLine("Threads cannot be less than 1");
+                            break;
+                        }
+
+                        engine.SetThreadCount(count);
+                        Console.WriteLine("info string Set Threads to " + count);
+                        break;
+                    case "Ponder":
+                        Console.WriteLine("Currently not implemented");
+                        break;
+                    default:
+                        Console.WriteLine("No such option as " + args[2]);
+                        break;
+                }
                 break;
             case "position":
                 InterpretPositionCommand(args);
@@ -190,6 +246,9 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                             break;
                     }
                 }
+                break;
+            case "bench":
+                Benchmark.Run();
                 break;
 
 

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Runtime.CompilerServices;
 
 public class Search
@@ -10,7 +11,7 @@ public class Search
 
     private const int MaxExtensions = 8;
 
-    private int nodeCount = 0;
+    public int nodeCount { get; private set; } = 0;
     private const int CancelDelay = 1023; //Amount of nodes to check before next check of cancelSearch value - HAS to be mask - like ending in only ones -> 0b0001111111
     //private static int quiescenseCount = 0;
     //private static int ttHits = 0;
