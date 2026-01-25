@@ -321,7 +321,7 @@ public class Search
             bool searchFullDepth = true;
 
             //Late Move Reduction
-            if (i > 4 && extensions == 0 && depth > 3)  //Assuming move ordering isn't completely wrong
+            if (legalMoves > 4 && extensions == 0 && depth > 3)  //Assuming move ordering isn't completely wrong //TODO: Prob make a seperate function for calculating the exact depth reduction based on move-index plyfromroot and so on
             {
                 evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -beta, -alpha, numExtensions);
 
@@ -426,10 +426,8 @@ public class Search
 
         moveOrdering.OrderMoves(ref moves, moveCount, bestMove, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
 
-        for (int i = 0; i < moveCount; i++)
+        for (int i = 0; i < moveCount; i++) //TODO: Could use pruning techniques like LMR in q-search as well
         {
-            nodeCount++; //TODO: increment after testing legality ofc
-
             board.MakeMove(moves[i], true);
 
             //No need to account for castling as that is always a quiet move
@@ -438,6 +436,8 @@ public class Search
                 board.UnMakeMove(moves[i], true);
                 continue;
             }
+
+            nodeCount++;
 
             eval = -SearchAllCaptures(-beta, -alpha);
             board.UnMakeMove(moves[i], true);
