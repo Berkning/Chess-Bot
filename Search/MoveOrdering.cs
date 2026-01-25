@@ -2,7 +2,7 @@ using System;
 
 public class MoveOrdering
 {
-    private int[] moveScores = new int[218]; //TODOcant: Change to span? Should be way faster in sort especially i think
+    private int[] moveScores = new int[218]; //TODOcant: Change to span? Should be way faster in sort especially i think //TODO: Stackallock ofc!!!!!
 
     const int prevBestBias = 2000000;
     const int killerBias = 500000; //TODO: try making smaller than goodCaptureBias

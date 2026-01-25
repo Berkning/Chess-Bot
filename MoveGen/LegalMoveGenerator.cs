@@ -583,6 +583,7 @@ public class LegalMoveGenerator
     #endregion
 }
 
+//TODO: make readonly
 public struct Move //FFFFTTTTTTSSSSSS - F = Flag bit - T = Target square bit - S = Start square bit
 {
     public readonly struct Flag //TODO: Use the last flagbit for quiet vs capture maybe - could make a lot of things easier and avoid expensive checks like whether the target square is empty in make/unmake
