@@ -81,7 +81,7 @@ public static class Benchmark
 
         Search.transpositionTable.Clear();
         FenUtility.LoadPositionFromFen(board, positions[currentIndex].fen);
-        search.searchDepth = positions[currentIndex].depth - 1;
+        search.searchDepth = positions[currentIndex].depth - 2;
         search.searchTime = -2;
 
         stopwatch.Restart();
