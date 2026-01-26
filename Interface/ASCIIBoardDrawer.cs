@@ -13,10 +13,11 @@ public static class ASCIIBoardDrawer
             {
                 middle += " " + GetPieceEmoji(board, BoardHelper.CoordToIndex(file, rank)) + " |";
             }
-            Console.WriteLine(middle);
+            Console.WriteLine(middle + ' ' + (rank + 1));
 
             Console.WriteLine("+---+---+---+---+---+---+---+---+");
         }
+        Console.WriteLine("  a   b   c   d   e   f   g   h");
     }
 
     private static char GetPieceEmoji(Board board, int square)

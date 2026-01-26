@@ -190,6 +190,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 break;
             case "d":
                 ASCIIBoardDrawer.DrawBoard(Engine.mainBoard);
+                Console.WriteLine(" ");
                 Console.WriteLine("Fen: " + FenUtility.GetCurrentFen(Engine.mainBoard));
                 break;
             case "test":
