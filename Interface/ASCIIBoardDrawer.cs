@@ -1,7 +1,7 @@
 
 public static class ASCIIBoardDrawer
 {
-    public static void DrawBoard(Board board)
+    public static void DrawBoard(Board board, ulong bitBoard = 0UL)
     {
         Console.WriteLine("+---+---+---+---+---+---+---+---+");
 
@@ -11,7 +11,16 @@ public static class ASCIIBoardDrawer
 
             for (int file = 0; file < 8; file++)
             {
-                middle += " " + GetPieceEmoji(board, BoardHelper.CoordToIndex(file, rank)) + " |";
+                int square = BoardHelper.CoordToIndex(file, rank);
+
+                if (!BitBoardHelper.ContainsSquare(bitBoard, square)) middle += " " + GetPieceEmoji(board, square) + " |";
+                else
+                {
+                    char emoji = GetPieceEmoji(board, square);
+                    if (emoji == ' ') emoji = '=';
+
+                    middle += "<" + emoji + ">|";
+                }
             }
             Console.WriteLine(middle + ' ' + (rank + 1));
 
