@@ -138,20 +138,20 @@ public class Evaluation
         blackMaterialValue = 0;
 
         int whiteNonPawn = 0;
-        whiteNonPawn += board.allPieceList[1].Count * KnightValue;
-        whiteNonPawn += board.allPieceList[2].Count * BishopValue;
-        whiteNonPawn += board.allPieceList[3].Count * RookValue;
-        whiteNonPawn += board.allPieceList[4].Count * QueenValue;
+        whiteNonPawn += board.allPieceList[2].Count * KnightValue;
+        whiteNonPawn += board.allPieceList[4].Count * BishopValue;
+        whiteNonPawn += board.allPieceList[8].Count * RookValue;
+        whiteNonPawn += board.allPieceList[16].Count * QueenValue;
 
-        whiteMaterialValue = whiteNonPawn + board.allPieceList[0].Count * PawnValue;
+        whiteMaterialValue = whiteNonPawn + board.allPieceList[1].Count * PawnValue;
 
         int blackNonPawn = 0;
-        blackNonPawn += board.allPieceList[6].Count * KnightValue;
-        blackNonPawn += board.allPieceList[7].Count * BishopValue;
-        blackNonPawn += board.allPieceList[8].Count * RookValue;
-        blackNonPawn += board.allPieceList[9].Count * QueenValue;
+        blackNonPawn += board.allPieceList[3].Count * KnightValue;
+        blackNonPawn += board.allPieceList[5].Count * BishopValue;
+        blackNonPawn += board.allPieceList[9].Count * RookValue;
+        blackNonPawn += board.allPieceList[17].Count * QueenValue;
 
-        blackMaterialValue = blackNonPawn + board.allPieceList[5].Count * PawnValue;
+        blackMaterialValue = blackNonPawn + board.allPieceList[0].Count * PawnValue;
 
         totalMaterialWithoutPawns = whiteNonPawn + blackNonPawn;
     }

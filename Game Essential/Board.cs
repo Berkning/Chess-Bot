@@ -30,7 +30,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     //public PieceList[] rookList;
     //public PieceList[] queenList;
 
-    public PieceList[] allPieceList;
+    public PieceList[] allPieceList; //TODO: Maybe just add king piecelist as well - or just keep track of bitboard
 
     public int whiteKingSquare;
     public int blackKingSquare;
@@ -50,7 +50,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     public PieceList GetPieceList(int type, int colorBit)
     {
         //TODO: Try optimizing index calculation somehow
-        return allPieceList[type - 2 + colorBit * 5];
+        //return allPieceList[type - 2 + colorBit * 5];
+        return allPieceList[(1 << (type - 2)) ^ colorBit];
     }
 
     public void AddPiece(int square, int piece)
@@ -131,18 +132,25 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         //rookList = new PieceList[2] { new PieceList(10), new PieceList(10) };
         //queenList = new PieceList[2] { new PieceList(9), new PieceList(9) };
 
-        allPieceList = new PieceList[10]
+        allPieceList = new PieceList[18]
         {
+            new PieceList(8), //Black pawnlist
             new PieceList(8), //White pawnlist
             new PieceList(10), //White knightlist
-            new PieceList(10), //White bishoplist
-            new PieceList(10), //White rooklist
-            new PieceList(9), //White queenlist
-
-            new PieceList(8), //Black pawnlist
             new PieceList(10), //Black knightlist
+            new PieceList(10), //White bishoplist
             new PieceList(10), //Black bishoplist
+            null,
+            null,
+            new PieceList(10), //White rooklist
             new PieceList(10), //Black rooklist
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new PieceList(9), //White queenlist
             new PieceList(9), //Black queenlist
         };
     }
@@ -156,6 +164,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         foreach (PieceList pieceList in allPieceList)
         {
+            if (pieceList == null) continue;
+
             pieceList.Clear();
         }
 

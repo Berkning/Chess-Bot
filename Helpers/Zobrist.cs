@@ -275,8 +275,8 @@ public static class Zobrist
         //Add pieces to key
         for (int typeIndex = 0; typeIndex < 5; typeIndex++)
         {
-            PieceList whitePieceList = board.allPieceList[typeIndex];
-            PieceList blackPieceList = board.allPieceList[typeIndex + 5];
+            PieceList whitePieceList = board.GetPieceList(typeIndex + 2, 0); //board.allPieceList[typeIndex];
+            PieceList blackPieceList = board.GetPieceList(typeIndex + 2, 1); //board.allPieceList[typeIndex + 5];
 
             for (int i = 0; i < whitePieceList.Count; i++)
             {
