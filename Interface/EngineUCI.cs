@@ -189,6 +189,15 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 }
                 break;
             case "d":
+                ulong bitBoard = 0UL;
+
+                if (args.Length > 1)
+                {
+                    bitBoard = ulong.Parse(args[1]);
+                }
+
+                ASCIIBoardDrawer.DrawBoard(Engine.mainBoard, bitBoard);
+                Console.WriteLine(" ");
                 Console.WriteLine("Fen: " + FenUtility.GetCurrentFen(Engine.mainBoard));
                 break;
             case "test":
