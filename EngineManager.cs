@@ -124,7 +124,7 @@ public class Engine
             int id = i; //Extremely weird issue where i gets incremented before being passed along to thread if not done like this - found out why. everything is passed as a reference to threads apparently
 
             //if (id != 0) Thread.Sleep(100);
-            if (id != 0) Thread.Sleep(10 * id); //TODOne: Check if id == 0 bc Sleep(0) will yield for other threads
+            //if (id != 0) Thread.Sleep(10 * id); //TODOne: Check if id == 0 bc Sleep(0) will yield for other threads
 
             //if (i % 4 == 0) depth++;
 
