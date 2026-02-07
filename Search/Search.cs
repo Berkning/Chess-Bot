@@ -250,6 +250,8 @@ public class Search
             return tableEval;
         }
 
+        if (InteriorNodeRecognizer.IsDraw(board)) return 0;
+
         if (depth == 0)
         {
             //quiescenseCount++;
