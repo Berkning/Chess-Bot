@@ -38,7 +38,7 @@ public class Engine
 
         for (int i = 0; i < searchThreads.Length; i++)
         {
-            searchThreads[i] = new EngineThread(i, callback);
+            searchThreads[i] = new EngineThread(i, callback, this);
 
             FenUtility.LoadPositionFromFen(searchThreads[i].board, fen);
         }
@@ -117,24 +117,53 @@ public class Engine
 
         searchTimer.Restart();
 
-        for (int i = 0; i < searchThreads.Length; i++)
+        //for (int i = 0; i < searchThreads.Length; i++)
+        //{
+        //Console.WriteLine("info string Thread " + i + " Searching...");
+
+        //int id = i; //Extremely weird issue where i gets incremented before being passed along to thread if not done like this - found out why. everything is passed as a reference to threads apparently
+
+        //if (id != 0) Thread.Sleep(100);
+        //if (id != 0) Thread.Sleep(10 * id); //TODOne: Check if id == 0 bc Sleep(0) will yield for other threads
+
+        //if (i % 4 == 0) depth++;
+
+        //if (Search.cancelSearch) break; //TODO: stop if search has been cancelled while we are launching threads still - prob use own timer for this
+
+        Console.WriteLine("info string Main Thread Searching...");
+
+        availableThreads--;
+        searchThreads[0].Start(depth, time); //TODOne: Keep thread data persistent?
+        //}
+    }
+
+    public void StartHelperThreads(int depth)
+    {
+        Action<Move, int> callback = (result, id) => OnSearchCompleted(result, id);
+
+        for (int i = 1; i < searchThreads.Length; i++) //Start all threads except the main one - these will be helper threads that will stop themselves when they are done
         {
             Console.WriteLine("info string Thread " + i + " Searching...");
 
             int id = i; //Extremely weird issue where i gets incremented before being passed along to thread if not done like this - found out why. everything is passed as a reference to threads apparently
 
-            //if (id != 0) Thread.Sleep(100);
-            //if (id != 0) Thread.Sleep(10 * id); //TODOne: Check if id == 0 bc Sleep(0) will yield for other threads
-
-            //if (i % 4 == 0) depth++;
-
-            //if (Search.cancelSearch) break; //TODO: stop if search has been cancelled while we are launching threads still - prob use own timer for this
-
             availableThreads--;
-            searchThreads[i].Start(depth, time); //TODOne: Keep thread data persistent?
+            searchThreads[i].Start(depth, -2); //Time is set to -2 so that they will stop themselves when they are done searching their assigned depth
         }
     }
 
+    public void StopHelperThreads()
+    {
+        //Console.WriteLine("stopping helper threads");
+
+        for (int i = 1; i < searchThreads.Length; i++)
+        {
+            searchThreads[i].search.searchTime = -999; //Stop helper
+            searchThreads[i].WaitForFinish();
+        }
+
+        //Console.WriteLine("Finished stopping helper threads");
+    }
 
     private void OnSearchCompleted(Move move, int id)
     {
@@ -142,7 +171,7 @@ public class Engine
 
         if (availableThreads == threadCount) Console.WriteLine("info string All Threads Done");
 
-        if (availableThreads > 1) return; //Another thread has already finished so no need to log stuff
+        if (id != 0) return; //This is a helper thread
 
         searchTimer.Stop();
         StopSearch();
@@ -153,7 +182,7 @@ public class Engine
         //Search.cancelSearch = true;
     }
 
-    public void StopSearch()
+    public void StopSearch() //TODO: Wait with .Join()?
     {
         foreach (EngineThread thread in searchThreads) thread.search.searchTime = -999;
     }
@@ -166,11 +195,11 @@ public class Engine
         public Board board;
         private Thread thread;
 
-        public EngineThread(int _id, Action<Move, int> callback)
+        public EngineThread(int _id, Action<Move, int> callback, Engine _engine)
         {
             id = _id;
             board = new Board();
-            search = new Search(board, callback, id);
+            search = new Search(board, callback, id, (id == 0) ? _engine : null);
         }
 
         public void Start(int depth, int time)
@@ -180,6 +209,11 @@ public class Engine
 
             thread = new Thread(search.StartSearch);
             thread.Start(); //TODO: Try unsafestart
+        }
+
+        public void WaitForFinish()
+        {
+            thread.Join();
         }
     }
 }

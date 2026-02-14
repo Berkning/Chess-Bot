@@ -1,7 +1,7 @@
 
 public static class ASCIIBoardDrawer
 {
-    public static void DrawBoard(Board board, ulong bitBoard = 0UL)
+    public static void DrawBoard(Board board, ulong bitBoard = 0UL) //TODO: Add line for zobrist hash
     {
         Console.WriteLine("+---+---+---+---+---+---+---+---+");
 
