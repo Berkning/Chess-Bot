@@ -28,6 +28,7 @@ public class Search
     private MoveGenerator moveGenerator;
     private MoveOrdering moveOrdering;
     private Evaluation evaluator;
+    private Engine engine;
     //private int threadShuffle;
     private int threadID;
     private Action<Move, int> callback;
@@ -36,7 +37,7 @@ public class Search
     private Stopwatch clock = new Stopwatch();
 
 
-    public Search(Board _board, Action<Move, int> _callback, int _threadID)
+    public Search(Board _board, Action<Move, int> _callback, int _threadID, Engine _engine)
     {
         threadID = _threadID;
         callback = _callback;
@@ -46,6 +47,7 @@ public class Search
         moveGenerator = new MoveGenerator(board);
         moveOrdering = new MoveOrdering(board, moveGenerator, threadID);
         evaluator = new Evaluation();
+        engine = _engine;
     }
 
     public int searchDepth = -1;
@@ -105,7 +107,13 @@ public class Search
 
         for (uint depth = 1; depth <= searchDepth; depth++)
         {
-            prevResult = AspirationSearch(depth, prevResult);
+            if (engine != null)
+            {
+                engine.StartHelperThreads((int)depth);
+                prevResult = AspirationSearch(depth, prevResult);
+                engine.StopHelperThreads();
+            }
+            else prevResult = AspirationSearch(depth, prevResult);
 
             if (clock.ElapsedMilliseconds >= searchTime)
             {
@@ -373,7 +381,6 @@ public class Search
 
         return alpha;
     }
-
 
 
     private int SearchAllCaptures(int alpha, int beta) //TODO: maybe try including non-capture promotions - Checks??
