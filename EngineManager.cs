@@ -79,7 +79,7 @@ public class Engine
 
         searchTimer.Restart();
 
-        //                                     Janky
+        //                                     Janky - just use mainboard now
         MateSearch mateSearch = new MateSearch(searchThreads[0].board, callback, 0);
 
         availableThreads--;
@@ -148,6 +148,9 @@ public class Engine
             int id = i; //Extremely weird issue where i gets incremented before being passed along to thread if not done like this - found out why. everything is passed as a reference to threads apparently
 
             availableThreads--;
+
+            if (id % 2 == 1) depth++; //TODO: try starting first helper thread as same depth as main thread
+
             searchThreads[i].Start(depth, -2); //Time is set to -2 so that they will stop themselves when they are done searching their assigned depth
         }
     }
