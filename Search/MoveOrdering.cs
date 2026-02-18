@@ -18,7 +18,7 @@ public class MoveOrdering
     //Indexed by [sideToMove][from][to] //TODO: Try with [piece][to] - would make array a LOT smaller and maybe not have that much of a negative impact either
 
     private const int MaxHistory = 1024; //800 seems to be exactly the same/extremely slightly better than 1024
-    public int[][][] history;
+    public int[][][] history; //TODO: Maybe sync across threads? Probably bad idea
 
     public void UpdateHistory(int bonus, int colorBit, int from, int to)
     {

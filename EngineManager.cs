@@ -137,9 +137,10 @@ public class Engine
         //}
     }
 
-    public void StartHelperThreads(int depth)
+    public void StartHelperThreads(int depth) //TODO: Def doesn't make sense - Maybe it doesn't make sense to have helper threads running iterative deepening but seems like TT makes it almost instant anyway so idk. Does seem stupid tho
     {
         Action<Move, int> callback = (result, id) => OnSearchCompleted(result, id);
+
 
         for (int i = 1; i < searchThreads.Length; i++) //Start all threads except the main one - these will be helper threads that will stop themselves when they are done
         {
@@ -149,7 +150,7 @@ public class Engine
 
             availableThreads--;
 
-            if (id % 2 == 1) depth++; //TODO: try starting first helper thread as same depth as main thread
+            //if (id % 2 == 1) depth++; //TODO: try starting first helper thread as same depth as main thread
 
             searchThreads[i].Start(depth, -2); //Time is set to -2 so that they will stop themselves when they are done searching their assigned depth
         }
@@ -157,18 +158,19 @@ public class Engine
 
     public void StopHelperThreads()
     {
-        //Console.WriteLine("stopping helper threads");
+        Console.WriteLine("stopping helper threads");
+
 
         for (int i = 1; i < searchThreads.Length; i++)
         {
-            searchThreads[i].search.searchTime = -999; //Stop helper
+            searchThreads[i].search.searchTime = int.MinValue; //Stop helper //TODO: Use stopsearch instead of this bc other threads won't be stopping while we wait for this one to finish currently
             searchThreads[i].WaitForFinish();
         }
 
         //Console.WriteLine("Finished stopping helper threads");
     }
 
-    private void OnSearchCompleted(Move move, int id)
+    private void OnSearchCompleted(Move move, int id) //TODO: Just have separate callback for helper threads that doesn't do all of this
     {
         availableThreads++;
 
@@ -187,7 +189,7 @@ public class Engine
 
     public void StopSearch() //TODO: Wait with .Join()?
     {
-        foreach (EngineThread thread in searchThreads) thread.search.searchTime = -999;
+        foreach (EngineThread thread in searchThreads) thread.search.searchTime = int.MinValue;
     }
 
 
@@ -210,7 +212,9 @@ public class Engine
             search.searchDepth = depth;
             search.searchTime = time;
 
-            thread = new Thread(search.StartSearch);
+            if (id == 0) thread = new Thread(search.StartSearch);
+            else thread = new Thread(search.StartHelperSearch);
+
             thread.Start(); //TODO: Try unsafestart
         }
 

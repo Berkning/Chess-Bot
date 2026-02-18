@@ -50,7 +50,7 @@ public class Search
         engine = _engine;
     }
 
-    public int searchDepth = -1;
+    public int searchDepth = -1; //Used as target depth for iterative deepening in main thread and as fixed depth for helper threads
     //Might be necessary to mark as volatile so it's synced when main thread wants to stop this thread
     public int searchTime = -1; //-2 : infinite,  -1 : use time management,  x : use x amount of time
 
@@ -136,7 +136,38 @@ public class Search
         callback.Invoke(bestMove, threadID);
     }
 
+    public void StartHelperSearch()
+    {
+        bestMove = Move.nullMove;
+        bestEval = NegativeInfinity;
+        repetitionTable.Copy(board.repetitionTable);
 
+        nodeCount = -1; //Dont want to include start node
+
+        moveOrdering.DecayHistory(); //TODO: maybe do after search when it is our opponents turn
+
+        searchTime = int.MaxValue; //Helpers will get stopped when main thread finishes, so we can just set this to max value and then check for cancel in the search like normal
+
+
+        int prevResult = NegativeInfinity;
+
+
+        int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
+
+        if (resultFromLastSearch != TranspositionTable.LookupFailed)
+        {
+            prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
+        }
+
+        if (searchDepth >= 1000) Console.WriteLine("Search depth was over 1000 in helper thread " + threadID + "!!");
+
+        int result = AspirationSearch((uint)searchDepth, prevResult);
+
+        LogSearchInfo((uint)searchDepth, nodeCount, clock.ElapsedMilliseconds >= searchTime, threadID);
+
+
+        callback.Invoke(bestMove, threadID);
+    }
 
 
 
