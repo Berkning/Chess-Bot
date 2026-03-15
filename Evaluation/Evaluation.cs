@@ -1,9 +1,12 @@
 
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 public class Evaluation
 {
     //TODO: Maybe make non-static for multithreaded performance
+
+    //ALWAYS make sure the length of this array is divisible by 2, 4, 8 and 16 to support all possible vector sizes
     private static readonly int[] Weights = {
         -1, 1, 0, -8, 3, -9, 20, -4, 0, 0, 0, -5, -6, 0,
         5, -1, 0, 0, 0, 0, 0, 1, 1, -2, 0, 0, 0, 0, 1, 1,
@@ -60,9 +63,46 @@ public class Evaluation
         59, 12, -11
         };
 
+    private Vector<int>[] weightVectors;
+
     private const int Bias = 2;
 
     private int[] Features = new int[Weights.Length];
+
+    public Evaluation()
+    {
+        weightVectors = new Vector<int>[(int)Math.Ceiling(Weights.Length / ((float)Vector<int>.Count))];
+
+        int FullVectorCount = Weights.Length / Vector<int>.Count; //Floors Weights.Length to a multiple of the vector length, giving us the amount of vectors that can be fully filled before we run out of weights to fill them with
+
+        for (int i = 0; i < FullVectorCount; i++)
+        {
+            weightVectors[i] = new Vector<int>(Weights, i * Vector<int>.Count);
+        }
+
+        /*if (weightVectors.Length != FullVectorCount) //If all vectors cant be fully filled, we fill the last one partially
+        {
+
+            int[] lastVectorContents = new int[Vector<int>.Count];
+            int startIndex = FullVectorCount * Vector<int>.Count;
+
+            for (int i = startIndex; i < Weights.Length; i++)
+            {
+                lastVectorContents[i - startIndex] = Weights[i];
+            }
+
+            weightVectors[FullVectorCount] = new Vector<int>(lastVectorContents);
+        }*/
+
+
+        /*for (int i = 0; i < weightVectors.Length; i++)
+        {
+            Console.WriteLine("Vector #" + i + " == " + weightVectors[i]);
+        }*/
+    }
+
+
+
 
     public int Evaluate(Board board)
     {
@@ -75,16 +115,34 @@ public class Evaluation
 
         CalculateFeatures(board);
 
-        int result = Bias;
-
-        for (int i = 0; i < Weights.Length; i++)
-        {
-            result += Features[i] * Weights[i]; //TODO: SIMD
-        }
+        int result = CalculateResult();
 
         int perspective = board.colorToMove == Piece.White ? 1 : -1;
 
         return result * perspective;
+    }
+
+    private int CalculateResult()
+    {
+        int result = Bias;
+
+        //TODO: Use spans instead of passing the entire array
+
+        Vector<int> sumVector = Vector<int>.Zero;
+
+        for (int i = 0; i < weightVectors.Length; i++)
+        {
+            Vector<int> featureVector = new Vector<int>(Features, i * Vector<int>.Count);
+
+            sumVector += featureVector * weightVectors[i];
+        }
+
+        for (int i = 0; i < Vector<int>.Count; i++)
+        {
+            result += sumVector[i];
+        }
+
+        return result;
     }
 
     private void CalculateFeatures(Board board)

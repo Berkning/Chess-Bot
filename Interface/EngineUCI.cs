@@ -236,6 +236,8 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                     Console.WriteLine("Bishop: " + Evaluation.GetPieceTypeValue(Piece.Bishop));
                     Console.WriteLine("Rook: " + Evaluation.GetPieceTypeValue(Piece.Rook));
                     Console.WriteLine("Queen: " + Evaluation.GetPieceTypeValue(Piece.Queen));
+
+                    Console.WriteLine("Vector Length: " + Vector<int>.Count);
                 }
                 break;
             case "gc":
