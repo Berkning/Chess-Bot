@@ -229,6 +229,13 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                     Console.WriteLine(test.depth);
                     Console.WriteLine(test.nodeType);
                     Console.WriteLine(Convert.ToString(test.move.data, 2));
+
+                    Console.WriteLine("Piece Values ------------");
+                    Console.WriteLine("Pawn: " + Evaluation.GetPieceTypeValue(Piece.Pawn));
+                    Console.WriteLine("Knight: " + Evaluation.GetPieceTypeValue(Piece.Knight));
+                    Console.WriteLine("Bishop: " + Evaluation.GetPieceTypeValue(Piece.Bishop));
+                    Console.WriteLine("Rook: " + Evaluation.GetPieceTypeValue(Piece.Rook));
+                    Console.WriteLine("Queen: " + Evaluation.GetPieceTypeValue(Piece.Queen));
                 }
                 break;
             case "gc":
