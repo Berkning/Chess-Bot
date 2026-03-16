@@ -1,6 +1,7 @@
 
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 public class Evaluation
 {
@@ -78,11 +79,14 @@ public class Evaluation
 
         Vector<int> sumVector = Vector<int>.Zero;
 
+        ReadOnlySpan<int> features = Features;
+        ReadOnlySpan<Vector<int>> featureVectors = MemoryMarshal.Cast<int, Vector<int>>(features);
+
         for (int i = 0; i < weightVectors.Length; i++)
         {
-            Vector<int> featureVector = new Vector<int>(Features, i * Vector<int>.Count);
+            //Vector<int> featureVector = new Vector<int>(Features, i * Vector<int>.Count);
 
-            sumVector += featureVector * weightVectors[i];
+            sumVector += featureVectors[i] * weightVectors[i];
         }
 
         for (int i = 0; i < Vector<int>.Count; i++)
