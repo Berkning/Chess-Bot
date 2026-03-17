@@ -83,6 +83,8 @@ public class Evaluation
 
     private const int MaxPhase = KnightPhase * 4 + BishopPhase * 4 + RookPhase * 4 + QueenPhase * 2;
     private int phase; //Phase is between 0 (MG) and 100 (EG)
+    private int mgWeight;
+    private int egWeight;
 
     private void CalculatePhase(Board board)
     {
@@ -98,7 +100,8 @@ public class Evaluation
         phase -= board.GetPieceList(Piece.Queen, 1).Count * QueenPhase;
 
         phase = (phase * 100 + (MaxPhase / 2)) / MaxPhase; //TODO: Implement in a better way
-        //TODO: Precompute phase/100 and 1 - (phase / 100)
+        mgWeight = 1 - (phase / 100);
+        egWeight = phase / 100;
     }
 
     #endregion
@@ -116,8 +119,8 @@ public class Evaluation
 
         //TODO: Use the allPieceList array instead of calling GetPiecelist
 
-        result += Weights[board.whiteKingSquare] * (1 - (phase / 100));
-        result += Weights[board.whiteKingSquare + 384] * (phase / 100);
+        result += Weights[board.whiteKingSquare] * mgWeight;
+        result += Weights[board.whiteKingSquare + 384] * egWeight;
 
         result += SetPSQTFeaturesWhite(board.GetPieceList(Piece.Pawn, 0), 64 * 1);
         result += SetPSQTFeaturesWhite(board.GetPieceList(Piece.Knight, 0), 64 * 2);
@@ -127,8 +130,8 @@ public class Evaluation
 
         int blackKingFlipped = BoardHelper.FlipIndex(board.blackKingSquare);
 
-        result -= Weights[blackKingFlipped] * (1 - (phase / 100));
-        result -= Weights[blackKingFlipped + 384] * (phase / 100);
+        result -= Weights[blackKingFlipped] * mgWeight;
+        result -= Weights[blackKingFlipped + 384] * egWeight;
 
         result += SetPSQTFeaturesBlack(board.GetPieceList(Piece.Pawn, 1), 64 * 1);
         result += SetPSQTFeaturesBlack(board.GetPieceList(Piece.Knight, 1), 64 * 2);
@@ -147,8 +150,8 @@ public class Evaluation
 
         for (int i = 0; i < list.Count; i++)
         {
-            result += Weights[list[i] + PSQTOffset] * (1 - (phase / 100)); //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
-            result += Weights[list[i] + PSQTOffset + 384] * (phase / 100); //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame 
+            result += Weights[list[i] + PSQTOffset] * mgWeight; //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
+            result += Weights[list[i] + PSQTOffset + 384] * egWeight; //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame 
         }
 
         return result;
@@ -164,8 +167,8 @@ public class Evaluation
             //TODO: Rename "flipindex" to "mirrorindex"
             int mirroredSquare = BoardHelper.FlipIndex(list[i]);
 
-            result -= Weights[mirroredSquare + PSQTOffset] * (1 - (phase / 100)); //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
-            result -= Weights[mirroredSquare + PSQTOffset + 384] * (phase / 100); //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame
+            result -= Weights[mirroredSquare + PSQTOffset] * mgWeight; //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
+            result -= Weights[mirroredSquare + PSQTOffset + 384] * egWeight; //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame
         }
 
         return result;
@@ -355,7 +358,7 @@ public class Evaluation
 
         if (!BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.Up)) missingPawnDefenseDifference--;
 
-        result += Weights[783] * missingPawnDefenseDifference * (1 - phase / 100);
+        result += Weights[783] * missingPawnDefenseDifference * mgWeight;
 
         return result;
     }
