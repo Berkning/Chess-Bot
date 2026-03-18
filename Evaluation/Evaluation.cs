@@ -82,7 +82,7 @@ public class Evaluation
     private const int QueenPhase = 4;
 
     private const int MaxPhase = KnightPhase * 4 + BishopPhase * 4 + RookPhase * 4 + QueenPhase * 2;
-    private int phase; //Phase is between 0 (MG) and 100 (EG)
+    private int phase; //Phase is between 0 (MG) and 256 (EG)
     private int mgWeight;
     private int egWeight;
 
@@ -99,9 +99,10 @@ public class Evaluation
         phase -= board.GetPieceList(Piece.Queen, 0).Count * QueenPhase;
         phase -= board.GetPieceList(Piece.Queen, 1).Count * QueenPhase;
 
-        phase = (phase * 100 + (MaxPhase / 2)) / MaxPhase; //TODO: Implement in a better way
-        mgWeight = 1 - (phase / 100);
-        egWeight = phase / 100;
+        phase = (phase * 256 + (MaxPhase / 2)) / MaxPhase;
+
+        mgWeight = 256 - phase;
+        egWeight = phase;
     }
 
     #endregion
@@ -119,8 +120,8 @@ public class Evaluation
 
         //TODO: Use the allPieceList array instead of calling GetPiecelist
 
-        result += Weights[board.whiteKingSquare] * mgWeight;
-        result += Weights[board.whiteKingSquare + 384] * egWeight;
+        result += (Weights[board.whiteKingSquare] * mgWeight) >> 8;
+        result += (Weights[board.whiteKingSquare + 384] * egWeight) >> 8;
 
         result += SetPSQTFeaturesWhite(board.GetPieceList(Piece.Pawn, 0), 64 * 1);
         result += SetPSQTFeaturesWhite(board.GetPieceList(Piece.Knight, 0), 64 * 2);
@@ -130,8 +131,8 @@ public class Evaluation
 
         int blackKingFlipped = BoardHelper.FlipIndex(board.blackKingSquare);
 
-        result -= Weights[blackKingFlipped] * mgWeight;
-        result -= Weights[blackKingFlipped + 384] * egWeight;
+        result -= (Weights[blackKingFlipped] * mgWeight) >> 8;
+        result -= (Weights[blackKingFlipped + 384] * egWeight) >> 8;
 
         result += SetPSQTFeaturesBlack(board.GetPieceList(Piece.Pawn, 1), 64 * 1);
         result += SetPSQTFeaturesBlack(board.GetPieceList(Piece.Knight, 1), 64 * 2);
@@ -150,8 +151,8 @@ public class Evaluation
 
         for (int i = 0; i < list.Count; i++)
         {
-            result += Weights[list[i] + PSQTOffset] * mgWeight; //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
-            result += Weights[list[i] + PSQTOffset + 384] * egWeight; //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame 
+            result += (Weights[list[i] + PSQTOffset] * mgWeight) >> 8; //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
+            result += (Weights[list[i] + PSQTOffset + 384] * egWeight) >> 8; //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame 
         }
 
         return result;
@@ -167,8 +168,8 @@ public class Evaluation
             //TODO: Rename "flipindex" to "mirrorindex"
             int mirroredSquare = BoardHelper.FlipIndex(list[i]);
 
-            result -= Weights[mirroredSquare + PSQTOffset] * mgWeight; //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
-            result -= Weights[mirroredSquare + PSQTOffset + 384] * egWeight; //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame
+            result -= (Weights[mirroredSquare + PSQTOffset] * mgWeight) >> 8; //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
+            result -= (Weights[mirroredSquare + PSQTOffset + 384] * egWeight) >> 8; //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame
         }
 
         return result;
@@ -358,7 +359,7 @@ public class Evaluation
 
         if (!BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.Up)) missingPawnDefenseDifference--;
 
-        result += Weights[783] * missingPawnDefenseDifference * mgWeight;
+        result += (Weights[783] * missingPawnDefenseDifference * mgWeight) >> 8;
 
         return result;
     }
