@@ -334,11 +334,12 @@ public class Evaluation
     #region King Safety
     //TODO: Add way more features
     //1 missing pawns on top of king difference = 1 feature
-    private int CalculateKingSafety(Board board)
+    private int CalculateKingSafety(Board board) //TODO: Extend pawn cover to include extra row above king so pawns are allowed to push - maybe add as new feature bc it's prob still bad if all pawns push but idk
     {
         int result = 0;
 
         //TODO: Calculate in PrecomputedData
+        //TODO: Currently counts pawns above king no matter where he is - if king moves up with the pawn it still sees no pawns missing - we should prob also only apply this when castled to not get weird results in the opening where the king is in the middle
         int missingPawnDefenseDifference = 0;
 
         int kingFile = BoardHelper.IndexToFile(board.whiteKingSquare);
@@ -353,11 +354,11 @@ public class Evaluation
 
         kingFile = BoardHelper.IndexToFile(board.blackKingSquare);
 
-        if (kingFile > 0 && !BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.UpLeft)) missingPawnDefenseDifference--;
+        if (kingFile > 0 && !BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.DownLeft)) missingPawnDefenseDifference--;
 
-        if (kingFile < 7 && !BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.UpRight)) missingPawnDefenseDifference--;
+        if (kingFile < 7 && !BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.DownRight)) missingPawnDefenseDifference--;
 
-        if (!BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.Up)) missingPawnDefenseDifference--;
+        if (!BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.Down)) missingPawnDefenseDifference--;
 
         result += (Weights[783] * missingPawnDefenseDifference * mgWeight) >> 8;
 
