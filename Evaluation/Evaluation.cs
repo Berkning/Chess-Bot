@@ -338,27 +338,19 @@ public class Evaluation
     {
         int result = 0;
 
-        //TODO: Calculate in PrecomputedData
         //TODO: Currently counts pawns above king no matter where he is - if king moves up with the pawn it still sees no pawns missing - we should prob also only apply this when castled to not get weird results in the opening where the king is in the middle
         int missingPawnDefenseDifference = 0;
 
-        int kingFile = BoardHelper.IndexToFile(board.whiteKingSquare);
+        //                                                      First find pawns in the cover area/mask                             then invert all bits inside the mask to show holes in cover
+        ulong whiteCoverHoles = (PrecomputedData.kingPawnCoverMasks[board.whiteKingSquare] & board.GetPieceList(Piece.Pawn, 0).bitboard) ^ PrecomputedData.kingPawnCoverMasks[board.whiteKingSquare];
 
-        if (kingFile > 0 && !BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 0).bitboard, board.whiteKingSquare + PrecomputedData.UpLeft)) missingPawnDefenseDifference++;
-
-        if (kingFile < 7 && !BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 0).bitboard, board.whiteKingSquare + PrecomputedData.UpRight)) missingPawnDefenseDifference++;
-
-        if (!BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 0).bitboard, board.whiteKingSquare + PrecomputedData.Up)) missingPawnDefenseDifference++;
+        missingPawnDefenseDifference += BitBoardHelper.BitCount(whiteCoverHoles);
 
 
 
-        kingFile = BoardHelper.IndexToFile(board.blackKingSquare);
+        ulong blackCoverHoles = (PrecomputedData.kingPawnCoverMasks[board.blackKingSquare + 64] & board.GetPieceList(Piece.Pawn, 1).bitboard) ^ PrecomputedData.kingPawnCoverMasks[board.blackKingSquare + 64];
 
-        if (kingFile > 0 && !BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.DownLeft)) missingPawnDefenseDifference--;
-
-        if (kingFile < 7 && !BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.DownRight)) missingPawnDefenseDifference--;
-
-        if (!BitBoardHelper.ContainsSquare(board.GetPieceList(Piece.Pawn, 1).bitboard, board.blackKingSquare + PrecomputedData.Down)) missingPawnDefenseDifference--;
+        missingPawnDefenseDifference -= BitBoardHelper.BitCount(blackCoverHoles);
 
         result += (Weights[783] * missingPawnDefenseDifference * mgWeight) >> 8;
 
