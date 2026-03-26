@@ -130,19 +130,19 @@ public class MoveOrdering
 
                 if (flag == Move.Flag.PromoteToQueen) //TODO: Maybe account for king attack squares here
                 {
-                    moveScore += Evaluation.QueenValue;
+                    moveScore += Evaluation.GetPieceTypeValue(Piece.Queen);
                 }
                 else if (flag == Move.Flag.PromoteToKnight)
                 {
-                    moveScore += Evaluation.KnightValue;
+                    moveScore += Evaluation.GetPieceTypeValue(Piece.Knight);
                 }
                 else if (flag == Move.Flag.PromoteToRook)
                 {
-                    moveScore += Evaluation.RookValue;
+                    moveScore += Evaluation.GetPieceTypeValue(Piece.Rook);
                 }
                 else if (flag == Move.Flag.PromoteToBishop)
                 {
-                    moveScore += Evaluation.BishopValue;
+                    moveScore += Evaluation.GetPieceTypeValue(Piece.Bishop);
                 }
             }
             else

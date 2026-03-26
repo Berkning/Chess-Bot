@@ -47,7 +47,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
 
 
-    public PieceList GetPieceList(int type, int colorBit)
+    public PieceList GetPieceList(int type, int colorBit) //TODO: Replace with an array: pieceLists[piece][colorBit]
     {
         //TODO: Try optimizing index calculation somehow
         return allPieceList[type - 2 + colorBit * 5];
