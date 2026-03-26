@@ -46,7 +46,7 @@ public static class Benchmark
 
         board = new Board();
 
-        search = new Search(board, callback, 0);
+        search = new Search(board, callback, 0, null);
         search.searchTime = -2;
         stopwatch.Reset();
         currentIndex = -1;
