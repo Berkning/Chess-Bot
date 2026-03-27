@@ -320,10 +320,9 @@ public class Search
             //Late Move Reduction
             if (i > 4 && extensions == 0 && depth > 3)  //Assuming move ordering isn't completely wrong
             {
-                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -beta, -alpha, numExtensions);
+                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions);
 
-                //TODOne: if eval jumps, analyse at full depth
-                //If evals better than anything else so far well search to full depth - horizon effect but outweighed by speed
+                //If evals better than anything else so far we'll search to full depth
                 searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime); //TODOnt?: Move cancel check to separate if before this
             }
 
