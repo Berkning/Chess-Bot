@@ -291,6 +291,16 @@ public class Search
             return 0; //Stalemate
         }
 
+        //Null-Move pruning
+        if (depth > 3 && !moveGenerator.inCheck)
+        {
+            board.MakeNullMove();
+            uint nullReduction = 3;
+            int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
+            board.UnMakeNullMove();
+            if (nullEval >= beta) return nullEval;
+        }
+
 
 
         Move bestMoveInPosition = Move.nullMove;

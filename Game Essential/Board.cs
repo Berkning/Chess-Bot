@@ -489,6 +489,55 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         //if (currentZobrist != Zobrist.Hash(this)) Console.WriteLine("Zobrist incorrect");
     }
+
+
+
+    public void MakeNullMove()
+    {
+        uint prevGameState = currentGameState;
+        uint prevCastleRights = (prevGameState & castleRightsMask) >> 9;
+        int prevEpFile = (int)((prevGameState & epFileMask) >> 5) - 1;
+        uint prev50MoveCount = (prevGameState & fiftyMoveCounterMask) >> 13; //TODO: have to implement this differently in search as well - maybe just don't - rarely ever see draws by 50 move rule anyway
+
+        currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Remove previous castling rights
+
+        currentGameState = 0;
+
+        SetColorToMove(Piece.OppositeColor(colorToMove));
+        currentZobrist ^= Zobrist.sideToMove; //Toggle side to move
+
+
+        currentGameState |= prevCastleRights << 9;
+
+        currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Add new castling rights
+        if (prevEpFile != -1) currentZobrist ^= Zobrist.epArray[prevEpFile]; //Remove old ep file
+
+        gameStateHistory.Push(currentGameState);
+    }
+
+    public void UnMakeNullMove()
+    {
+        SetColorToMove(Piece.OppositeColor(colorToMove));
+
+        uint prevCastleRights = (currentGameState & castleRightsMask) >> 9;
+        int prevEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
+
+        currentZobrist ^= Zobrist.sideToMove;
+        if (prevEpFile != -1) currentZobrist ^= Zobrist.epArray[prevEpFile];
+
+        currentZobrist ^= Zobrist.castlingArray[prevCastleRights];
+
+        gameStateHistory.Pop();
+
+        currentGameState = gameStateHistory.Peek();
+
+        uint newCastleRights = (currentGameState & castleRightsMask) >> 9;
+        int newEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
+
+        if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
+
+        currentZobrist ^= Zobrist.castlingArray[newCastleRights];
+    }
 }
 
 //TODOnt: Struct instead - store byte and not int for memory
