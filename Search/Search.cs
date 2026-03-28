@@ -303,6 +303,11 @@ public class Search
 
             if (before != after) Console.WriteLine("bestmove No match: " + before + " : " + after + " : " + board.currentZobrist);
 
+            if ((nodeCount & CancelDelay) == 0)
+            {
+                if (clock.ElapsedMilliseconds >= searchTime) return 0;
+            }
+
             if (nullEval >= beta) return nullEval;
         }
 
