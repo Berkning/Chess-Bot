@@ -489,6 +489,47 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         //if (currentZobrist != Zobrist.Hash(this)) Console.WriteLine("Zobrist incorrect");
     }
+
+
+
+    public void MakeNullMove()
+    {
+        uint prevGameState = currentGameState;
+        int prevEpFile = (int)((prevGameState & epFileMask) >> 5) - 1;
+
+        SetColorToMove(Piece.OppositeColor(colorToMove));
+        currentZobrist ^= Zobrist.sideToMove; //Toggle side to move
+
+        if (prevEpFile != -1)
+        {
+            currentZobrist ^= Zobrist.epArray[prevEpFile]; //Remove old ep file
+            currentGameState ^= prevGameState & epFileMask;
+        }
+
+        gameStateHistory.Push(currentGameState);
+
+        //Console.WriteLine(currentGameState);
+    }
+
+    public void UnMakeNullMove()
+    {
+        SetColorToMove(Piece.OppositeColor(colorToMove));
+
+        int prevEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
+
+        currentZobrist ^= Zobrist.sideToMove;
+        if (prevEpFile != -1) currentZobrist ^= Zobrist.epArray[prevEpFile];
+
+        gameStateHistory.Pop();
+
+        currentGameState = gameStateHistory.Peek();
+
+        int newEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
+
+        if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
+
+        //Console.WriteLine(currentGameState);
+    }
 }
 
 //TODOnt: Struct instead - store byte and not int for memory

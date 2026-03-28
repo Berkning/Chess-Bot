@@ -291,6 +291,26 @@ public class Search
             return 0; //Stalemate
         }
 
+        //Null-Move pruning
+        if (depth > 3 && !moveGenerator.inCheck)
+        {
+            ulong before = board.currentGameState ^ board.currentZobrist;
+            board.MakeNullMove();
+            uint nullReduction = 3;
+            int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
+            board.UnMakeNullMove();
+            ulong after = board.currentGameState ^ board.currentZobrist;
+
+            if (before != after) Console.WriteLine("bestmove No match: " + before + " : " + after + " : " + board.currentZobrist);
+
+            if ((nodeCount & CancelDelay) == 0)
+            {
+                if (clock.ElapsedMilliseconds >= searchTime) return 0;
+            }
+
+            if (nullEval >= beta) return nullEval;
+        }
+
 
 
         Move bestMoveInPosition = Move.nullMove;

@@ -199,6 +199,8 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 ASCIIBoardDrawer.DrawBoard(Engine.mainBoard, bitBoard);
                 Console.WriteLine(" ");
                 Console.WriteLine("Fen: " + FenUtility.GetCurrentFen(Engine.mainBoard));
+                Console.WriteLine(" ");
+                Console.WriteLine("Zobrist: " + Convert.ToString((long)Engine.mainBoard.currentZobrist, 16));
                 break;
             case "test":
                 if (args.Length == 1) Console.WriteLine(/*MoveOrdering.jitterBias*/"Disabled");
