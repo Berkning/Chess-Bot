@@ -292,10 +292,10 @@ public class Search
         }
 
         //Null-Move pruning
-        if (depth > 4 && !moveGenerator.inCheck)
+        if (depth > 3 && !moveGenerator.inCheck)
         {
             board.MakeNullMove();
-            uint nullReduction = 4;
+            uint nullReduction = 3;
             int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
             board.UnMakeNullMove();
             if (nullEval >= beta) return nullEval;
