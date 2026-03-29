@@ -105,6 +105,22 @@ public class Evaluation
         egWeight = phase;
     }
 
+    public int GetRawPhase(Board board) //0 -> MaxPhase
+    {
+        phase = MaxPhase;
+
+        phase -= board.GetPieceList(Piece.Knight, 0).Count * KnightPhase;
+        phase -= board.GetPieceList(Piece.Knight, 1).Count * KnightPhase;
+        phase -= board.GetPieceList(Piece.Bishop, 0).Count * BishopPhase;
+        phase -= board.GetPieceList(Piece.Bishop, 1).Count * BishopPhase;
+        phase -= board.GetPieceList(Piece.Rook, 0).Count * RookPhase;
+        phase -= board.GetPieceList(Piece.Rook, 1).Count * RookPhase;
+        phase -= board.GetPieceList(Piece.Queen, 0).Count * QueenPhase;
+        phase -= board.GetPieceList(Piece.Queen, 1).Count * QueenPhase;
+
+        return phase;
+    }
+
     #endregion
 
 
