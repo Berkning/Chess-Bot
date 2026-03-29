@@ -507,8 +507,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
 
         gameStateHistory.Push(currentGameState);
-
-        //Console.WriteLine(currentGameState);
     }
 
     public void UnMakeNullMove()
@@ -527,8 +525,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         int newEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
 
         if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
-
-        //Console.WriteLine(currentGameState);
     }
 }
 
