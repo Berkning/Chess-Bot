@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 public static class Perft
@@ -147,6 +148,9 @@ public static class Perft
         MoveGenerator moveGenerator = new MoveGenerator(board);
         moveGenerator = new MoveGenerator(board);
 
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+
         for (int i = 0; i < testSuite.Length; i++)
         {
             SuiteComponent component = testSuite[i];
@@ -160,7 +164,9 @@ public static class Perft
             Console.WriteLine("Test " + (i + 1) + '/' + testSuite.Length + " - Ply: " + component.depth + " Nodes: " + result + " Passed: " + passed + (passed ? "" : " Expected: " + component.correctResult) + "   Fen: " + component.fen);
         }
 
-        Console.WriteLine(passedAll ? "Suite Passed" : "Suite Failed");
+        stopwatch.Stop();
+
+        Console.WriteLine((passedAll ? "Suite Passed in " : "Suite Failed in ") + stopwatch.ElapsedMilliseconds + "ms");
 
         MoveGenerator.promotionMode = prevPromotionMode;
     }

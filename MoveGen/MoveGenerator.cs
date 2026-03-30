@@ -47,16 +47,9 @@ public class MoveGenerator
     {
         GenerateSlidingAttackMap();
 
-        ulong kingOrthoMask = MagicData.rookMasks[friendlyKingSquare] & enemyPieces; //Bitboard of enemy ortho attack blcoks by enemy's own pieces
+        ulong kingOrthoAttackMask = MagicData.GetRookMoveBoard(enemyPieces, friendlyKingSquare); //Bitboard of potential ortho attack directions
 
-        ulong kingOrthoIndex = (kingOrthoMask * MagicData.rookMagics[friendlyKingSquare]) >> MagicData.rookShifts[friendlyKingSquare];
-
-        ulong kingOrthoAttackMask = MagicData.rookMoveBitboards[friendlyKingSquare][kingOrthoIndex]; //Bitboard of potential ortho attack directions
-
-        ulong kingDiagMask = MagicData.bishopMasks[friendlyKingSquare] & enemyPieces; //Bitboard of enemy diags attack blcoks by enemy's own pieces
-        ulong kingDiagIndex = (kingDiagMask * MagicData.bishopMagics[friendlyKingSquare]) >> MagicData.bishopShifts[friendlyKingSquare];
-
-        ulong kingDiagAttackMask = MagicData.bishopMoveBitboards[friendlyKingSquare][kingDiagIndex]; //Bitboard of potential diag attack directions
+        ulong kingDiagAttackMask = MagicData.GetBishopMoveBoard(enemyPieces, friendlyKingSquare); //Bitboard of potential diag attack directions
 
         ulong kingAttackMask = kingOrthoAttackMask | kingDiagAttackMask; //Bitboard of enemy slider attack blcoks - ignoring slider behind slider
         ulong potentialKingAttackers = (kingOrthoAttackMask & enemyOrthos) | (kingDiagAttackMask & enemyDiags); //Bitboard of all enemy sliders that could be checking or pinning
@@ -147,11 +140,7 @@ public class MoveGenerator
         {
             int startSquare = BitBoardHelper.PopFirstBit(ref orthos);
 
-            ulong blockers = MagicData.rookMasks[startSquare] & (allPieces ^ (1UL << friendlyKingSquare)); //Remove friendly king square from blockers so attack ray will continue through it - prevents king from just moving backwards and still being in the ray
-
-            ulong index = (blockers * MagicData.rookMagics[startSquare]) >> MagicData.rookShifts[startSquare];
-
-            ulong moveBoard = MagicData.rookMoveBitboards[startSquare][index];
+            ulong moveBoard = MagicData.GetRookMoveBoard(allPieces ^ (1UL << friendlyKingSquare), startSquare); //Remove friendly king square from blockers so attack ray will continue through it - prevents king from just moving backwards and still being in the ray
 
             opponentSlidingAttackMap |= moveBoard;
         }
@@ -160,11 +149,7 @@ public class MoveGenerator
         {
             int startSquare = BitBoardHelper.PopFirstBit(ref diags);
 
-            ulong blockers = MagicData.bishopMasks[startSquare] & (allPieces ^ (1UL << friendlyKingSquare)); //Remove friendly king square from blockers so attack ray will continue through it - prevents king from just moving backwards and still being in the ray
-
-            ulong index = (blockers * MagicData.bishopMagics[startSquare]) >> MagicData.bishopShifts[startSquare];
-
-            ulong moveBoard = MagicData.bishopMoveBitboards[startSquare][index];
+            ulong moveBoard = MagicData.GetBishopMoveBoard(allPieces ^ (1UL << friendlyKingSquare), startSquare); //Remove friendly king square from blockers so attack ray will continue through it - prevents king from just moving backwards and still being in the ray
 
             opponentSlidingAttackMap |= moveBoard;
         }
@@ -301,10 +286,7 @@ public class MoveGenerator
         {
             int startSquare = BitBoardHelper.PopFirstBit(ref orthos);
 
-            ulong blockers = MagicData.rookMasks[startSquare] & allPieces;
-            ulong index = (blockers * MagicData.rookMagics[startSquare]) >> MagicData.rookShifts[startSquare];
-
-            ulong moveBoard = MagicData.rookMoveBitboards[startSquare][index] & moveMask;
+            ulong moveBoard = MagicData.GetRookMoveBoard(allPieces, startSquare) & moveMask;
 
             if (IsPinned(startSquare))
             {
@@ -323,10 +305,7 @@ public class MoveGenerator
         {
             int startSquare = BitBoardHelper.PopFirstBit(ref diags);
 
-            ulong blockers = MagicData.bishopMasks[startSquare] & allPieces;
-            ulong index = (blockers * MagicData.bishopMagics[startSquare]) >> MagicData.bishopShifts[startSquare];
-
-            ulong moveBoard = MagicData.bishopMoveBitboards[startSquare][index] & moveMask;
+            ulong moveBoard = MagicData.GetBishopMoveBoard(allPieces, startSquare) & moveMask;
 
             if (IsPinned(startSquare))
             {

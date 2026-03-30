@@ -191,7 +191,7 @@ public class TranspositionTable
         public short eval { get { return (short)((data & evalMask) >> 16); } }
         public byte depth { get { return (byte)((data & depthMask) >> 32); } }
         public ulong nodeType { get { return (data & nodeTypeMask) >> 38; } }
-        public Move move { get { return new Move((ushort)((data & moveMask) >> 40)); } } //TODO: Try without move entirely - not necessary unless at root - just maintain PV instead
+        public Move move { get { return new Move((ushort)((data & moveMask) >> 40)); } } //TODOnt: Try without move entirely - not necessary unless at root - just maintain PV instead - necessary for move ordering
 
         public Transposition(ulong zobrist, short eval, byte depth, byte nodeType, Move move) //TODO: make all ulong here in params?
         {
