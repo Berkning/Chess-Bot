@@ -61,4 +61,25 @@ public static class BitBoardHelper
         //return math.countbits(board);
         return BitOperations.PopCount(board);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong AlgorithmicPEXT(ulong value, ulong mask)
+    {
+        ulong ret = 0;
+        int setMaskBits = 0;
+
+        for (int i = 0; i < 64; ++i)
+        {
+            if ((mask & (1UL << i)) != 0)
+            {
+                if ((value & (1UL << i)) != 0)
+                {
+                    ret |= 1UL << setMaskBits;
+                }
+                setMaskBits++;
+            }
+        }
+
+        return ret;
+    }
 }
