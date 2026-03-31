@@ -71,15 +71,23 @@ public static class MagicData
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong GetRookMoveBoard(ulong allPieces, int square) //TODO: Determine whether to use magics or PEXT on startup
     {
-        if (Bmi2.IsSupported) return GetRookBoardPEXT(allPieces, square);
-        else return ulong.MaxValue; //TODO: Obv replace with magics
+        if (Bmi2.IsSupported)
+        {
+            if (HardwareCapabilities.UsePEXT) return GetRookBoardPEXT(allPieces, square);
+            else return GetRookBoardMagic(allPieces, square);
+        }
+        else return GetRookBoardMagic(allPieces, square);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong GetBishopMoveBoard(ulong allPieces, int square) //TODO: Determine whether to use magics or PEXT on startup
     {
-        if (Bmi2.IsSupported) return GetBishopBoardPEXT(allPieces, square);
-        else return ulong.MaxValue; //TODO: Obv replace with magics
+        if (Bmi2.IsSupported)
+        {
+            if (HardwareCapabilities.UsePEXT) return GetBishopBoardPEXT(allPieces, square);
+            else return GetBishopBoardMagic(allPieces, square);
+        }
+        else return GetBishopBoardMagic(allPieces, square);
     }
 
 
@@ -87,13 +95,13 @@ public static class MagicData
 
     #region PEXT
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ulong GetRookBoardPEXT(ulong allPieces, int square)
+    public static ulong GetRookBoardPEXT(ulong allPieces, int square)
     {
         return rookPEXTMoveBitboards[square][Bmi2.X64.ParallelBitExtract(allPieces, rookMasks[square])];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ulong GetBishopBoardPEXT(ulong allPieces, int square)
+    public static ulong GetBishopBoardPEXT(ulong allPieces, int square)
     {
         return bishopPEXTMoveBitboards[square][Bmi2.X64.ParallelBitExtract(allPieces, bishopMasks[square])];
     }
@@ -115,7 +123,7 @@ public static class MagicData
 
     #region Magic Bitboards
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ulong GetRookBoardMagic(ulong allPieces, int square)
+    public static ulong GetRookBoardMagic(ulong allPieces, int square)
     {
         ulong blockers = rookMasks[square] & allPieces;
         ulong index = (blockers * rookMagics[square]) >> rookShifts[square];
@@ -124,7 +132,7 @@ public static class MagicData
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ulong GetBishopBoardMagic(ulong allPieces, int square)
+    public static ulong GetBishopBoardMagic(ulong allPieces, int square)
     {
         ulong blockers = bishopMasks[square] & allPieces;
         ulong index = (blockers * bishopMagics[square]) >> bishopShifts[square];

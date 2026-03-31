@@ -5,6 +5,7 @@ public static class Program
 
     public static void Main(string[] args)
     {
+        HardwareCapabilities.Initialize();
 
         EngineUCI engineUCI = new EngineUCI();
         if (args.Length != 0)

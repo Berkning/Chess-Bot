@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 public class MoveGenerator
 {
@@ -507,7 +508,7 @@ public class MoveGenerator
         return (board.currentGameState & (1U << (11 + board.friendlyColorBit))) > 0;
     }
 
-    private bool InCheckAfterEnPassant(int square, int startRank, int capturedPawnSquare)
+    private bool InCheckAfterEnPassant(int square, int startRank, int capturedPawnSquare) //TODO: Seemingly doesn't work in "3k4/8/r7/1KPp4/8/8/8/8 w - d6 0 4"
     {
         int kingRank = BoardHelper.IndexToRank(friendlyKingSquare);
 
@@ -519,8 +520,10 @@ public class MoveGenerator
         int startFile = BoardHelper.IndexToFile(friendlyKingSquare);
         int fileCount = directionIncrement == 1 ? 8 - startFile : startFile; //number of files to check
 
+        //TODO: pretty sure the fix is to set this to "int startSquare = friendlyKingSquare"
         int startSquare = friendlyKingSquare + directionIncrement; //We start at the friendly kings square and move one square away from the king; this is the first square where a piece could be blocking a potential check
 
+        //TODO: ... and let i start at 1 instead
         for (int i = 0; i < fileCount; i++)
         {
             int index = startSquare + i * directionIncrement;
