@@ -270,6 +270,9 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
             case "bench":
                 Benchmark.Run();
                 break;
+            case "runDiagnostics":
+                EngineDiagnostics.RunDiagnostics();
+                break;
 
 
 

@@ -89,16 +89,19 @@ public static class Perft
 
     public static long RunSpecifiedDepth(int depth, Board board)
     {
-        if (depth == 0)
-        {
-            return 1L;
-        }
+        // if (depth == 0)
+        // {
+        //     return 1L;
+        // }
 
         MoveGenerator moveGenerator = new MoveGenerator(board);
 
         Span<Move> moves = stackalloc Move[256];
 
         int moveCount = moveGenerator.GenerateMoves(ref moves);
+
+        if (depth == 1) return moveCount;
+
 
         long numPositions = 0L;
 
@@ -134,9 +137,23 @@ public static class Perft
         new SuiteComponent("n1n5/1Pk5/8/8/8/8/5Kp1/5N1N w - - 0 1", 7, 690692460),
         new SuiteComponent("8/PPPk4/8/8/8/8/4Kppp/8 b - - 0 1", 7, 614154982),
         new SuiteComponent("r5k1/1p3p2/p1qb1P2/2p2RP1/2P4p/P2QBp2/1P3Pr1/3R2K1 w - - 1 1", 6, 79809396),
+        new SuiteComponent("3k4/3p4/8/K1P4r/8/8/8/8 b - - 0 1", 6 , 1134888),
+        new SuiteComponent("8/8/4k3/8/2p5/8/B2P2K1/8 w - - 0 1", 6 , 1015133),
+        new SuiteComponent("8/8/1k6/2b5/2pP4/8/5K2/8 b - d3 0 1", 6 , 1440467),
+        new SuiteComponent("5k2/8/8/8/8/8/8/4K2R w K - 0 1", 6 , 661072),
+        new SuiteComponent("3k4/8/8/8/8/8/8/R3K3 w Q - 0 1", 6 , 803711),
+        new SuiteComponent("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1", 4 , 1274206),
+        new SuiteComponent("r3k2r/8/3Q4/8/8/5q2/8/R3K2R b KQkq - 0 1", 4 , 1720476),
+        new SuiteComponent("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1", 6 , 3821001),
+        new SuiteComponent("8/8/1P2K3/8/2n5/1q6/8/5k2 b - - 0 1", 5 , 1004658),
+        new SuiteComponent("4k3/1P6/8/8/8/8/K7/8 w - - 0 1", 6 , 217342),
+        new SuiteComponent("8/P1k5/K7/8/8/8/8/8 w - - 0 1", 6 , 92683),
+        new SuiteComponent("K1k5/8/P7/8/8/8/8/8 w - - 0 1", 6 , 2217),
+        new SuiteComponent("8/k1P5/8/1K6/8/8/8/8 w - - 0 1", 7 , 567584),
+        new SuiteComponent("8/8/2k5/5q2/5n2/8/5K2/8 b - - 0 1", 4 , 23527),
     };
 
-    public static void RunFullSuite() //Wont keep current board position
+    public static bool RunFullSuite() //Wont keep current board position
     {
         MoveGenerator.PromotionMode prevPromotionMode = MoveGenerator.promotionMode; //Save what the promotionmode was set to
         MoveGenerator.promotionMode = MoveGenerator.PromotionMode.All; //Set the promotion mode to all to ensure we get all possible moves
@@ -169,6 +186,8 @@ public static class Perft
         Console.WriteLine((passedAll ? "Suite Passed in " : "Suite Failed in ") + stopwatch.ElapsedMilliseconds + "ms");
 
         MoveGenerator.promotionMode = prevPromotionMode;
+
+        return passedAll;
     }
 
     private struct SuiteComponent
