@@ -518,7 +518,7 @@ public class MoveGenerator
         int directionIncrement = (square - friendlyKingSquare) > 0 ? PrecomputedData.Right : PrecomputedData.Left;
 
         int startFile = BoardHelper.IndexToFile(friendlyKingSquare);
-        int fileCount = directionIncrement == 1 ? 8 - startFile : startFile; //number of files to check
+        int fileCount = directionIncrement == 1 ? 7 - startFile : startFile; //number of files to check
 
         //TODO: pretty sure the fix is to set this to "int startSquare = friendlyKingSquare"
         int startSquare = friendlyKingSquare + directionIncrement; //We start at the friendly kings square and move one square away from the king; this is the first square where a piece could be blocking a potential check
