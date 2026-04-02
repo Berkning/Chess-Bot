@@ -3,6 +3,7 @@
 using System.Diagnostics;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 
 public static class HardwareCapabilities
 {
@@ -13,7 +14,7 @@ public static class HardwareCapabilities
 
     static HardwareCapabilities()
     {
-        UsePEXT = IsPEXTFaster();
+        if (Bmi2.IsSupported) UsePEXT = IsPEXTFaster();
     }
 
     public static void Initialize()
@@ -23,7 +24,7 @@ public static class HardwareCapabilities
 
     private static bool IsPEXTFaster()
     {
-        Console.WriteLine("Running PEXT benchmark...");
+        //Console.WriteLine("Running PEXT benchmark...");
 
         Span<ulong> occupancies = stackalloc ulong[RandomBoardCount];
 
@@ -39,7 +40,7 @@ public static class HardwareCapabilities
 
 
         //Warmup
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++) //TODO: Set this to only 1 round to save a lot of startup delay
         {
             RunPEXT(occupancies);
             RunMagics(occupancies);
@@ -68,19 +69,19 @@ public static class HardwareCapabilities
 
                 if (difference > 1.25d)
                 {
-                    Console.WriteLine("Exiting after " + (i + 1) + " rounds because diff is " + difference);
+                    //Console.WriteLine("Exiting after " + (i + 1) + " rounds because diff is " + difference);
                     break; //If PEXT is significantly faster //TODO: return true
                 }
                 else if (difference < 0.75d)
                 {
-                    Console.WriteLine("Exiting after " + (i + 1) + " rounds because diff is " + difference);
+                    //Console.WriteLine("Exiting after " + (i + 1) + " rounds because diff is " + difference);
                     break; //If magics are significantly faster //TODO: return false
                 }
             }
         }
 
-        Console.WriteLine("Total PEXT time was: " + totalPEXTTime);
-        Console.WriteLine("Total Magic time was: " + totalMagicTime);
+        //Console.WriteLine("Total PEXT time was: " + totalPEXTTime);
+        //Console.WriteLine("Total Magic time was: " + totalMagicTime);
 
         return totalPEXTTime < totalMagicTime;
     }
