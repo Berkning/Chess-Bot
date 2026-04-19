@@ -291,6 +291,8 @@ public class Search
             return 0; //Stalemate
         }
 
+        if ((board.currentGameState & Board.fiftyMoveCounterMask) >> 13 >= 100) return 0;
+
         //Null-Move pruning
         if (depth > 3 && !moveGenerator.inCheck)
         {

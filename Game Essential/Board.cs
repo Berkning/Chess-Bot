@@ -13,14 +13,14 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     //0-5 = Captured Piece //TODO: Could be pretty easily reduced by removing the two color bits and infering the color based on colorToMove
     //6-9 = EP file
     //10-13 = Castling Rights - 10 = Wshort, 11 = Bshort, 12 = Wlong, 13 = Blong
-    //14-19 = fifty move counter //TODO:
+    //14-20 = fifty move counter
     public Stack<uint> gameStateHistory;
     public uint currentGameState = 0;//0b1111000000000; //Castles allowed by default 
 
     public const uint capturedPieceMask = 0b11111;
     public const uint epFileMask = 0b111100000;
     public const uint castleRightsMask = 0b1111000000000;
-    public const uint fiftyMoveCounterMask = 0b1111110000000000000;
+    public const uint fiftyMoveCounterMask = 0b11111110000000000000;
 
     //Piece lists
     //TODOne: Try getting rid of these and just using GetPieceList bc faster for movegen at least for some reason (guess cache locality from it being used before calling movegen?)
@@ -176,7 +176,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         uint prevGameState = currentGameState;
         uint prevCastleRights = (prevGameState & castleRightsMask) >> 9;
         int prevEpFile = (int)((prevGameState & epFileMask) >> 5) - 1;
-        uint prev50MoveCount = (prevGameState & fiftyMoveCounterMask) >> 13; //TODO: have to implement this differently in search as well - maybe just don't - rarely ever see draws by 50 move rule anyway
+        uint halfMoveCount = ((prevGameState & fiftyMoveCounterMask) >> 13) + 1; //TODO: have to implement this differently in search as well - maybe just don't - rarely ever see draws by 50 move rule anyway
 
         currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Remove previous castling rights
 
@@ -187,10 +187,11 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         int movedPieceType = Piece.Type(Squares[move.startSquare]);
 
-        if (!inSearch && (movedPieceType == Piece.Pawn || Squares[move.targetSquare] != Piece.None)) //Pawn moves and captures reset 3 and 50 move rule
+        if (movedPieceType == Piece.Pawn || Squares[move.targetSquare] != Piece.None) //Pawn moves and captures reset 3 and 50 move rule
         {
-            //TODO: reset 50 move
-            repetitionTable.Clear();
+            halfMoveCount = 0;
+
+            if (!inSearch) repetitionTable.Clear();
         }
 
 
@@ -355,6 +356,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
 
         currentGameState |= prevCastleRights << 9;
+
+        currentGameState |= halfMoveCount << 13;
 
         currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Add new castling rights
         if (prevEpFile != -1) currentZobrist ^= Zobrist.epArray[prevEpFile]; //Remove old ep file

@@ -18,6 +18,7 @@ public static class FenUtility
         LoadColorToMove(board, parts[1][0]);
         LoadCastleRights(board, parts[2]);
         LoadEnPassantFile(board, parts[3]);
+        Load50MoveRule(board, parts[4]);
 
         board.currentZobrist = Zobrist.Hash(board);
 
@@ -126,6 +127,12 @@ public static class FenUtility
 
         board.currentGameState |= (uint)(file << 5);
     }
+
+    private static void Load50MoveRule(Board board, string halfMoves)
+    {
+        uint halfMoveCount = uint.Parse(halfMoves);
+        board.currentGameState |= halfMoveCount << 13;
+    }
     #endregion
 
 
@@ -212,7 +219,7 @@ public static class FenUtility
 
         // En-passant
         fen += ' ';
-        int epFile = (int)(board.currentGameState & Board.epFileMask)>>5;
+        int epFile = (int)(board.currentGameState & Board.epFileMask) >> 5;
         if (epFile == 0)
         {
             fen += '-';
@@ -226,7 +233,7 @@ public static class FenUtility
 
         // 50 move counter
         fen += ' ';
-        fen += 1;//board.fiftyMoveCounter; TODO: Fifty move counter
+        fen += (board.currentGameState & Board.fiftyMoveCounterMask) >> 13;
 
         // Full-move count (should be one at start, and increase after each move by black)
         fen += ' ';
