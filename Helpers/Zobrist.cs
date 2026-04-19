@@ -308,7 +308,7 @@ public static class Zobrist
     //Convert from our way of representing pieces, to the polyglot standard
     private static int[] pieceConversions = new int[] { int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, 11, 1, 3, 5, 7, 9, int.MaxValue, int.MaxValue, 10, 0, 2, 4, 6, 8 };
 
-    public static int PieceToPolyGlot(int piece)
+    private static int PieceToPolyGlot(int piece)
     {
         return pieceConversions[piece];
     }

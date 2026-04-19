@@ -173,4 +173,74 @@ public static class BoardHelper
 
         return -1;
     }
+
+
+
+
+
+
+
+
+    //Only for testing - really slow
+    public static bool OpponentInCheckSlow(Board board)
+    {
+        ulong allPieces = GetAllPieceBoard(board);
+
+        int opponentKingSquare = board.colorToMove == Piece.White ? board.blackKingSquare : board.whiteKingSquare;
+
+
+        if ((PrecomputedData.knightAttackBitboards[opponentKingSquare] & board.GetPieceList(Piece.Knight, board.friendlyColorBit).bitboard) != 0) return true;
+
+        if ((MagicData.GetBishopMoveBoard(allPieces, opponentKingSquare) & (board.GetPieceList(Piece.Bishop, board.friendlyColorBit).bitboard | board.GetPieceList(Piece.Queen, board.friendlyColorBit).bitboard)) != 0) return true;
+
+        if ((MagicData.GetRookMoveBoard(allPieces, opponentKingSquare) & (board.GetPieceList(Piece.Rook, board.friendlyColorBit).bitboard | board.GetPieceList(Piece.Queen, board.friendlyColorBit).bitboard)) != 0) return true;
+
+        if ((PrecomputedData.pawnAttackBitboards[opponentKingSquare + board.friendlyColorBit * 64] & board.GetPieceList(Piece.Pawn, board.friendlyColorBit).bitboard) != 0) return true;
+
+        return false;
+    }
+
+    //Only for testing - really slow
+    public static bool InCheckSlow(Board board)
+    {
+        ulong allPieces = GetAllPieceBoard(board);
+
+        int friendlyKingSquare = board.colorToMove == Piece.White ? board.whiteKingSquare : board.blackKingSquare;
+
+
+        if ((PrecomputedData.knightAttackBitboards[friendlyKingSquare] & board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard) != 0) return true;
+
+        if ((MagicData.GetBishopMoveBoard(allPieces, friendlyKingSquare) & (board.GetPieceList(Piece.Bishop, board.opponentColorBit).bitboard | board.GetPieceList(Piece.Queen, board.opponentColorBit).bitboard)) != 0) return true;
+
+        if ((MagicData.GetRookMoveBoard(allPieces, friendlyKingSquare) & (board.GetPieceList(Piece.Rook, board.opponentColorBit).bitboard | board.GetPieceList(Piece.Queen, board.opponentColorBit).bitboard)) != 0) return true;
+
+        if ((PrecomputedData.pawnAttackBitboards[friendlyKingSquare + board.opponentColorBit * 64] & board.GetPieceList(Piece.Pawn, board.opponentColorBit).bitboard) != 0) return true;
+
+        return false;
+    }
+
+    private static ulong GetAllPieceBoard(Board board)
+    {
+        int friendlyBit = board.friendlyColorBit;
+        int enemyBit = board.opponentColorBit;
+
+        int friendlyKingSquare = board.colorToMove == Piece.White ? board.whiteKingSquare : board.blackKingSquare;
+        int enemyKingSquare = board.colorToMove == Piece.White ? board.blackKingSquare : board.whiteKingSquare;
+
+        ulong friendlyQueens = board.GetPieceList(Piece.Queen, friendlyBit).bitboard;
+        ulong enemyQueens = board.GetPieceList(Piece.Queen, enemyBit).bitboard;
+
+
+        ulong friendlyOrthos = board.GetPieceList(Piece.Rook, friendlyBit).bitboard | friendlyQueens;
+        ulong friendlyDiags = board.GetPieceList(Piece.Bishop, friendlyBit).bitboard | friendlyQueens;
+        ulong enemyOrthos = board.GetPieceList(Piece.Rook, enemyBit).bitboard | enemyQueens;
+        ulong enemyDiags = board.GetPieceList(Piece.Bishop, enemyBit).bitboard | enemyQueens;
+
+        ulong friendlyPieces = board.GetPieceList(Piece.Pawn, friendlyBit).bitboard | board.GetPieceList(Piece.Knight, friendlyBit).bitboard | friendlyDiags | friendlyOrthos | (1UL << friendlyKingSquare);
+        ulong enemyPieces = board.GetPieceList(Piece.Pawn, enemyBit).bitboard | board.GetPieceList(Piece.Knight, enemyBit).bitboard | enemyDiags | enemyOrthos | (1UL << enemyKingSquare);
+
+        ulong allPieces = friendlyPieces | enemyPieces;
+
+        return allPieces;
+    }
 }

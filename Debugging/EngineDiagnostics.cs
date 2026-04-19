@@ -46,7 +46,7 @@ public static class EngineDiagnostics
     private static Board board = new Board();
     private static MoveGenerator moveGenerator = new MoveGenerator(board);
 
-    public static void RunDiagnostics()
+    public static void RunDiagnostics(int n = 0)
     {
         Console.WriteLine("");
 
@@ -54,23 +54,36 @@ public static class EngineDiagnostics
         Console.WriteLine("\x1b[1mRunning Engine Diagnostics...\x1b[0m");
         Console.ResetColor();
 
+        if (n == 0 || n == 1)
+        {
+            Console.WriteLine("");
+            Console.WriteLine("\x1b[1m#1 Verifying Make/UnMake Move...\x1b[0m");
+            VerifyMakeUnmake();
+        }
 
-        Console.WriteLine("");
-        Console.WriteLine("\x1b[1m#1 Verifying Make/UnMake Move...\x1b[0m");
-        VerifyMakeUnmake();
-
-        Console.WriteLine("");
-        Console.WriteLine("\x1b[1m#2 Verifying Search...\x1b[0m");
-        VerifyMakeUnmake();
-
-
-        //TODO: Verify null moves
+        if (n == 0 || n == 2)
+        {
+            Console.WriteLine("");
+            Console.WriteLine("\x1b[1m#2 Verifying Search...\x1b[0m");
+            VerifySearch();
+        }
 
 
-        //Always keep this last bc user can just run perft separately
-        Console.WriteLine("");
-        Console.WriteLine("\x1b[1m#3 Verifying MoveGen...\x1b[0m");
-        VerifyMoveGeneration();
+        if (n == 0 || n == 3)
+        {
+            Console.WriteLine("");
+            Console.WriteLine("\x1b[1m#3 Verifying NullMove Make/UnMake...\x1b[0m");
+            VerifyNullMove();
+        }
+
+
+        if (n == 0 || n == 4)
+        {
+            //Always keep this last bc user can just run perft separately
+            Console.WriteLine("");
+            Console.WriteLine("\x1b[1m#4 Verifying MoveGen...\x1b[0m");
+            VerifyMoveGeneration();
+        }
     }
 
     private static void VerifyMoveGeneration()
@@ -136,7 +149,7 @@ public static class EngineDiagnostics
                 passed = false;
 
                 string moveString = "";
-                for (int m = 0; m < moveHistory.Count; m++)
+                for (int m = moveHistory.Count - 1; m >= 0; m--)
                 {
                     moveString += BoardHelper.GetMoveNameUCI(moveHistory.ElementAt(m)) + " ";
                 }
@@ -194,7 +207,90 @@ public static class EngineDiagnostics
     }
     #endregion
 
+
     #region Make/UnMake Null-Move
+    private static void VerifyNullMove()
+    {
+        bool passed = true;
+
+        for (int i = 0; i < positions.Length; i++)
+        {
+            FenUtility.LoadPositionFromFen(board, positions[i].fen);
+
+            bool p = VerifyNullMoveRecursive(VerificationDepth, MovesPerPosition, new Stack<Move>(), positions[i].fen);
+
+            passed = passed && p;
+
+            Console.WriteLine("Position " + (i + 1) + "/" + positions.Length + (p ? " Passed" : " Failed"));
+        }
+
+        Console.ForegroundColor = passed ? ConsoleColor.Green : ConsoleColor.Red;
+        Console.WriteLine(passed ? "NullMove Make/UnMake Verification \x1b[1mPassed ✅\x1b[0m" : "NullMove Make/UnMake Verification \x1b[1mFailed ❌\x1b[0m");
+        Console.ResetColor();
+    }
+
+    private static bool VerifyNullMoveRecursive(int depth, int movesPerPos, Stack<Move> moveHistory, string startFen) //TODO: finish - return list of moves that lead to fail
+    {
+        bool passed = true;
+
+        Span<Move> moves = stackalloc Move[256];
+
+        int moveCount = moveGenerator.GenerateMoves(ref moves);
+
+        if (moveCount == 0) return true; //Checkmate/Stalemate
+
+        bool checkedPosition = moveGenerator.inCheck || moveGenerator.inDoubleCheck || moveGenerator.checkRayBitMap != ulong.MaxValue || BoardHelper.InCheckSlow(board) || BoardHelper.OpponentInCheckSlow(board);
+
+        for (int i = 0; i < Math.Min(movesPerPos, moveCount); i++)
+        {
+            int randomMoveIndex = Random.Shared.Next(moveCount);
+            bool shouldNullMove = Random.Shared.Next(100) >= 50;
+
+            BoardSnapshot snapshot = new BoardSnapshot(board);
+
+            moveHistory.Push(moves[randomMoveIndex]);
+
+
+            if (!checkedPosition && shouldNullMove)
+            {
+                board.MakeNullMove();
+            }
+            else board.MakeMove(moves[randomMoveIndex], true);
+
+
+            if (depth > 0)
+            {
+                bool p = VerifyNullMoveRecursive(depth - 1, movesPerPos, moveHistory, startFen);
+                passed = passed && p;
+            }
+
+            //if (BoardHelper.InCheckSlow(board)) Console.WriteLine("In check in middle");
+
+            if (checkedPosition || !shouldNullMove) board.UnMakeMove(moves[randomMoveIndex], true);
+            else board.UnMakeNullMove();
+
+            if (!snapshot.Verify(board))
+            {
+                passed = false;
+
+                string moveString = "";
+                for (int m = moveHistory.Count - 1; m >= 0; m--)
+                {
+                    moveString += BoardHelper.GetMoveNameUCI(moveHistory.ElementAt(m)) + " ";
+                }
+
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("State was corrupted from position: " + startFen + " after moves: " + moveString + " Current fen is: " + FenUtility.GetCurrentFen(board) + " inCheck = " + checkedPosition + " opponentInCheck = " + BoardHelper.OpponentInCheckSlow(board));
+                Console.ResetColor();
+            }
+
+            moveHistory.Pop();
+        }
+
+
+
+        return passed;
+    }
     #endregion
 
 
@@ -233,6 +329,35 @@ public static class EngineDiagnostics
             if (zobrist != board.currentZobrist)
             {
                 Console.WriteLine("Zobrist Corrupted");
+                Console.WriteLine("Before: " + zobrist + " After: " + board.currentZobrist);
+                ulong originalZobristRandom = zobrist ^ board.currentZobrist;
+
+                //Find the specific number that changed the zobrist
+                if (originalZobristRandom == Zobrist.sideToMove) Console.WriteLine("SideToMove Zobrist wasn't applied correctly");
+
+                for (int i = 0; i < 8; i++)
+                {
+                    if (originalZobristRandom == Zobrist.epArray[i]) Console.WriteLine("EP Zobrist at index " + i + " wasn't applied correctly");
+                }
+
+                for (int i = 0; i < 16; i++)
+                {
+                    if (originalZobristRandom == Zobrist.castlingArray[i]) Console.WriteLine("Castle Zobrist at index " + i + " wasn't applied correctly");
+                }
+
+                for (int p = 0; p < 6; p++)
+                {
+                    for (int c = 0; c < 2; c++)
+                    {
+                        for (int sq = 0; sq < 64; sq++)
+                        {
+                            if (originalZobristRandom == Zobrist.piecesArray[p, c, sq]) Console.WriteLine("Piece Zobrist at piece " + p + " with color " + c + " on square " + sq + " wasn't applied correctly");
+                        }
+                    }
+                }
+
+
+
                 success = false;
             }
 

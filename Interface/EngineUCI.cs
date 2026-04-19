@@ -271,7 +271,12 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 Benchmark.Run();
                 break;
             case "runDiagnostics":
-                EngineDiagnostics.RunDiagnostics();
+                if (args.Length == 1) EngineDiagnostics.RunDiagnostics();
+                else
+                {
+                    int number = int.Parse(args[1]);
+                    EngineDiagnostics.RunDiagnostics(number);
+                }
                 break;
 
 
