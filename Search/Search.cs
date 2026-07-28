@@ -220,10 +220,15 @@ public class Search
     {
         nodeCount++;
 
+
+        if ((board.currentGameState & Board.fiftyMoveCounterMask) >> 13 >= 100) return 0; //50 Move draw - Technically this should come right after the mate check, because a 50-move draw is overridden if a mate happens on the exact same move. But performance ig
+
+
         if ((nodeCount & CancelDelay) == 0) //TODO: test with removing this
         {
             if (clock.ElapsedMilliseconds >= searchTime) return 0;
         }
+
 
         if (plyFromRoot > 0)
         {
@@ -291,7 +296,6 @@ public class Search
             return 0; //Stalemate
         }
 
-        if ((board.currentGameState & Board.fiftyMoveCounterMask) >> 13 >= 100) return 0;
 
         //Null-Move pruning
         if (depth > 3 && !moveGenerator.inCheck)
