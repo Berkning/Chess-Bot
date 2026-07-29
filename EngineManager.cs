@@ -87,7 +87,7 @@ public class Engine
         mateSearch.StartSearch();
     }
 
-    public void InitializeSearch(int depth, int time)
+    public void InitializeSearch(int depth, int time, int nodes = -1)
     {
         //TODOne: Adjust TT on first book move
         if (!outOfBook) //If we aren't yet out of book, check if the position is present in our opening book. If not, mark us as out of book
@@ -133,7 +133,7 @@ public class Engine
         Console.WriteLine("info string Main Thread Searching...");
 
         availableThreads--;
-        searchThreads[0].Start(depth, time); //TODOne: Keep thread data persistent?
+        searchThreads[0].Start(depth, time, nodes); //TODOne: Keep thread data persistent?
         //}
     }
 
@@ -148,7 +148,7 @@ public class Engine
             int id = i; //Extremely weird issue where i gets incremented before being passed along to thread if not done like this - found out why. everything is passed as a reference to threads apparently
 
             availableThreads--;
-            searchThreads[i].Start(depth, -2); //Time is set to -2 so that they will stop themselves when they are done searching their assigned depth
+            searchThreads[i].Start(depth, -2, int.MaxValue); //Time is set to -2 so that they will stop themselves when they are done searching their assigned depth
         }
     }
 
@@ -202,10 +202,11 @@ public class Engine
             search = new Search(board, callback, id, (id == 0) ? _engine : null);
         }
 
-        public void Start(int depth, int time)
+        public void Start(int depth, int time, int nodes)
         {
             search.searchDepth = depth;
             search.searchTime = time;
+            search.searchNodes = nodes;
 
             thread = new Thread(search.StartSearch);
             thread.Start(); //TODO: Try unsafestart

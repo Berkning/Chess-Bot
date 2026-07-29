@@ -387,6 +387,10 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
             case "bench":
                 //Benchmark.Run();
                 return;
+            case "nodes":
+                int nodes = int.Parse(args[2]);
+                engine.InitializeSearch(int.MaxValue, -2, nodes);
+                return;
         }
     }
 

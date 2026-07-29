@@ -53,6 +53,7 @@ public class Search
     public int searchDepth = -1;
     //Might be necessary to mark as volatile so it's synced when main thread wants to stop this thread
     public int searchTime = -1; //-2 : infinite,  -1 : use time management,  x : use x amount of time
+    public int searchNodes = -1;
 
 
     public void StartSearch()
@@ -115,6 +116,19 @@ public class Search
             }
             else prevResult = AspirationSearch(depth, prevResult);
 
+            //   ***TEMPORARY***
+            if (nodeCount >= searchNodes)
+            {
+                if (bestMove.data == 0)
+                {
+                    Console.WriteLine("bestmove NoBestmoveFound");
+                }
+
+                LogSearchInfo(depth, nodeCount, true, threadID);
+                break;
+            }
+            //   ***TEMPORARY***
+
             if (clock.ElapsedMilliseconds >= searchTime)
             {
                 //If we haven't found a move to play, and search is being cancelled, run an emergency full width search to a depth of 1
@@ -164,6 +178,12 @@ public class Search
         while (true)
         {
             result = AlphaBeta(depth, 0, alpha, beta);
+
+
+            //   ***TEMPORARY***
+            if (nodeCount >= searchNodes) return 0;
+            //   ***TEMPORARY***
+
 
             //if ((nodeCount & CancelDelay) == 0) //Obv don't only check when canceldelay has passed, otherwise if nodecount is off by just 1 we keep running the aspiration search even if search is cancelled
             //{
@@ -219,6 +239,10 @@ public class Search
     private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0)//, bool test)
     {
         nodeCount++;
+
+        //   ***TEMPORARY***
+        if (nodeCount >= searchNodes) return 0;
+        //   ***TEMPORARY***
 
         if ((nodeCount & CancelDelay) == 0) //TODO: test with removing this
         {
@@ -301,6 +325,10 @@ public class Search
                 int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
                 board.UnMakeNullMove();
 
+                //   ***TEMPORARY***
+                if (nodeCount >= searchNodes) return 0;
+                //   ***TEMPORARY***
+
                 if ((nodeCount & CancelDelay) == 0)
                 {
                     if (clock.ElapsedMilliseconds >= searchTime) return 0;
@@ -350,6 +378,9 @@ public class Search
 
             board.UnMakeMove(moves[i], true);
 
+            //   ***TEMPORARY***
+            if (nodeCount >= searchNodes) return 0;
+            //   ***TEMPORARY***
 
             if ((nodeCount & CancelDelay) == 0) //Makes perfect sense to have this here now - //Seemingly doesn't work properly without this check, but works fine without the check at the start of the function. Doesn't make any sense - also doesn't work do the correct amount of checks without the check at the start, but still stops in reasonable amount of time
             {
@@ -403,6 +434,10 @@ public class Search
 
     private int SearchAllCaptures(int alpha, int beta) //TODO: maybe try including non-capture promotions - Checks??
     {
+        //   ***TEMPORARY***
+        if (nodeCount >= searchNodes) return 0;
+        //   ***TEMPORARY***
+
         if ((nodeCount & CancelDelay) == 0) //TODO: Try removing this
         {
             if (clock.ElapsedMilliseconds >= searchTime) return 0; //We are checking in the iterative part im just stupid - //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
@@ -437,6 +472,10 @@ public class Search
             eval = -SearchAllCaptures(-beta, -alpha);
             board.UnMakeMove(moves[i], true);
             //numQNodes++;
+
+            //   ***TEMPORARY***
+            if (nodeCount >= searchNodes) return 0;
+            //   ***TEMPORARY***
 
             if ((nodeCount & CancelDelay) == 0)
             {
