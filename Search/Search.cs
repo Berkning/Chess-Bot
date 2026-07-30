@@ -320,9 +320,13 @@ public class Search
         {
             /*if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {*/
+
+            //TODO: Add criteria for static eval to be a certain threshold above beta before performing NMP
             board.MakeNullMove();
             uint nullReduction = 3;
-            int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
+            //TODO: Maybe don't allow an NMP search to add entries to TT, because would be a waste of space? (Because the positions searched would likely never arise in a normal search?)
+            //int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions); //TODO: Try maybe not doing extension within NMP? Can just set numExtensions to max here
+            int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -alpha, numExtensions); //   ***TEMPORARY***
             board.UnMakeNullMove();
 
             //   ***TEMPORARY***
