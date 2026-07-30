@@ -316,7 +316,7 @@ public class Search
         }
 
         //Null-Move pruning
-        if (depth > 3 && !moveGenerator.inCheck)
+        /*if (depth > 3 && !moveGenerator.inCheck)
         {
             if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {
@@ -336,7 +336,7 @@ public class Search
 
                 if (nullEval >= beta) return nullEval;
             }
-        }
+        }*/
 
 
 
