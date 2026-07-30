@@ -117,7 +117,7 @@ public class Search
             else prevResult = AspirationSearch(depth, prevResult);
 
             //   ***TEMPORARY***
-            if (nodeCount >= searchNodes)
+            if (nodeCount >= searchNodes && searchNodes != -1)
             {
                 if (bestMove.data == 0)
                 {
@@ -181,7 +181,7 @@ public class Search
 
 
             //   ***TEMPORARY***
-            if (nodeCount >= searchNodes) return 0;
+            if (nodeCount >= searchNodes && searchNodes != -1) return 0;
             //   ***TEMPORARY***
 
 
@@ -241,7 +241,7 @@ public class Search
         nodeCount++;
 
         //   ***TEMPORARY***
-        if (nodeCount >= searchNodes) return 0;
+        if (nodeCount >= searchNodes && searchNodes != -1) return 0;
         //   ***TEMPORARY***
 
         if ((nodeCount & CancelDelay) == 0) //TODO: test with removing this
@@ -326,7 +326,7 @@ public class Search
                 board.UnMakeNullMove();
 
                 //   ***TEMPORARY***
-                if (nodeCount >= searchNodes) return 0;
+                if (nodeCount >= searchNodes && searchNodes != -1) return 0;
                 //   ***TEMPORARY***
 
                 if ((nodeCount & CancelDelay) == 0)
@@ -379,7 +379,7 @@ public class Search
             board.UnMakeMove(moves[i], true);
 
             //   ***TEMPORARY***
-            if (nodeCount >= searchNodes) return 0;
+            if (nodeCount >= searchNodes && searchNodes != -1) return 0;
             //   ***TEMPORARY***
 
             if ((nodeCount & CancelDelay) == 0) //Makes perfect sense to have this here now - //Seemingly doesn't work properly without this check, but works fine without the check at the start of the function. Doesn't make any sense - also doesn't work do the correct amount of checks without the check at the start, but still stops in reasonable amount of time
@@ -435,7 +435,7 @@ public class Search
     private int SearchAllCaptures(int alpha, int beta) //TODO: maybe try including non-capture promotions - Checks??
     {
         //   ***TEMPORARY***
-        if (nodeCount >= searchNodes) return 0;
+        if (nodeCount >= searchNodes && searchNodes != -1) return 0;
         //   ***TEMPORARY***
 
         if ((nodeCount & CancelDelay) == 0) //TODO: Try removing this
