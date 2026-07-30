@@ -316,27 +316,27 @@ public class Search
         }
 
         //Null-Move pruning
-        /*if (depth > 3 && !moveGenerator.inCheck)
+        if (depth > 3 && !moveGenerator.inCheck)
         {
-            if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
+            /*if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
+            {*/
+            board.MakeNullMove();
+            uint nullReduction = 3;
+            int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
+            board.UnMakeNullMove();
+
+            //   ***TEMPORARY***
+            if (nodeCount >= searchNodes && searchNodes != -1) return 0;
+            //   ***TEMPORARY***
+
+            if ((nodeCount & CancelDelay) == 0)
             {
-                board.MakeNullMove();
-                uint nullReduction = 3;
-                int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
-                board.UnMakeNullMove();
-
-                //   ***TEMPORARY***
-                if (nodeCount >= searchNodes && searchNodes != -1) return 0;
-                //   ***TEMPORARY***
-
-                if ((nodeCount & CancelDelay) == 0)
-                {
-                    if (clock.ElapsedMilliseconds >= searchTime) return 0;
-                }
-
-                if (nullEval >= beta) return nullEval;
+                if (clock.ElapsedMilliseconds >= searchTime) return 0;
             }
-        }*/
+
+            if (nullEval >= beta) return nullEval;
+            /*}*/
+        }
 
 
 
