@@ -320,10 +320,10 @@ public class Search
         {
             /*if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {*/
-            board.MakeNullMove();
+            //board.MakeNullMove();   ***TEMPORARY***
             uint nullReduction = 3;
             int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
-            board.UnMakeNullMove();
+            //board.UnMakeNullMove();   ***TEMPORARY***
 
             //   ***TEMPORARY***
             if (nodeCount >= searchNodes && searchNodes != -1) return 0;
