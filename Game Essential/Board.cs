@@ -503,7 +503,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         if (prevEpFile != -1)
         {
             currentZobrist ^= Zobrist.epArray[prevEpFile]; //Remove old ep file
-            currentGameState ^= prevGameState & epFileMask; //TODO: can be simplified to currentGameState &= ~epFileMask
+            currentGameState ^= prevGameState & epFileMask;
         }
 
         gameStateHistory.Push(currentGameState);
