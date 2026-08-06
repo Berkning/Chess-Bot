@@ -236,7 +236,7 @@ public class Search
 
     #region Search
 
-    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0)//, bool test)
+    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0, bool nmpSearch = false)//, bool test)
     {
         nodeCount++;
 
@@ -316,14 +316,14 @@ public class Search
         }
 
         //Null-Move pruning
-        if (depth > 3 && !moveGenerator.inCheck)
+        if (depth > 3 && !moveGenerator.inCheck && !nmpSearch)
         {
             /*if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {*/
-            //board.MakeNullMove();   ***TEMPORARY***
+            board.MakeNullMove();
             uint nullReduction = 3;
-            int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
-            //board.UnMakeNullMove();   ***TEMPORARY***
+            int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions, true);
+            board.UnMakeNullMove();
 
             //   ***TEMPORARY***
             if (nodeCount >= searchNodes && searchNodes != -1) return 0;
