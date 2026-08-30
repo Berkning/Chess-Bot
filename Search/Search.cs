@@ -58,96 +58,103 @@ public class Search
 
     public void StartSearch()
     {
-        bestMove = Move.nullMove;
-        bestEval = NegativeInfinity;
-        repetitionTable.Copy(board.repetitionTable);
-
-        nodeCount = -1; //Dont want to include start node
-
-        clock.Reset();
-
-
-        moveOrdering.DecayHistory(); //TODO: maybe do after search when it is our opponents turn
-
-
-        if (searchTime == -1)
+        try
         {
-            searchTime = TimeManagement.GetSearchTime(board.colorToMove); //Doesn't matter that other threads will have same search time and are started with delay. Their searchTime will be set to a negative number when first thread finishes anyway
+            bestMove = Move.nullMove;
+            bestEval = NegativeInfinity;
+            repetitionTable.Copy(board.repetitionTable);
 
-            clock.Start();
-        }
-        else if (searchTime > 0)
-        {
-            clock.Start();
-        }
-        else if (searchTime == 0)
-        {
-            Console.WriteLine("Searchtime was zero!!");
-            Console.WriteLine("bestmove searchtimewaszero");
-            return;
-        }
-        else //Go forever till stop is recieved
-        {
-            //TODO: Remove
-            //Console.WriteLine("bestmove timeWasUnder-1=" + searchTime);
+            nodeCount = -1; //Dont want to include start node
 
-            searchTime = int.MaxValue;
-            clock.Start();
-        }
+            clock.Reset();
 
 
-        int prevResult = NegativeInfinity;
+            moveOrdering.DecayHistory(); //TODO: maybe do after search when it is our opponents turn
 
 
-        int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
-
-        if (resultFromLastSearch != TranspositionTable.LookupFailed)
-        {
-            prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
-        }
-
-        for (uint depth = 1; depth <= searchDepth; depth++)
-        {
-            if (engine != null)
+            if (searchTime == -1)
             {
-                engine.StartHelperThreads((int)depth);
-                prevResult = AspirationSearch(depth, prevResult);
-                engine.StopHelperThreads();
+                searchTime = TimeManagement.GetSearchTime(board.colorToMove); //Doesn't matter that other threads will have same search time and are started with delay. Their searchTime will be set to a negative number when first thread finishes anyway
+
+                clock.Start();
             }
-            else prevResult = AspirationSearch(depth, prevResult);
-
-            //   ***TEMPORARY***
-            if (nodeCount >= searchNodes && searchNodes != -1)
+            else if (searchTime > 0)
             {
-                if (bestMove.data == 0)
+                clock.Start();
+            }
+            else if (searchTime == 0)
+            {
+                Console.WriteLine("Searchtime was zero!!");
+                Console.WriteLine("bestmove searchtimewaszero");
+                return;
+            }
+            else //Go forever till stop is recieved
+            {
+                //TODO: Remove
+                //Console.WriteLine("bestmove timeWasUnder-1=" + searchTime);
+
+                searchTime = int.MaxValue;
+                clock.Start();
+            }
+
+
+            int prevResult = NegativeInfinity;
+
+
+            int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
+
+            if (resultFromLastSearch != TranspositionTable.LookupFailed)
+            {
+                prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
+            }
+
+            for (uint depth = 1; depth <= searchDepth; depth++)
+            {
+                if (engine != null)
                 {
-                    Console.WriteLine("bestmove NoBestmoveFound");
+                    engine.StartHelperThreads((int)depth);
+                    prevResult = AspirationSearch(depth, prevResult);
+                    engine.StopHelperThreads();
                 }
+                else prevResult = AspirationSearch(depth, prevResult);
 
-                LogSearchInfo(depth, nodeCount, true, threadID);
-                break;
-            }
-            //   ***TEMPORARY***
-
-            if (clock.ElapsedMilliseconds >= searchTime)
-            {
-                //If we haven't found a move to play, and search is being cancelled, run an emergency full width search to a depth of 1
-                if (bestMove.data == 0)
+                //   ***TEMPORARY***
+                if (nodeCount >= searchNodes && searchNodes != -1)
                 {
-                    Console.WriteLine("info string Running emergency search");
-                    AlphaBeta(1, 0, NegativeInfinity, PositiveInfinity);
+                    if (bestMove.data == 0)
+                    {
+                        Console.WriteLine("bestmove NoBestmoveFound");
+                    }
+
+                    LogSearchInfo(depth, nodeCount, true, threadID);
+                    break;
                 }
+                //   ***TEMPORARY***
 
-                LogSearchInfo(depth, nodeCount, true, threadID);
-                break;
+                if (clock.ElapsedMilliseconds >= searchTime)
+                {
+                    //If we haven't found a move to play, and search is being cancelled, run an emergency full width search to a depth of 1
+                    if (bestMove.data == 0)
+                    {
+                        Console.WriteLine("info string Running emergency search");
+                        AlphaBeta(1, 0, NegativeInfinity, PositiveInfinity);
+                    }
+
+                    LogSearchInfo(depth, nodeCount, true, threadID);
+                    break;
+                }
+                else LogSearchInfo(depth, nodeCount, false, threadID); //TODO: check if matescore and then exit if were low on time
             }
-            else LogSearchInfo(depth, nodeCount, false, threadID); //TODO: check if matescore and then exit if were low on time
+
+            clock.Stop();
+
+            callback.Invoke(bestMove, threadID);
         }
-
-
-        clock.Stop();
-
-        callback.Invoke(bestMove, threadID);
+        catch (Exception e)
+        {
+            File.AppendAllText("ENGINE CRASH LOG " + nodeCount + "#" + searchTime, e.ToString());
+            throw;
+        }
     }
 
 
