@@ -350,9 +350,9 @@ public class Search
             bool searchFullDepth = true;
 
             //Late Move Reduction
-            if (i > 4 && extensions == 0 && depth > 3)  //Assuming move ordering isn't completely wrong
+            if (i > 4 && extensions == 0 && depth > 3 && false)  //Assuming move ordering isn't completely wrong
             {
-                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions);
+                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions); //TODO: try making this a normal search - might be causing the crashes
 
                 //If evals better than anything else so far we'll search to full depth
                 searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime); //TODOnt?: Move cancel check to separate if before this
