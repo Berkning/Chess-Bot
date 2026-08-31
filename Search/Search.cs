@@ -121,7 +121,7 @@ public class Search
                 if (bestMove.data == 0)
                 {
                     Console.WriteLine("info string Running emergency search");
-                    AlphaBeta(1, 0, NegativeInfinity, PositiveInfinity);
+                    AlphaBeta(1, 0, NegativeInfinity, PositiveInfinity); //FIXME: Emergency search doesn't help at all if clock has run out, because search will return 0 immediatly
                 }
 
                 LogSearchInfo(depth, nodeCount, true, threadID);
@@ -216,7 +216,7 @@ public class Search
 
     #region Search
 
-    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0)//, bool test)
+    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0, bool isPV = true)//, bool test)
     {
         nodeCount++;
 
@@ -292,14 +292,16 @@ public class Search
         }
 
         //Null-Move pruning
-        if (depth > 3 && !moveGenerator.inCheck)
+        if (depth > 3 && !moveGenerator.inCheck && !isPV)
         {
             if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {
                 board.MakeNullMove();
                 uint nullReduction = 3;
-                int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
+                int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions, false);
                 board.UnMakeNullMove();
+
+                //TODO: do a verification search
 
                 if ((nodeCount & CancelDelay) == 0)
                 {
@@ -339,13 +341,26 @@ public class Search
             //Late Move Reduction
             if (i > 4 && extensions == 0 && depth > 3)  //Assuming move ordering isn't completely wrong
             {
-                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions);
+                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions, false);
 
                 //If evals better than anything else so far we'll search to full depth
                 searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime); //TODOnt?: Move cancel check to separate if before this
             }
 
-            if (searchFullDepth) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);
+            if (searchFullDepth)
+            {
+                if (i == 0) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions, isPV);//, test);
+                else
+                {
+                    evaluation = -AlphaBeta(depth - 1, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions + extensions, false);
+
+                    if (evaluation > alpha && isPV)
+                    {
+                        //Research with full window
+                        evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions, true);
+                    }
+                }
+            }
 
 
             board.UnMakeMove(moves[i], true);
