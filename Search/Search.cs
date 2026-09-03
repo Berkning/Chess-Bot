@@ -118,11 +118,11 @@ public class Search
             if (clock.ElapsedMilliseconds >= searchTime)
             {
                 //If we haven't found a move to play, and search is being cancelled, run an emergency full width search to a depth of 1
-                if (bestMove.data == 0)
+                /*if (bestMove.data == 0)
                 {
                     Console.WriteLine("info string Running emergency search");
                     AlphaBeta(1, 0, NegativeInfinity, PositiveInfinity); //FIXME: Emergency search doesn't help at all if clock has run out, because search will return 0 immediatly
-                }
+                }*/
 
                 LogSearchInfo(depth, nodeCount, true, threadID);
                 break;
@@ -222,7 +222,7 @@ public class Search
 
         if ((nodeCount & CancelDelay) == 0) //TODO: test with removing this
         {
-            if (clock.ElapsedMilliseconds >= searchTime) return 0;
+            if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
         }
 
         if (plyFromRoot > 0)
@@ -305,7 +305,7 @@ public class Search
 
                 if ((nodeCount & CancelDelay) == 0)
                 {
-                    if (clock.ElapsedMilliseconds >= searchTime) return 0;
+                    if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
                 }
 
                 if (nullEval >= beta) return nullEval;
@@ -368,7 +368,7 @@ public class Search
 
             if ((nodeCount & CancelDelay) == 0) //Makes perfect sense to have this here now - //Seemingly doesn't work properly without this check, but works fine without the check at the start of the function. Doesn't make any sense - also doesn't work do the correct amount of checks without the check at the start, but still stops in reasonable amount of time
             {
-                if (clock.ElapsedMilliseconds >= searchTime) return 0;
+                if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
             }
 
             //Move was good opponent will avoid this position
@@ -420,7 +420,7 @@ public class Search
     {
         if ((nodeCount & CancelDelay) == 0) //TODO: Try removing this
         {
-            if (clock.ElapsedMilliseconds >= searchTime) return 0; //We are checking in the iterative part im just stupid - //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
+            if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0; //We are checking in the iterative part im just stupid - //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
         }
 
         // A player isn't forced to make a capture (typically), so see what the evaluation is without capturing anything.
@@ -455,7 +455,7 @@ public class Search
 
             if ((nodeCount & CancelDelay) == 0)
             {
-                if (clock.ElapsedMilliseconds >= searchTime) return 0;
+                if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
             }
 
             if (eval >= beta)
