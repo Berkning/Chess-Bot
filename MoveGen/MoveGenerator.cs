@@ -611,4 +611,9 @@ public struct Move //FFFFTTTTTTSSSSSS - F = Flag bit - T = Target square bit - S
         int _flag = flag;
         return _flag > 2 && _flag < 7;
     }
+
+    public bool IsNullMove()
+    {
+        return data == 0;
+    }
 }
