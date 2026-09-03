@@ -89,8 +89,6 @@ public class TranspositionTable
 
     public int LookupEvaluation(ulong zobrist, uint depth, int plyFromRoot, int alpha, int beta)
     {
-        return LookupFailed;
-
         ulong index = Index(zobrist);
 
         Transposition transposition = table[index];
@@ -145,8 +143,6 @@ public class TranspositionTable
         //currentEntry = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move); //TODO: try changing casts/removing?
 
         //table[index] = currentEntry;
-
-        return;
 
         if (Math.Abs(eval) > short.MaxValue)
         {
