@@ -10,7 +10,7 @@ public class RepetitionTable
 
     public void Push(ulong hash) //TODO: optimize like sebastian so we have a reversible reset, maybe, when pawn pushes/capture
     {
-        //if (currentIndex < 0 || currentIndex > 127) Debug.Log(currentIndex);
+        if (currentIndex < 0 || currentIndex > 127) Console.WriteLine("bestmove repetitionTableBoundsViolation:" + currentIndex);
         hashes[currentIndex] = hash;
         currentIndex++;
     }
