@@ -167,7 +167,7 @@ public class Search
 
             //if ((nodeCount & CancelDelay) == 0) //Obv don't only check when canceldelay has passed, otherwise if nodecount is off by just 1 we keep running the aspiration search even if search is cancelled
             //{
-            if (clock.ElapsedMilliseconds >= searchTime) return 0;
+            if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
             //}
 
             incrementIndex++; //If we fail, we have to increment this index anyway, and if we don't, we won't continue the loop anyway
@@ -344,7 +344,7 @@ public class Search
                 evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions, false);
 
                 //If evals better than anything else so far we'll search to full depth
-                searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime); //TODOnt?: Move cancel check to separate if before this
+                searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()); //TODOnt?: Move cancel check to separate if before this
             }
 
             if (searchFullDepth)
@@ -424,7 +424,7 @@ public class Search
         }
 
         // A player isn't forced to make a capture (typically), so see what the evaluation is without capturing anything.
-        // This prevents situations where a plcancelSearchayer ony has bad captures available from being evaluated as bad,
+        // This prevents situations where a player only has bad captures available from being evaluated as bad,
         // when the player might have good non-capture moves available.
         int eval = evaluator.Evaluate(board);
         //positionCount++;
@@ -482,9 +482,10 @@ public class Search
 
     private void LogSearchInfo(uint depth, int nodeCount, bool isPartial, int id)
     {
-        if (bestMove.data == 0)
+        if (bestMove.IsNullMove())
         {
-            Console.WriteLine("bestmove " + FenUtility.GetCurrentFen(board) + " GHU#EGWHOIBHVDUBWRUBGUJOBJCBJOBNOWJRNOJNJNCBJNWUIORNBJUHBNWONRFIOBNWROJBNOJCNSOJBNRJOWNORJNBJUONBJONWERJONB");
+            //Console.WriteLine("bestmove " + FenUtility.GetCurrentFen(board) + " GHU#EGWHOIBHVDUBWRUBGUJOBJCBJOBNOWJRNOJNJNCBJNWUIORNBJUHBNWONRFIOBNWROJBNOJCNSOJBNRJOWNORJNBJUONBJONWERJONB");
+            Console.WriteLine("bestmove bestMoveWasANullMove");
             return;
         }
 
