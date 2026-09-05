@@ -20,7 +20,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
         switch (args[0])
         {
             case "uci":
-                Console.WriteLine("id name BerkBot");
+                Console.WriteLine("id name Manatee");
                 Console.WriteLine("id author Berkning");
 
                 Console.WriteLine("option name Hash type spin default 16 min 1 max 1024");

@@ -1,7 +1,7 @@
 
 public class RepetitionTable
 {
-    private ulong[] hashes = new ulong[128];
+    private ulong[] hashes = new ulong[256]; //A size of 128 for this would theoretically (i believe) be more than enough (bc of 50 move rule), but without having 50 move rule implemented this should be 256 (which could still cause crashes but odds are like 1/inf)
     private int currentIndex = 0;
 
     public int Count => currentIndex;
@@ -10,7 +10,7 @@ public class RepetitionTable
 
     public void Push(ulong hash) //TODO: optimize like sebastian so we have a reversible reset, maybe, when pawn pushes/capture
     {
-        if (currentIndex < 0 || currentIndex > 127) Console.WriteLine("bestmove repetitionTableBoundsViolation:" + currentIndex);
+        if (currentIndex < 0 || currentIndex >= hashes.Length) Console.WriteLine("bestmove repetitionTableBoundsViolation:" + currentIndex);
         hashes[currentIndex] = hash;
         currentIndex++;
     }
