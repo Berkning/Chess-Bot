@@ -10,14 +10,14 @@ public static class BitBoardHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong AddSquare(ulong bitboard, int square)
+    public static ulong AddSquare(ulong bitboard, int square) //TODO: Test which is faster and remove the other
     {
         bitboard |= 1UL << square;
         return bitboard;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AddSquare(ref ulong bitboard, int square)
+    public static void AddSquare(ref ulong bitboard, int square) //TODO: Test which is faster and remove the other
     {
         bitboard |= 1UL << square;
     }

@@ -408,7 +408,6 @@ public class MoveGenerator
             targetSquare = PrecomputedData.PawnAttackSquares[attackIndex][i];
             int captureDirection = targetSquare - startSquare;
 
-            //TODO:                      Can replace this with a simple check for the square being in pinRayBoard bc that will always be true if moving along ray with pawns?
             if (IsPinned(startSquare) && !IsMovingAlongRay(friendlyKingSquare, startSquare, captureDirection)) continue; //Pawn is pinned and cant move in this direction
 
             int targetPiece = board.Squares[targetSquare];
@@ -438,19 +437,20 @@ public class MoveGenerator
 
     private void GenerateKnightMoves(Span<Move> moves, int startSquare, bool genOnlyCaptures)
     {
-        //TODO: Bitboards
-        for (int i = 0; i < PrecomputedData.KnightMoves[startSquare].Length; i++)
+        if (IsPinned(startSquare)) return; //Knight can't move at all if pinned
+
+        ulong moveBoard = PrecomputedData.knightAttackBitboards[startSquare];
+
+        if (genOnlyCaptures) moveBoard &= ~enemyPieces;
+        else moveBoard &= ~friendlyPieces;
+
+        if (inCheck) moveBoard &= checkRayBitMap;
+
+        while (moveBoard != 0)
         {
-            if (IsPinned(startSquare)) return; //Knight cant move at all if pinned //TODO: Just move outside loop
+            int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
 
-            int targetSquare = PrecomputedData.KnightMoves[startSquare][i];
-            int pieceOnTarget = board.Squares[targetSquare];
-
-            if (Piece.Color(pieceOnTarget) == board.friendlyColor) continue;
-
-            bool isCapture = !Piece.IsNone(pieceOnTarget);
-
-            if ((isCapture || !genOnlyCaptures) && (!inCheck || SquareIsInCheckRay(targetSquare))) moves[moveCount++] = new Move(startSquare, targetSquare);
+            moves[moveCount++] = new Move(startSquare, targetSquare);
         }
     }
 
