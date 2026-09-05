@@ -54,90 +54,80 @@ public class Search
     //Might be necessary to mark as volatile so it's synced when main thread wants to stop this thread
     public int searchTime = -1; //-2 : infinite,  -1 : use time management,  x : use x amount of time
 
-    private int debugSection;
-
 
     public void StartSearch()
     {
-        try
+        bestMove = Move.nullMove;
+        bestEval = NegativeInfinity;
+        repetitionTable.Copy(board.repetitionTable);
+
+        nodeCount = -1; //Dont want to include start node
+
+        clock.Reset();
+
+
+        moveOrdering.DecayHistory(); //TODO: maybe do after search when it is our opponents turn
+
+
+        if (searchTime == -1)
         {
-            bestMove = Move.nullMove;
-            bestEval = NegativeInfinity;
-            repetitionTable.Copy(board.repetitionTable);
+            searchTime = TimeManagement.GetSearchTime(board.colorToMove); //Doesn't matter that other threads will have same search time and are started with delay. Their searchTime will be set to a negative number when first thread finishes anyway
 
-            nodeCount = -1; //Dont want to include start node
-
-            clock.Reset();
-
-
-            moveOrdering.DecayHistory(); //TODO: maybe do after search when it is our opponents turn
-
-
-            if (searchTime == -1)
-            {
-                searchTime = TimeManagement.GetSearchTime(board.colorToMove); //Doesn't matter that other threads will have same search time and are started with delay. Their searchTime will be set to a negative number when first thread finishes anyway
-
-                clock.Start();
-            }
-            else if (searchTime > 0)
-            {
-                clock.Start();
-            }
-            else if (searchTime == 0)
-            {
-                Console.WriteLine("Searchtime was zero!!");
-                Console.WriteLine("bestmove searchtimewaszero");
-                return;
-            }
-            else //Go forever till stop is recieved
-            {
-                //TODO: Remove
-                //Console.WriteLine("bestmove timeWasUnder-1=" + searchTime);
-
-                searchTime = int.MaxValue;
-                clock.Start();
-            }
-
-
-            int prevResult = NegativeInfinity;
-
-
-            int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
-
-            if (resultFromLastSearch != TranspositionTable.LookupFailed)
-            {
-                prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
-            }
-
-            for (uint depth = 1; depth <= searchDepth; depth++)
-            {
-                if (engine != null)
-                {
-                    engine.StartHelperThreads((int)depth);
-                    prevResult = AspirationSearch(depth, prevResult);
-                    engine.StopHelperThreads();
-                }
-                else prevResult = AspirationSearch(depth, prevResult);
-
-                if (clock.ElapsedMilliseconds >= searchTime)
-                {
-                    //If we haven't found a move to play, and search is being cancelled, run an emergency full width search to a depth of 1
-                    /*if (bestMove.data == 0)
-                    {
-                        Console.WriteLine("info string Running emergency search");
-                        AlphaBeta(1, 0, NegativeInfinity, PositiveInfinity); //FIXME: Emergency search doesn't help at all if clock has run out, because search will return 0 immediatly
-                    }*/
-
-                    LogSearchInfo(depth, nodeCount, true, threadID);
-                    break;
-                }
-                else LogSearchInfo(depth, nodeCount, false, threadID); //TODO: check if matescore and then exit if were low on time
-            }
+            clock.Start();
         }
-        catch (Exception e)
+        else if (searchTime > 0)
         {
-            File.AppendAllText("ENGINE CRASH LOG " + nodeCount + "#" + searchTime + " Section #" + debugSection, e.ToString());
-            throw;
+            clock.Start();
+        }
+        else if (searchTime == 0)
+        {
+            Console.WriteLine("Searchtime was zero!!");
+            Console.WriteLine("bestmove searchtimewaszero");
+            return;
+        }
+        else //Go forever till stop is recieved
+        {
+            //TODO: Remove
+            //Console.WriteLine("bestmove timeWasUnder-1=" + searchTime);
+
+            searchTime = int.MaxValue;
+            clock.Start();
+        }
+
+
+        int prevResult = NegativeInfinity;
+
+
+        int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
+
+        if (resultFromLastSearch != TranspositionTable.LookupFailed)
+        {
+            prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
+        }
+
+        for (uint depth = 1; depth <= searchDepth; depth++)
+        {
+            if (engine != null)
+            {
+                engine.StartHelperThreads((int)depth);
+                prevResult = AspirationSearch(depth, prevResult);
+                engine.StopHelperThreads();
+            }
+            else prevResult = AspirationSearch(depth, prevResult);
+
+            if (clock.ElapsedMilliseconds >= searchTime)
+            {
+                //If we haven't found a move to play, and search is being cancelled, run an emergency full width search to a depth of 1
+                /*if (bestMove.data == 0)
+                {
+                    Console.WriteLine("info string Running emergency search");
+                    AlphaBeta(1, 0, NegativeInfinity, PositiveInfinity); //FIXME: Emergency search doesn't help at all if clock has run out, because search will return 0 immediatly
+                }*/
+
+                LogSearchInfo(depth, nodeCount, true, threadID);
+                break;
+            }
+            else LogSearchInfo(depth, nodeCount, false, threadID); //TODO: check if matescore and then exit if were low on time
         }
 
 
@@ -173,8 +163,6 @@ public class Search
 
         while (true)
         {
-            debugSection = 1;
-
             result = AlphaBeta(depth, 0, alpha, beta);
 
             //if ((nodeCount & CancelDelay) == 0) //Obv don't only check when canceldelay has passed, otherwise if nodecount is off by just 1 we keep running the aspiration search even if search is cancelled
@@ -232,8 +220,6 @@ public class Search
     {
         nodeCount++;
 
-        debugSection = 2;
-
         if ((nodeCount & CancelDelay) == 0) //TODO: test with removing this
         {
             if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
@@ -259,8 +245,6 @@ public class Search
             }
         }
 
-        debugSection = 3;
-
         int tableEval = transpositionTable.LookupEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, beta);
         if (transpositionTable.IsSuccessfulLookup(tableEval))
         {
@@ -274,8 +258,6 @@ public class Search
             return tableEval;
         }
 
-        debugSection = 4;
-
         if (depth == 0)
         {
             //quiescenseCount++;
@@ -283,13 +265,9 @@ public class Search
             return SearchAllCaptures(alpha, beta);
         }
 
-        debugSection = 10;
-
         Span<Move> moves = stackalloc Move[256];
 
         int moveCount = moveGenerator.GenerateMoves(ref moves);
-
-        debugSection = 11;
 
 
         //TODO: Try setting hash move to the global bestmove if plyfromroot == 0
@@ -297,12 +275,8 @@ public class Search
 
         if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
 
-        debugSection = 12;
-
         /*if (test)*/
         moveOrdering.OrderMoves(ref moves, moveCount, hashMove, plyFromRoot); //TODOnt: Try this after the mate check - somehow basically makes zero to worse difference
-
-        debugSection = 13;
 
         //TODO: Could prob optimize to avoid this if statement
         //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
@@ -316,21 +290,15 @@ public class Search
             return 0; //Stalemate
         }
 
-        debugSection = 14;
-
         //Null-Move pruning
         if (depth > 3 && !moveGenerator.inCheck && !isPV)
         {
-            debugSection = 15;
             if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {
                 board.MakeNullMove();
-                debugSection = 16;
                 uint nullReduction = 3;
                 int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions, false);
-                debugSection = 17;
                 board.UnMakeNullMove();
-                debugSection = 18;
 
                 //TODO: do a verification search
 
@@ -343,14 +311,10 @@ public class Search
             }
         }
 
-        debugSection = 19;
-
         Move bestMoveInPosition = Move.nullMove;
         ulong transpositionBound = TranspositionTable.UpperBound;
 
         if (plyFromRoot > 0) repetitionTable.Push(board.currentZobrist);
-
-        debugSection = 20;
 
 
         for (int i = 0; i < moveCount; i++)
@@ -358,8 +322,6 @@ public class Search
             //Move move = moves[i];
 
             board.MakeMove(moves[i], true); //TODOne: test having ref to move instead of accesing array - prob already done by compiler though
-
-            debugSection = 21;
 
             uint extensions = 0;
             if (numExtensions < MaxExtensions)
@@ -369,8 +331,6 @@ public class Search
                 int targetRank = BoardHelper.IndexToRank(moves[i].targetSquare);
                 if (Piece.Type(board.Squares[moves[i].targetSquare]) == Piece.Pawn && (targetRank == 1 || targetRank == 6)) extensions = 1; //Extend when about to promote //TODO: test properly
             }
-
-            debugSection = 22;
 
             int evaluation = NegativeInfinity;
             bool searchFullDepth = true;
@@ -383,8 +343,6 @@ public class Search
                 //If evals better than anything else so far we'll search to full depth
                 searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()); //TODOnt?: Move cancel check to separate if before this
             }
-
-            debugSection = 23;
 
             if (searchFullDepth)
             {
@@ -401,20 +359,14 @@ public class Search
                 }
             }
 
-            debugSection = 24;
-
 
             board.UnMakeMove(moves[i], true);
-
-            debugSection = 25;
 
 
             if ((nodeCount & CancelDelay) == 0) //Makes perfect sense to have this here now - //Seemingly doesn't work properly without this check, but works fine without the check at the start of the function. Doesn't make any sense - also doesn't work do the correct amount of checks without the check at the start, but still stops in reasonable amount of time
             {
                 if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
             }
-
-            debugSection = 26;
 
             //Move was good opponent will avoid this position
             if (evaluation >= beta)
@@ -437,8 +389,6 @@ public class Search
                 return beta;
             }
 
-            debugSection = 27;
-
             if (evaluation > alpha)
             {
                 alpha = evaluation;
@@ -453,17 +403,11 @@ public class Search
                     bestEval = evaluation;
                 }
             }
-
-            debugSection = 28;
         }
 
         if (plyFromRoot > 0) repetitionTable.PopNoRtn();
 
-        debugSection = 29;
-
         transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);
-
-        debugSection = 30;
 
         return alpha;
     }
@@ -476,15 +420,11 @@ public class Search
             if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0; //We are checking in the iterative part im just stupid - //From seb lague. Don't need to return 0 during the iterative part i guess, bc the main search calling this function will check if search is cancelled after this returns
         }
 
-        debugSection = 5;
-
         // A player isn't forced to make a capture (typically), so see what the evaluation is without capturing anything.
         // This prevents situations where a player only has bad captures available from being evaluated as bad,
         // when the player might have good non-capture moves available.
         int eval = evaluator.Evaluate(board);
         //positionCount++;
-
-        debugSection = 6;
 
         if (eval >= beta)
         {
@@ -499,11 +439,7 @@ public class Search
 
         int moveCount = moveGenerator.GenerateMoves(ref moves, true);
 
-        debugSection = 7;
-
         moveOrdering.OrderMoves(ref moves, moveCount, bestMove, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
-
-        debugSection = 8;
 
         for (int i = 0; i < moveCount; i++)
         {
@@ -529,8 +465,6 @@ public class Search
                 alpha = eval;
             }
         }
-
-        debugSection = 9;
 
         return alpha;
     }
