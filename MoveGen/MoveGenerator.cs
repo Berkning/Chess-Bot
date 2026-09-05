@@ -182,6 +182,7 @@ public class MoveGenerator
         // allPieces = friendlyPieces | enemyPieces;
 
 
+        //TODO: Keep a bitboard for friendly and enemy pieces in board to avoid having to assemble it every time maybe?
 
         ulong friendlyQueens = board.GetPieceList(Piece.Queen, friendlyBit).bitboard;
         ulong enemyQueens = board.GetPieceList(Piece.Queen, enemyBit).bitboard;
@@ -210,12 +211,12 @@ public class MoveGenerator
     public Span<Move> GenerateMovesSlow()
     {
         Span<Move> moves = new Move[256];
-        GenerateMoves(ref moves);
+        GenerateMoves(moves);
         return moves;
     }
 
     //TODO: Remove ref here bc unnecessary - span is ref to array anyway so just return a span like normal
-    public int GenerateMoves(ref Span<Move> moves, bool genOnlyCaptures = false) //Returns move count
+    public int GenerateMoves(Span<Move> moves, bool genOnlyCaptures = false) //Returns move count
     {
         moveCount = 0;
 
@@ -243,27 +244,27 @@ public class MoveGenerator
         //TODOnt: Pass genOnlyCaptures bc we then should also only worry about if the opponent can REcapture our king if he captures a piece bc only his capturing moves are generated - should cause slight speedup bc we don't need to worry about non attacking moves? - can't see any way it could be useful when using magic bitboards
         GenerateAttackMaps();
 
-        GenerateKingMoves(ref moves, genOnlyCaptures);
+        GenerateKingMoves(moves, genOnlyCaptures);
 
         if (inDoubleCheck) return moveCount; //Only king moves valid when in double check
 
         for (int i = 0; i < board.GetPieceList(Piece.Pawn, board.friendlyColorBit).Count; i++)
         {
-            GeneratePawnMoves(ref moves, board.GetPieceList(Piece.Pawn, board.friendlyColorBit)[i], genOnlyCaptures); //TODO: Cache piecelist ref ofc!!!
+            GeneratePawnMoves(moves, board.GetPieceList(Piece.Pawn, board.friendlyColorBit)[i], genOnlyCaptures); //TODO: Cache piecelist ref ofc!!!
         }
 
         for (int i = 0; i < board.GetPieceList(Piece.Knight, board.friendlyColorBit).Count; i++)
         {
-            GenerateKnightMoves(ref moves, board.GetPieceList(Piece.Knight, board.friendlyColorBit)[i], genOnlyCaptures); //TODO: Cache piecelist ref ofc!!!
+            GenerateKnightMoves(moves, board.GetPieceList(Piece.Knight, board.friendlyColorBit)[i], genOnlyCaptures); //TODO: Cache piecelist ref ofc!!!
         }
 
-        GenerateSlidingMoves(ref moves, genOnlyCaptures);
+        GenerateSlidingMoves(moves, genOnlyCaptures);
 
         moves = moves.Slice(0, moveCount);
         return moveCount;
     }
 
-    private void GenerateSlidingMoves(ref Span<Move> moves, bool genOnlyCaptures)
+    private void GenerateSlidingMoves(Span<Move> moves, bool genOnlyCaptures)
     {
         //            Only if blocks check
         ulong moveMask = checkRayBitMap;
@@ -321,7 +322,7 @@ public class MoveGenerator
         }
     }
 
-    private void GenerateKingMoves(ref Span<Move> moves, bool genOnlyCaptures)
+    private void GenerateKingMoves(Span<Move> moves, bool genOnlyCaptures)
     {
         ulong moveBoard = PrecomputedData.kingAttackBitboards[friendlyKingSquare] & (~friendlyPieces);
         ulong safetyMap = ~opponentAttackMap; //All squares not attacked by opponent
@@ -358,7 +359,7 @@ public class MoveGenerator
         }
     }
 
-    private void GeneratePawnMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
+    private void GeneratePawnMoves(Span<Move> moves, int startSquare, bool genOnlyCaptures)
     {
         int moveDir = board.friendlyColor == Piece.White ? PrecomputedData.Up : PrecomputedData.Down;
         int targetSquare = startSquare + moveDir;//One move up/down
@@ -379,7 +380,7 @@ public class MoveGenerator
                 {
                     if (!inCheck || SquareIsInCheckRay(targetSquare))
                     {
-                        if (oneStepFromPromotion) AddPromotionMoves(ref moves, startSquare, targetSquare);
+                        if (oneStepFromPromotion) AddPromotionMoves(moves, startSquare, targetSquare);
                         else moves[moveCount++] = new Move(startSquare, targetSquare);
                     }
 
@@ -416,7 +417,7 @@ public class MoveGenerator
             {
                 if (inCheck && !SquareIsInCheckRay(targetSquare)) continue; //Skip direction if were in check and this move doesn't block it
 
-                if (oneStepFromPromotion) AddPromotionMoves(ref moves, startSquare, targetSquare);
+                if (oneStepFromPromotion) AddPromotionMoves(moves, startSquare, targetSquare);
                 else moves[moveCount++] = new Move(startSquare, targetSquare);
             }
 
@@ -435,7 +436,7 @@ public class MoveGenerator
         }
     }
 
-    private void GenerateKnightMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
+    private void GenerateKnightMoves(Span<Move> moves, int startSquare, bool genOnlyCaptures)
     {
         //TODO: Bitboards
         for (int i = 0; i < PrecomputedData.KnightMoves[startSquare].Length; i++)
@@ -454,7 +455,7 @@ public class MoveGenerator
     }
 
 
-    private void AddPromotionMoves(ref Span<Move> moves, int startSquare, int targetSquare)
+    private void AddPromotionMoves(Span<Move> moves, int startSquare, int targetSquare)
     {
         moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.PromoteToQueen);
         moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.PromoteToKnight);

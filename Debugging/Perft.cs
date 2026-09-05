@@ -15,7 +15,7 @@ public static class Perft
         MoveGenerator.promotionMode = MoveGenerator.PromotionMode.All; //Set the promotion mode to all to ensure we get all possible moves
 
         Span<Move> moves = stackalloc Move[256];
-        int moveCountInCurrentPosition = moveGenerator.GenerateMoves(ref moves);
+        int moveCountInCurrentPosition = moveGenerator.GenerateMoves(moves);
 
 
         string results = "";
@@ -98,7 +98,7 @@ public static class Perft
 
         Span<Move> moves = stackalloc Move[256];
 
-        int moveCount = moveGenerator.GenerateMoves(ref moves);
+        int moveCount = moveGenerator.GenerateMoves(moves);
 
         if (depth == 1) return moveCount;
 

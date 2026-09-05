@@ -122,7 +122,7 @@ public static class EngineDiagnostics
 
         Span<Move> moves = stackalloc Move[256];
 
-        int moveCount = moveGenerator.GenerateMoves(ref moves);
+        int moveCount = moveGenerator.GenerateMoves(moves);
 
         for (int i = 0; i < Math.Min(movesPerPos, moveCount); i++)
         {
@@ -235,7 +235,7 @@ public static class EngineDiagnostics
 
         Span<Move> moves = stackalloc Move[256];
 
-        int moveCount = moveGenerator.GenerateMoves(ref moves);
+        int moveCount = moveGenerator.GenerateMoves(moves);
 
         if (moveCount == 0) return true; //Checkmate/Stalemate
 

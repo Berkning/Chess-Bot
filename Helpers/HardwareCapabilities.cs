@@ -1,11 +1,8 @@
-
-
 using System.Diagnostics;
-using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 
-public static class HardwareCapabilities
+public static class HardwareCapabilities //TODO: Add a better alternative to the slow ahh benchmark we're currently using to determine whether to use PEXT or not
 {
     private const int MinTime = 100; //Minimum amount of time a benchmark has to run for, before we can count it as conclusive
     private const int MaxRounds = 256;

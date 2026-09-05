@@ -267,7 +267,7 @@ public class Search
 
         Span<Move> moves = stackalloc Move[256];
 
-        int moveCount = moveGenerator.GenerateMoves(ref moves);
+        int moveCount = moveGenerator.GenerateMoves(moves);
 
 
         //TODO: Try setting hash move to the global bestmove if plyfromroot == 0
@@ -437,7 +437,7 @@ public class Search
 
         Span<Move> moves = stackalloc Move[256];
 
-        int moveCount = moveGenerator.GenerateMoves(ref moves, true);
+        int moveCount = moveGenerator.GenerateMoves(moves, true);
 
         moveOrdering.OrderMoves(ref moves, moveCount, bestMove, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
 
