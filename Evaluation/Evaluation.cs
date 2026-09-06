@@ -16,7 +16,7 @@ public class Evaluation
 
     private const int Bias = 1;
 
-    public Evaluation()
+    public Evaluation()//TODO: https://chessprogramming.org/XOP#:~:text=Instructions-,Integer%20Multiply%2C%20Add%20and%20Accumulate,-XOP%20has%20a
     {
         weightVectors = new Vector<int>[(int)Math.Ceiling(Weights.Length / ((float)Vector<int>.Count))];
 

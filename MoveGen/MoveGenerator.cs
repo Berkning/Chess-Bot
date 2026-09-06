@@ -63,7 +63,7 @@ public class MoveGenerator
             ulong directionMask = PrecomputedData.directionalMasks[friendlyKingSquare][startSquare]; //Mask of line from king through piece to board edge
             ulong pinMask = kingAttackMask & directionMask; //Bitboard of line from king to attacking slider - includes slider itself
 
-            ulong pinBoard = pinMask & friendlyPieces; //Bitboard of all potentially pinned pieces between this slider and the king - if none; were in check
+            ulong pinBoard = pinMask & friendlyPieces; //Bitboard of all potentially pinned pieces between this slider and the king - if none; we're in check
 
             int pinCount = BitBoardHelper.BitCount(pinBoard); //Number of pieces in pinboard
 
@@ -167,20 +167,6 @@ public class MoveGenerator
         int friendlyBit = board.friendlyColorBit;
         int enemyBit = board.opponentColorBit;
 
-        // ulong friendlyQueens = board.queenList[friendlyBit].bitboard;
-        // ulong enemyQueens = board.queenList[enemyBit].bitboard;
-
-
-        // friendlyOrthos = board.rookList[friendlyBit].bitboard | friendlyQueens;
-        // friendlyDiags = board.bishopList[friendlyBit].bitboard | friendlyQueens;
-        // enemyOrthos = board.rookList[enemyBit].bitboard | enemyQueens;
-        // enemyDiags = board.bishopList[enemyBit].bitboard | enemyQueens;
-
-        // friendlyPieces = board.pawnList[friendlyBit].bitboard | board.knightList[friendlyBit].bitboard | friendlyDiags | friendlyOrthos | (1UL << friendlyKingSquare);
-        // enemyPieces = board.pawnList[enemyBit].bitboard | board.knightList[enemyBit].bitboard | enemyDiags | enemyOrthos | (1UL << enemyKingSquare);
-
-        // allPieces = friendlyPieces | enemyPieces;
-
 
         //TODO: Keep a bitboard for friendly and enemy pieces in board to avoid having to assemble it every time maybe?
 
@@ -215,7 +201,7 @@ public class MoveGenerator
         return moves;
     }
 
-    //TODO: Remove ref here bc unnecessary - span is ref to array anyway so just return a span like normal
+
     public int GenerateMoves(Span<Move> moves, bool genOnlyCaptures = false) //Returns move count
     {
         moveCount = 0;
@@ -369,10 +355,7 @@ public class MoveGenerator
 
         if (!genOnlyCaptures) //Only run this code if were not generating captures only
         {
-
             int startRank = board.friendlyColor == Piece.White ? 1 : 6;
-
-
 
             if (Piece.IsNone(board.Squares[targetSquare]))
             {
@@ -441,7 +424,7 @@ public class MoveGenerator
 
         ulong moveBoard = PrecomputedData.knightAttackBitboards[startSquare];
 
-        if (genOnlyCaptures) moveBoard &= ~enemyPieces;
+        if (genOnlyCaptures) moveBoard &= enemyPieces;
         else moveBoard &= ~friendlyPieces;
 
         if (inCheck) moveBoard &= checkRayBitMap;
@@ -524,7 +507,7 @@ public class MoveGenerator
         //TODO: pretty sure the fix is to set this to "int startSquare = friendlyKingSquare"
         int startSquare = friendlyKingSquare + directionIncrement; //We start at the friendly kings square and move one square away from the king; this is the first square where a piece could be blocking a potential check
 
-        //TODO: ... and let i start at 1 instead
+        //TODOnt: ... and let i start at 1 instead
         for (int i = 0; i < fileCount; i++)
         {
             int index = startSquare + i * directionIncrement;

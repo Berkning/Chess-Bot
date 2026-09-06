@@ -529,7 +529,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 }
 
 //TODOnt: Struct instead - store byte and not int for memory
-public class Piece
+//TODO: make this a static class bc cleaner
+public class Piece //TODO: a piece can technically be stored with just 4 bits (or just as a byte, try that), where 0b0111 stores piece type and 0b1000 stores 0 for white/blacj and 1 for the opposite color. Convinced this is not at all useful, since we would have to convert to a byte to manipulate it anyway.
 {
     public const int None = 0; //0b000
     public const int King = 1; //0b001
