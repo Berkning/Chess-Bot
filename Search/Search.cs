@@ -276,7 +276,7 @@ public class Search
         if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
 
         /*if (test)*/
-        moveOrdering.OrderMoves(ref moves, moveCount, hashMove, plyFromRoot); //TODOnt: Try this after the mate check - somehow basically makes zero to worse difference
+        moveOrdering.OrderMoves(moves, moveCount, hashMove, plyFromRoot); //TODOnt: Try this after the mate check - somehow basically makes zero to worse difference
 
         //TODO: Could prob optimize to avoid this if statement
         //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
@@ -439,7 +439,7 @@ public class Search
 
         int moveCount = moveGenerator.GenerateMoves(moves, true);
 
-        moveOrdering.OrderMoves(ref moves, moveCount, bestMove, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
+        moveOrdering.OrderMoves(moves, moveCount, bestMove, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
 
         for (int i = 0; i < moveCount; i++)
         {

@@ -71,7 +71,7 @@ public class MoveOrdering
 
 
     //TODOne: try penalizing moving very valuable pieces into less valuable enemy attack range - penalize rook in bishop attack range
-    public void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove, int ply) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
+    public void OrderMoves(Span<Move> moves, int moveCount, Move prevBestMove, int ply) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
     {
         int jitterIndex = moveCount != 0 ? threadID % moveCount : 0;
 
