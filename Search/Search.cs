@@ -291,10 +291,14 @@ public class Search
         }
 
         //Null-Move pruning
-        if (depth > 3 && !moveGenerator.inCheck && !isPV)
+        if (depth >= 3 && !moveGenerator.inCheck && !isPV)
         {
             if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {
+
+                //TODO: Try doing static eval / quiescence search first, check if above beta before doing this as a verificition
+
+
                 board.MakeNullMove();
                 uint nullReduction = 3;
                 int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions, false);
