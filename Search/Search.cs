@@ -352,7 +352,7 @@ public class Search
                 if (i == 0) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions, isPV);//, test);
                 else
                 {
-                    evaluation = -AlphaBeta(depth - 1, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions + extensions, false);
+                    evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions + extensions, false);
 
                     if (evaluation > alpha && isPV)
                     {
