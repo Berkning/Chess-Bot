@@ -354,7 +354,7 @@ public class Search
                 {
                     evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions + extensions, false);
 
-                    if (evaluation > alpha && isPV)
+                    if (evaluation > alpha && isPV && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()))
                     {
                         //Research with full window
                         evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions, true);
