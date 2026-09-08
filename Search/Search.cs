@@ -97,6 +97,8 @@ public class Search
 
         int prevResult = NegativeInfinity;
 
+        //TODO: Check if we're in the default start position, in which case we can set prevResult to the actual expected search value and use aspiration window from the start
+
 
         int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
 
@@ -143,7 +145,7 @@ public class Search
     #region Aspiration Window
     //public static class AspirationWindow //TODO: Try making non-static
     //{
-    private readonly static int[] windowIncrements = { 25, 50, 100, 200, 400, 800, 1600 }; //TODO: Tweak
+    private readonly static int[] windowIncrements = { PositiveInfinity - 100 };//{ 25, 50, 100, 200, 400, 800, 1600 }; //TODO: Tweak
     private const int InstabilityMargin = 25;
 
     private int AspirationSearch(uint depth, int prevResult) //TODO: Think maybe the illegal moves and infinite evals come from not getting a proper width search before search is cancelled so we have to use the capped eval???
@@ -354,7 +356,7 @@ public class Search
                 {
                     evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions + extensions, false);
 
-                    if (evaluation > alpha && isPV)
+                    if (evaluation > alpha && isPV) //TODO: Timer check before this - no need to do it for the other search calls
                     {
                         //Research with full window
                         evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions, true);
