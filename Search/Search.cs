@@ -292,7 +292,7 @@ public class Search
         }
 
         //Null-Move pruning
-        if (depth > 3 && !moveGenerator.inCheck)
+        if (depth > 3 && !moveGenerator.inCheck && !isPV)
         {
             if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {
@@ -341,7 +341,7 @@ public class Search
             //Late Move Reduction
             if (i > 4 && extensions == 0 && depth > 3)  //Assuming move ordering isn't completely wrong
             {
-                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions, false); //TODO: try moving the pvs stuff in here as well to make it cleaner/maybe fix pvs being worse than plain A/B
+                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions, false);
 
                 //If evals better than anything else so far we'll search to full depth
                 searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()); //TODOnt?: Move cancel check to separate if before this
