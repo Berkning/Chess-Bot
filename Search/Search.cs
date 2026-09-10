@@ -341,6 +341,7 @@ public class Search
             //Late Move Reduction
             if (i > 4 && extensions == 0 && depth > 3)  //Assuming move ordering isn't completely wrong
             {
+                //TODO: try moving the pvs stuff in here as well to make it cleaner/maybe fix pvs being worse than plain A/B
                 evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions, false);
 
                 //If evals better than anything else so far we'll search to full depth
@@ -349,7 +350,7 @@ public class Search
 
             if (searchFullDepth)
             {
-                if (i == 0) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions, isPV);//, test);
+                if (isPV && i == 0) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions, true);//, test);
                 else
                 {
                     evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions + extensions, false);

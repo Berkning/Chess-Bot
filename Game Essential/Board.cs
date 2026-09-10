@@ -294,7 +294,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
         else if (movedPieceType == Piece.Rook)
         {
-            //TODO: Could maybe check if castling is even allowed to avoid unnecessary stuff
+            //TODO: Can remove this entire else if with a simple switch at the start of this function - along with other place we are checking this
             if (enemyColor == Piece.White) //Means white played the move
             {
                 if (move.startSquare == BoardHelper.h1) //White shortcastle rook
