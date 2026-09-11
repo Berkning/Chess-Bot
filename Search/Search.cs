@@ -274,7 +274,7 @@ public class Search
         //TODO: Try setting hash move to the global bestmove if plyfromroot == 0
         Move hashMove = Move.nullMove;
 
-        if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
+        if (tableEval != TranspositionTable.LookupFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
 
         /*if (test)*/
         moveOrdering.OrderMoves(ref moves, moveCount, hashMove, plyFromRoot); //TODOnt: Try this after the mate check - somehow basically makes zero to worse difference

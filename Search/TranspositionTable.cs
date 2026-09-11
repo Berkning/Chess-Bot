@@ -11,7 +11,7 @@ public class TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsSuccessfulLookup(int eval) { return eval > DepthFailed; }
 
-    public const int DepthFailed = int.MinValue + 1;
+    public const int DepthFailed = LookupFailed + 1;
     public const int LookupFailed = int.MinValue;
 
     // The value for this position is the exact evaluation
