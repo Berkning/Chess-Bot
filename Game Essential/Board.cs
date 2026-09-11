@@ -228,9 +228,44 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             }
 
         }
+        else
+        {
+            switch (move.startSquare)
+            {
+                case BoardHelper.h1:
+                    prevCastleRights &= 0b1110; //Disable white shortcastle
+                    break;
+                case BoardHelper.h8:
+                    prevCastleRights &= 0b1101; //Disable black shortcastle
+                    break;
+                case BoardHelper.a1:
+                    prevCastleRights &= 0b1011; //Disable white longCastle
+                    break;
+                case BoardHelper.a8:
+                    prevCastleRights &= 0b0111; //Disable black longCastle
+                    break;
+            }
+
+            switch (move.targetSquare)
+            {
+                case BoardHelper.h1:
+                    prevCastleRights &= 0b1110; //Disable white shortcastle
+                    break;
+                case BoardHelper.h8:
+                    prevCastleRights &= 0b1101; //Disable black shortcastle
+                    break;
+                case BoardHelper.a1:
+                    prevCastleRights &= 0b1011; //Disable white longCastle
+                    break;
+                case BoardHelper.a8:
+                    prevCastleRights &= 0b0111; //Disable black longCastle
+                    break;
+            }
+        }
+
 
         //Add captured piece to gamestate - depends on whether the captured piece is on the square we landed on, or if ep
-        if (move.flag == Move.Flag.EnPassantCapture)
+        if (move.flag == Move.Flag.EnPassantCapture) //TODO: Move this to join the if above
         {
             int capturedPawnColor = colorToMove; //The color of the captured pawn is the color whos turn it is to move now
 
@@ -243,30 +278,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
         else if (Squares[move.targetSquare] != Piece.None)
         {
-            int capturedPiece = Squares[move.targetSquare];
-
             currentGameState |= (ushort)Squares[move.targetSquare];
             RemovePiece(move.targetSquare);
-
-            if (Piece.Type(capturedPiece) == Piece.Rook)
-            {
-                if (move.targetSquare == BoardHelper.h1)
-                {
-                    prevCastleRights &= 0b1110; //Disable white shortcastle
-                }
-                else if (move.targetSquare == BoardHelper.h8)
-                {
-                    prevCastleRights &= 0b1101; //Disable black shortcastle
-                }
-                else if (move.targetSquare == BoardHelper.a1)
-                {
-                    prevCastleRights &= 0b1011; //Disable white longCastle
-                }
-                else if (move.targetSquare == BoardHelper.a8)
-                {
-                    prevCastleRights &= 0b0111; //Disable black longCastle
-                }
-            }
         }
 
 
@@ -292,39 +305,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
                 currentZobrist ^= Zobrist.piecesArray[0, 1, move.targetSquare]; //Place black king on new square in zobrist
             }
         }
-        else if (movedPieceType == Piece.Rook)
-        {
-            //TODO: Could maybe check if castling is even allowed to avoid unnecessary stuff
-            if (enemyColor == Piece.White) //Means white played the move
-            {
-                if (move.startSquare == BoardHelper.h1) //White shortcastle rook
-                {
-                    //Debug.Log("WShort Disabled");
-                    prevCastleRights &= ~0b0001U;
-                }
-                else if (move.startSquare == BoardHelper.a1) //White longcastle rook
-                {
-                    //Debug.Log("WLong Disabled");
-                    prevCastleRights &= ~0b0100U;
-                }
-            }
-            else //Means black played the move
-            {
-                if (move.startSquare == BoardHelper.h8) //Black shortcastle rook
-                {
-                    //Debug.Log("BShort Disabled");
-                    prevCastleRights &= ~0b0010U;
-                }
-                else if (move.startSquare == BoardHelper.a8) //Black longcastle rook
-                {
-                    //Debug.Log("BLong Disabled");
-                    prevCastleRights &= ~0b1000U;
-                }
-            }
-
-            MovePiece(move.startSquare, move.targetSquare);
-        }
-        else if (move.IsPromotion())
+        else if (move.IsPromotion()) //TODO: Move this to join the big else if chain along with the EP if
         {
             //pawnList[opponentColorBit].RemovePieceAtSquare(move.startSquare); //Color changed so its the enemys pawn technically which should prob be changed
             RemovePiece(move.startSquare);
