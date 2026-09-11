@@ -218,12 +218,12 @@ public class Search
 
     private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0, bool isPV = true)//, bool test)
     {
-        nodeCount++;
-
-        if ((nodeCount & CancelDelay) == 0) //TODO: test with removing this
+        if ((nodeCount & CancelDelay) == 0) //TODOnt: test with removing this
         {
             if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
         }
+
+        nodeCount++;
 
         if (plyFromRoot > 0)
         {
