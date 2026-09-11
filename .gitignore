@@ -77,3 +77,9 @@ crashlytics-build.properties
 #Toon Fantasy Demo Scenes
 /[Aa]ssets/[Aa]ssets/Toon Fantasy Nature/Scenes/
 /[Aa]ssets/[Aa]ssets/Toon Fantasy Nature/Terrain/
+
+
+
+
+#Chess-bot
+/bin
