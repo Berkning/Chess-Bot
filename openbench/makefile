@@ -17,8 +17,7 @@ all:
 		-c $(CONFIG) \
 		-r $(RUNTIME) \
 		--self-contained true \
-        /p:PublishSingleFile=true \
-		/p:DefineConstants=TUNABLE \
+		/p:PublishSingleFile=true \
 		/p:IncludeNativeLibrariesForSelfExtract=true \
 		-o $(OUTDIR)
 
