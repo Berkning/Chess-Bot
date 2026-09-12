@@ -9,10 +9,10 @@ public class Search
     private const int PositiveInfinity = 9999999;
     private const int NegativeInfinity = -PositiveInfinity;
 
-    private const int MaxExtensions = 8;
+    private const int MaxExtensions = 8; //TODO: Make tunable somehow
 
     public int nodeCount { get; private set; } = 0;
-    private const int CancelDelay = 1023; //Amount of nodes to check before next check of cancelSearch value - HAS to be mask - like ending in only ones -> 0b0001111111
+    private const int CancelDelay = 1023; //Amount of nodes to check before next check of cancelSearch value - HAS to be mask - like ending in only ones -> 0b0001111111 //TODO: Make tunable somehow
     //private static int quiescenseCount = 0;
     //private static int ttHits = 0;
 
@@ -143,8 +143,11 @@ public class Search
     #region Aspiration Window
     //public static class AspirationWindow //TODO: Try making non-static
     //{
-    private readonly static int[] windowIncrements = { 25, 50, 100, 200, 400, 800, 1600 }; //TODO: Tweak
-    private const int InstabilityMargin = 25;
+    private readonly static int[] windowIncrements =
+    {
+        TunableConstants.AspWindowIncrement0, TunableConstants.AspWindowIncrement1, TunableConstants.AspWindowIncrement2, TunableConstants.AspWindowIncrement3,
+        TunableConstants.AspWindowIncrement4, TunableConstants.AspWindowIncrement5, TunableConstants.AspWindowIncrement6
+    };
 
     private int AspirationSearch(uint depth, int prevResult) //TODO: Think maybe the illegal moves and infinite evals come from not getting a proper width search before search is cancelled so we have to use the capped eval???
     {
@@ -182,7 +185,7 @@ public class Search
                 }
 
                 beta = prevResult + windowIncrements[incrementIndex];
-                alpha = result - InstabilityMargin; //Have to still keep some space for search instability
+                alpha = result - TunableConstants.AspInstabilityMargin; //Have to still keep some space for search instability
             }
             else if (result <= alpha)
             {
@@ -194,7 +197,7 @@ public class Search
                 }
 
                 alpha = prevResult - windowIncrements[incrementIndex];
-                beta = result + InstabilityMargin;
+                beta = result + TunableConstants.AspInstabilityMargin;
             }
             else break; //Result is within window and we can stop re-searching
         }
