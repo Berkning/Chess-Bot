@@ -44,19 +44,6 @@ public static class TunableConstants
     {
         prevBestBias.currentValue = prevBestBias.currentValue + 0; //Lowkey janky but otherwise variables aren't initialized and thereby not added to the constant-list
     }
-#endif
-
-
-
-
-
-
-
-
-
-
-
-
 
     public class TunableConstant
     {
@@ -85,4 +72,5 @@ public static class TunableConstants
             rEnd = _rEnd;
         }
     }
+#endif
 }
