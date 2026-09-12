@@ -13,14 +13,13 @@ public class MoveOrdering
 
     //Indexed by [sideToMove][from][to] //TODO: Try with [piece][to] - would make array a LOT smaller and maybe not have that much of a negative impact either
 
-    private const int MaxHistory = 1024; //800 seems to be exactly the same/extremely slightly better than 1024
     public int[][][] history;
 
     public void UpdateHistory(int bonus, int colorBit, int from, int to)
     {
-        int clampedBonus = Math.Clamp(bonus, 0, MaxHistory);
+        int clampedBonus = Math.Clamp(bonus, 0, TunableConstants.MaxHistory);
 
-        history[colorBit][from][to] += clampedBonus - history[colorBit][from][to] * clampedBonus / MaxHistory;
+        history[colorBit][from][to] += clampedBonus - history[colorBit][from][to] * clampedBonus / TunableConstants.MaxHistory;
 
 
 
@@ -36,11 +35,11 @@ public class MoveOrdering
             for (int j = 0; j < 64; j++)
             {
                 //Console.WriteLine("Before: " + history[0][i][j]);
-                history[0][i][j] *= 8;
-                history[0][i][j] /= 10;
+                history[0][i][j] *= TunableConstants.HistoryDecay;
+                history[0][i][j] /= 10000;
                 //Console.WriteLine("After: " + history[0][i][j]);
-                history[1][i][j] *= 8;
-                history[1][i][j] /= 10;
+                history[1][i][j] *= TunableConstants.HistoryDecay;
+                history[1][i][j] /= 10000;
             }
         }
     }
