@@ -9,12 +9,12 @@ public static class TunableConstants
     //Move Ordering ----------------------------------------------
 
 #if TUNABLE
-    public static TunableConstant prevBestBias = Tuning.AddConstant(new TunableConstant("PrevBestBias", Category.MoveOrdering, 15000, 0, 25000));
-    public static TunableConstant killerBias =  Tuning.AddConstant(new TunableConstant("KillerBias", Category.MoveOrdering, 10000, 0, 20000));
-    public static TunableConstant goodCaptureBias =  Tuning.AddConstant(new TunableConstant("GoodCaptureBias", Category.MoveOrdering, 8000, 0, 20000));
-    public static TunableConstant badCaptureBias =  Tuning.AddConstant(new TunableConstant("BadCaptureBias", Category.MoveOrdering, 1100, 0, 20000));
-    public static TunableConstant attackedByPawnBias =  Tuning.AddConstant(new TunableConstant("AttackedByPawnBias", Category.MoveOrdering, -350, -10000, 500));
-    public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 1, 0, 20));
+    public static TunableConstant prevBestBias = Tuning.AddConstant(new TunableConstant("PrevBestBias", Category.MoveOrdering, 15406, 0, 20000));
+    public static TunableConstant killerBias =  Tuning.AddConstant(new TunableConstant("KillerBias", Category.MoveOrdering, 6515, 0, 10000));
+    public static TunableConstant goodCaptureBias =  Tuning.AddConstant(new TunableConstant("GoodCaptureBias", Category.MoveOrdering, 9250, 0, 10000));
+    public static TunableConstant badCaptureBias =  Tuning.AddConstant(new TunableConstant("BadCaptureBias", Category.MoveOrdering, 1805, 0, 10000));
+    public static TunableConstant attackedByPawnBias =  Tuning.AddConstant(new TunableConstant("AttackedByPawnBias", Category.MoveOrdering, -704, -2500, 500));
+    public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 2, 0, 15));
     public static TunableConstant maxHistory =  Tuning.AddConstant(new TunableConstant("MaxHistory", Category.MoveOrdering, 1024, 1, 4096));
     public static TunableConstant historyDecay =  Tuning.AddConstant(new TunableConstant("HistoryDecay", Category.MoveOrdering, 8000, 0, 10000));
 
@@ -27,12 +27,12 @@ public static class TunableConstants
     public static int MaxHistory {get {return maxHistory.currentValue;}}
     public static int HistoryDecay {get {return historyDecay.currentValue;}}
 #else
-    public const int PrevBestBias = 15000; //2000000
-    public const int KillerBias = 10000; //500000
-    public const int GoodCaptureBias = 8000;
-    public const int BadCaptureBias = 1100;
-    public const int AttackedByPawnBias = -350;
-    public const int CaptureValueDeltaMultiplier = 1;
+    public const int PrevBestBias = 15406; //2000000
+    public const int KillerBias = 6515; //500000
+    public const int GoodCaptureBias = 9250;
+    public const int BadCaptureBias = 1805;
+    public const int AttackedByPawnBias = -704;
+    public const int CaptureValueDeltaMultiplier = 2;
     public const int MaxHistory = 1024;
     public const int HistoryDecay = 8000;
 #endif
