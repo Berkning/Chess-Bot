@@ -27,8 +27,8 @@ public static class TunableConstants
     public static int MaxHistory {get {return maxHistory.currentValue;}}
     public static int HistoryDecay {get {return historyDecay.currentValue;}}
 #else
-    public const int PrevBestBias = 15000; //2000000
-    public const int KillerBias = 10000; //500000
+    public const int PrevBestBias = 2000000; //2000000
+    public const int KillerBias = 500000; //500000
     public const int GoodCaptureBias = 8000;
     public const int BadCaptureBias = 1100;
     public const int AttackedByPawnBias = -350;
