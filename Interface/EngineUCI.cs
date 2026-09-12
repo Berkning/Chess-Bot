@@ -26,6 +26,9 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 Console.WriteLine("option name Hash type spin default 16 min 1 max 1024");
                 Console.WriteLine("option name Threads type spin default 1 min 1 max 256");
                 Console.WriteLine("option name Ponder type check default false");
+#if TUNABLE
+                Tuning.LogAllConstants();
+#endif
 
                 Console.WriteLine("uciok");
                 break;

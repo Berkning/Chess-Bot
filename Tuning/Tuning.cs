@@ -91,6 +91,14 @@ public static class Tuning
 
 
 
+    public static void LogAllConstants()
+    {
+        foreach (TunableConstants.TunableConstant constant in constantList)
+        {
+            Console.WriteLine("option name " + constant.name + " type spin default " + constant.currentValue + " min " + constant.minValue + " max " + constant.maxValue);
+        }
+    }
+
     private static void LogConstant(TunableConstants.TunableConstant constant)
     {
         Console.WriteLine(constant.name + ", int, " + constant.currentValue + ".0, " + constant.minValue + ".0, " + constant.maxValue + ".0, " + constant.cEnd + ", " + constant.rEnd);
