@@ -430,6 +430,7 @@ public class Search
 
         int moveCount = moveGenerator.GenerateMoves(ref moves, true);
 
+        //FIXME: this should absolutely not pass -1 as the ply, as this is not checked by the moveordering. This is only saved by the fact that killer moves don't apply to captures, but if we ever search check-evasion or other non-capture moves, this will throw. Just pass a value greater than MaxKillerPlys (which will be globally accessible when made tunable anyway)
         moveOrdering.OrderMoves(ref moves, moveCount, bestMove, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
 
         for (int i = 0; i < moveCount; i++)
