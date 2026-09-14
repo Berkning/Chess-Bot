@@ -26,6 +26,9 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 Console.WriteLine("option name Hash type spin default 16 min 1 max 1024");
                 Console.WriteLine("option name Threads type spin default 1 min 1 max 256");
                 Console.WriteLine("option name Ponder type check default false");
+#if TUNABLE
+                Tuning.LogAllConstants();
+#endif
 
                 Console.WriteLine("uciok");
                 break;
@@ -88,7 +91,11 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                         Console.WriteLine("Currently not implemented");
                         break;
                     default:
+#if TUNABLE
+                        Tuning.RecieveSetOption(args);
+#else
                         Console.WriteLine("No such option as " + args[2]);
+#endif
                         break;
                 }
                 break;
@@ -201,6 +208,12 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 Console.WriteLine("Fen: " + FenUtility.GetCurrentFen(Engine.mainBoard));
                 Console.WriteLine(" ");
                 Console.WriteLine("Zobrist: " + Convert.ToString((long)Engine.mainBoard.currentZobrist, 16));
+
+#if TUNABLE
+                Console.WriteLine("TUNABLE flag enabled");
+#else
+                Console.WriteLine("TUNABLE flag disabled");
+#endif
                 break;
             case "test":
                 if (args.Length == 1) Console.WriteLine(/*MoveOrdering.jitterBias*/"Disabled");
@@ -296,9 +309,13 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 default:
                     Program.pipe.nextCommand = command; //If command not recognized here we should forward it to the engine
                     break;*/
+#if TUNABLE
+            case "tuning":
+                Tuning.RecieveTuningCommand(args);
+                break;
+#endif
         }
     }
-
 
 
     private bool autoAdjustTT = true;

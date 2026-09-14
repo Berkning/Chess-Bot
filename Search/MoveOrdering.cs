@@ -4,10 +4,6 @@ public class MoveOrdering
 {
     private int[] moveScores = new int[218]; //TODOcant: Change to span? Should be way faster in sort especially i think
 
-    const int prevBestBias = 2000000;
-    const int killerBias = 500000; //TODO: try making smaller than goodCaptureBias
-    const int goodCaptureBias = 8000;
-    const int badCaptureBias = 1100;
     //const int jitterBias = -100000;
     const int kingAttackBias = -250;
 
@@ -17,14 +13,13 @@ public class MoveOrdering
 
     //Indexed by [sideToMove][from][to] //TODO: Try with [piece][to] - would make array a LOT smaller and maybe not have that much of a negative impact either
 
-    private const int MaxHistory = 1024; //800 seems to be exactly the same/extremely slightly better than 1024
     public int[][][] history;
 
     public void UpdateHistory(int bonus, int colorBit, int from, int to)
     {
-        int clampedBonus = Math.Clamp(bonus, 0, MaxHistory);
+        int clampedBonus = Math.Clamp(bonus, 0, TunableConstants.MaxHistory);
 
-        history[colorBit][from][to] += clampedBonus - history[colorBit][from][to] * clampedBonus / MaxHistory;
+        history[colorBit][from][to] += clampedBonus - history[colorBit][from][to] * clampedBonus / TunableConstants.MaxHistory;
 
 
 
@@ -40,11 +35,11 @@ public class MoveOrdering
             for (int j = 0; j < 64; j++)
             {
                 //Console.WriteLine("Before: " + history[0][i][j]);
-                history[0][i][j] *= 8;
-                history[0][i][j] /= 10;
+                history[0][i][j] *= TunableConstants.HistoryDecay;
+                history[0][i][j] /= 10000;
                 //Console.WriteLine("After: " + history[0][i][j]);
-                history[1][i][j] *= 8;
-                history[1][i][j] /= 10;
+                history[1][i][j] *= TunableConstants.HistoryDecay;
+                history[1][i][j] /= 10000;
             }
         }
     }
@@ -86,23 +81,23 @@ public class MoveOrdering
 
             //TODOne: guess if opponent cant recapture //TODOne: penalize rook and queen movements in early game?
 
-            if (moves[i].data == prevBestMove.data) moveScore += prevBestBias; //TODO: Could optimize checking through all moves to find this one prob
+            if (moves[i].data == prevBestMove.data) moveScore += TunableConstants.PrevBestBias; //TODO: Could optimize checking through all moves to find this one prob
 
             //if (i == jitterIndex) moveScore += jitterBias;
 
             if (capturedPieceType != Piece.None)
             {
                 //moveScore += 10 * Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
-                int valueDelta = Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
+                int valueDelta = (Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue) * TunableConstants.CaptureValueDeltaMultiplier;
 
                 bool canRecaptureGuess = BitBoardHelper.ContainsSquare(moveGenerator.opponentAttackMap, moves[i].targetSquare);
                 if (canRecaptureGuess)
                 {
-                    moveScore += valueDelta >= 0 ? goodCaptureBias : badCaptureBias;
+                    moveScore += valueDelta >= 0 ? TunableConstants.GoodCaptureBias : TunableConstants.BadCaptureBias;
                 }
                 else
                 {
-                    moveScore += goodCaptureBias + valueDelta;
+                    moveScore += TunableConstants.GoodCaptureBias + valueDelta;
                 }
             }
             else if (moves[i].flag != Move.Flag.EnPassantCapture) //If not a capture
@@ -112,7 +107,7 @@ public class MoveOrdering
                 //     moveScore += kingAttackBias;
                 // }
 
-                if (ply < MaxKillerPlys && killerMoves[ply].Contains(moves[i])) moveScore += killerBias;
+                if (ply < MaxKillerPlys && killerMoves[ply].Contains(moves[i])) moveScore += TunableConstants.KillerBias;
                 else moveScore += history[board.friendlyColorBit][moves[i].startSquare][moves[i].targetSquare];
 
 
@@ -150,7 +145,7 @@ public class MoveOrdering
                 // Penalize moving piece to a square attacked by opponent pawn
                 if (BitBoardHelper.ContainsSquare(moveGenerator.oponnentPawnAttackMap, moves[i].targetSquare))
                 {
-                    moveScore -= 350;
+                    moveScore += TunableConstants.AttackedByPawnBias;
                 }
                 //else if (movedPieceType == Piece.Rook) moveScore -= (int)(100f * Evaluation.earlygameMultiplier); //Penalize moving rook in early game
             }

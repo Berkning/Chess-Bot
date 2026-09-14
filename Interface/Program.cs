@@ -6,6 +6,9 @@ public static class Program
     public static void Main(string[] args)
     {
         HardwareCapabilities.Initialize();
+#if TUNABLE
+        TunableConstants.Initialize();
+#endif
 
         EngineUCI engineUCI = new EngineUCI();
         if (args.Length != 0)
