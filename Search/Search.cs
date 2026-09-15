@@ -297,7 +297,7 @@ public class Search
         //Null-Move pruning
         if (depth > 3 && !moveGenerator.inCheck)
         {
-            if ((evaluator.GetRawPhase(board) << 8) < TunableConstants.NMPPhaseCutoff) // if still reasonably far from being in the endgame
+            if (evaluator.GetRawPhase(board) < TunableConstants.NMPPhaseCutoff) // if still reasonably far from being in the endgame
             {
                 uint nullReduction = (uint)((TunableConstants.NMPReduction1 * depth) / TunableConstants.NMPReduction2);
 
