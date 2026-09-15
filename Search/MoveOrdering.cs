@@ -107,7 +107,7 @@ public class MoveOrdering
                 //     moveScore += kingAttackBias;
                 // }
 
-                if (ply < MaxKillerPlys && killerMoves[ply].Contains(moves[i])) moveScore += TunableConstants.KillerBias;
+                if (ply < MaxKillerPlys && killerMoves[ply].Contains(moves[i])) moveScore += TunableConstants.KillerBias; //TODO: Score moveB differently (tune this obv)
                 else moveScore += history[board.friendlyColorBit][moves[i].startSquare][moves[i].targetSquare];
 
 
@@ -220,23 +220,21 @@ public class MoveOrdering
 
     public struct KillerMove //TODO: if only using one killer per ply, try not using struct and these add and contains methods, just pure array - don't see why this would make a difference
     {
-        public Move moveA; //TODOne: test adding more than 1 per ply - worse apparently
+        private Move moveA; //TODOne: test adding more than 1 per ply - worse apparently
+        private Move moveB;
         //public Move moveB;
 
         public void Add(Move move)
         {
+            if (Contains(move)) return;
+
+            moveB = moveA;
             moveA = move;
-            // if (move.data != moveA.data)
-            // {
-            //     moveB = moveA;
-            //     moveA = move;
-            // }
         }
 
         public bool Contains(Move move)
         {
-            return move.data == moveA.data;
-            //return moveA.data == move.data || moveB.data == move.data;
+            return move.data == moveA.data || move.data == moveB.data;
         }
     }
 }

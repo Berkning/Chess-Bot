@@ -54,9 +54,9 @@ public static class TunableConstants
     public static TunableConstant aspWindowIncrement5 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement5", Category.Search, 800, 0, 3000));
     public static TunableConstant aspWindowIncrement6 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement6", Category.Search, 1600, 0, 9000));
 
-    public static int AspInstabilityMargin {get {return aspInstabilityMargin.currentValue;}}
-    public static int AspWindowIncrement0 {get {return aspWindowIncrement0.currentValue;}}
-    public static int AspWindowIncrement1 {get {return aspWindowIncrement1.currentValue;}}
+    public static int AspInstabilityMargin {get {return aspInstabilityMargin.currentValue;}} //TODO: Think this maybe qualifies as a "poisoned parameter" bc of how small and volatile it is
+    public static int AspWindowIncrement0 {get {return aspWindowIncrement0.currentValue;}} //TODO: Think this maybe qualifies as a "poisoned parameter" bc of how small and volatile it is
+    public static int AspWindowIncrement1 {get {return aspWindowIncrement1.currentValue;}} //TODO: Think this maybe qualifies as a "poisoned parameter" bc of how small and volatile it is
     public static int AspWindowIncrement2 {get {return aspWindowIncrement2.currentValue;}}
     public static int AspWindowIncrement3 {get {return aspWindowIncrement3.currentValue;}}
     public static int AspWindowIncrement4 {get {return aspWindowIncrement4.currentValue;}}
@@ -64,9 +64,9 @@ public static class TunableConstants
     public static int AspWindowIncrement6 {get {return aspWindowIncrement6.currentValue;}}
 
 #else
-    public const int AspInstabilityMargin = 25;
-    public const int AspWindowIncrement0 = 25;
-    public const int AspWindowIncrement1 = 50;
+    public const int AspInstabilityMargin = 25; //TODO: Think this maybe qualifies as a "poisoned parameter" bc of how small and volatile it is
+    public const int AspWindowIncrement0 = 25; //TODO: Think this maybe qualifies as a "poisoned parameter" bc of how small and volatile it is
+    public const int AspWindowIncrement1 = 50; //TODO: Think this maybe qualifies as a "poisoned parameter" bc of how small and volatile it is
     public const int AspWindowIncrement2 = 100;
     public const int AspWindowIncrement3 = 200;
     public const int AspWindowIncrement4 = 400;
