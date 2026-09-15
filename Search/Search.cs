@@ -297,19 +297,26 @@ public class Search
         //Null-Move pruning
         if (depth > 3 && !moveGenerator.inCheck)
         {
-            if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
+            if ((evaluator.GetRawPhase(board) << 8) < TunableConstants.NMPPhaseCutoff) // if still reasonably far from being in the endgame
             {
-                board.MakeNullMove();
-                uint nullReduction = 3;
-                int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
-                board.UnMakeNullMove();
+                uint nullReduction = (uint)((TunableConstants.NMPReduction1 * depth) / TunableConstants.NMPReduction2);
 
-                if ((nodeCount & CancelDelay) == 0)
+                if (nullReduction != 0) //Maybe better way to guard against this
                 {
-                    if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
-                }
+                    if (nullReduction > depth) nullReduction = depth;
 
-                if (nullEval >= beta) return nullEval;
+                    board.MakeNullMove();
+
+                    int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
+                    board.UnMakeNullMove();
+
+                    if ((nodeCount & CancelDelay) == 0)
+                    {
+                        if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
+                    }
+
+                    if (nullEval >= beta) return nullEval;
+                }
             }
         }
 

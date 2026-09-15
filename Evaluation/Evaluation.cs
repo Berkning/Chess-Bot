@@ -59,7 +59,7 @@ public class Evaluation
 
         int perspective = board.colorToMove == Piece.White ? 1 : -1;
 
-        return result * perspective;
+        return result * perspective; //TODO: add tempo bonus to tune with SPSA
     }
 
     private int CalculateResult(Board board)
