@@ -55,8 +55,8 @@ public static class TunableConstants
     public static TunableConstant aspWindowIncrement6 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement6", Category.Search, 1600, 0, 9000));
 
     public static TunableConstant nMPPhaseCutoff = Tuning.AddConstant(new TunableConstant("NMPPhaseCutoff", Category.Search, 24, 0, 25));
-    public static TunableConstant nMPReduction1 = Tuning.AddConstant(new TunableConstant("NMPReduction1", Category.Search, 512, 0, 10000));
-    public static TunableConstant nMPReduction2 = Tuning.AddConstant(new TunableConstant("NMPReduction2", Category.Search, 2048, 1, 10000));
+    public static TunableConstant nMPReduction1 = Tuning.AddConstant(new TunableConstant("NMPReduction1", Category.Search, 16, 0, 256));
+    public static TunableConstant nMPReduction2 = Tuning.AddConstant(new TunableConstant("NMPReduction2", Category.Search, 16, 1, 256));
 
     public static int AspInstabilityMargin {get {return aspInstabilityMargin.currentValue;}}
     public static int AspWindowIncrement0 {get {return aspWindowIncrement0.currentValue;}}
@@ -82,8 +82,8 @@ public static class TunableConstants
     public const int AspWindowIncrement6 = 1600;
 
     public const int NMPPhaseCutoff = 24;
-    public const int NMPReduction1 = 512;
-    public const int NMPReduction2 = 2048;
+    public const int NMPReduction1 = 16;
+    public const int NMPReduction2 = 16;
 #endif
 
     //------------------------------------------------------------
