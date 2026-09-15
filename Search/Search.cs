@@ -299,7 +299,7 @@ public class Search
         {
             if (evaluator.GetRawPhase(board) < TunableConstants.NMPPhaseCutoff) // if still reasonably far from being in the endgame
             {
-                uint nullReduction = (uint)((TunableConstants.NMPReduction1 * depth) / TunableConstants.NMPReduction2);
+                uint nullReduction = (uint)((TunableConstants.NMPReduction1 * depth + TunableConstants.NMPReduction3) / TunableConstants.NMPReduction2);
 
                 if (nullReduction != 0) //Maybe better way to guard against this
                 {
