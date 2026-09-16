@@ -14,9 +14,9 @@ public static class TunableConstants
     public static TunableConstant goodCaptureBias =  Tuning.AddConstant(new TunableConstant("GoodCaptureBias", Category.MoveOrdering, 9250, 0, 10000));
     public static TunableConstant badCaptureBias =  Tuning.AddConstant(new TunableConstant("BadCaptureBias", Category.MoveOrdering, 1805, 0, 10000));
     public static TunableConstant attackedByPawnBias =  Tuning.AddConstant(new TunableConstant("AttackedByPawnBias", Category.MoveOrdering, -704, -2500, 500));
-    public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 2, 0, 15));
-    public static TunableConstant maxHistory =  Tuning.AddConstant(new TunableConstant("MaxHistory", Category.MoveOrdering, 1024, 1, 4096));
-    public static TunableConstant historyDecay =  Tuning.AddConstant(new TunableConstant("HistoryDecay", Category.MoveOrdering, 8000, 0, 10000));
+    public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 2, 0, 10));
+    public static TunableConstant maxHistory =  Tuning.AddConstant(new TunableConstant("MaxHistory", Category.MoveOrdering, 1020, 1, 2048));
+    public static TunableConstant historyDecay =  Tuning.AddConstant(new TunableConstant("HistoryDecay", Category.MoveOrdering, 7917, 0, 10000));
 
     public static int PrevBestBias {get {return prevBestBias.currentValue;}}
     public static int KillerBias {get {return killerBias.currentValue;}}
@@ -33,8 +33,8 @@ public static class TunableConstants
     public const int BadCaptureBias = 1805;
     public const int AttackedByPawnBias = -704;
     public const int CaptureValueDeltaMultiplier = 2;
-    public const int MaxHistory = 1024;
-    public const int HistoryDecay = 8000;
+    public const int MaxHistory = 1020;
+    public const int HistoryDecay = 7917;
 #endif
 
     //------------------------------------------------------------
@@ -45,14 +45,14 @@ public static class TunableConstants
 
 #if TUNABLE
 
-    public static TunableConstant aspInstabilityMargin = Tuning.AddConstant(new TunableConstant("AspInstabilityMargin", Category.Search, 25, -100, 150)); //TODO: Check once if tuning wants this to go negative, otherwise remove and just go like 0-100
-    public static TunableConstant aspWindowIncrement0 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement0", Category.Search, 25, 0, 150));
-    public static TunableConstant aspWindowIncrement1 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement1", Category.Search, 50, 0, 300));
-    public static TunableConstant aspWindowIncrement2 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement2", Category.Search, 100, 0, 650));
-    public static TunableConstant aspWindowIncrement3 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement3", Category.Search, 200, 0, 1100));
-    public static TunableConstant aspWindowIncrement4 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement4", Category.Search, 400, 0, 1600));
-    public static TunableConstant aspWindowIncrement5 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement5", Category.Search, 800, 0, 3000));
-    public static TunableConstant aspWindowIncrement6 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement6", Category.Search, 1600, 0, 9000));
+    public static TunableConstant aspInstabilityMargin = Tuning.AddConstant(new TunableConstant("AspInstabilityMargin", Category.Search, 25, 0, 75)); //TODO: Check once if tuning wants this to go negative, otherwise remove and just go like 0-100
+    public static TunableConstant aspWindowIncrement0 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement0", Category.Search, 25, 0, 75));
+    public static TunableConstant aspWindowIncrement1 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement1", Category.Search, 50, 0, 110));
+    public static TunableConstant aspWindowIncrement2 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement2", Category.Search, 97, 0, 250));
+    public static TunableConstant aspWindowIncrement3 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement3", Category.Search, 210, 0, 325));
+    public static TunableConstant aspWindowIncrement4 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement4", Category.Search, 394, 0, 600));
+    public static TunableConstant aspWindowIncrement5 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement5", Category.Search, 825, 0, 1100));
+    public static TunableConstant aspWindowIncrement6 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement6", Category.Search, 1438, 0, 1800));
 
     public static int AspInstabilityMargin {get {return aspInstabilityMargin.currentValue;}}
     public static int AspWindowIncrement0 {get {return aspWindowIncrement0.currentValue;}}
@@ -67,11 +67,11 @@ public static class TunableConstants
     public const int AspInstabilityMargin = 25;
     public const int AspWindowIncrement0 = 25;
     public const int AspWindowIncrement1 = 50;
-    public const int AspWindowIncrement2 = 100;
-    public const int AspWindowIncrement3 = 200;
-    public const int AspWindowIncrement4 = 400;
-    public const int AspWindowIncrement5 = 800;
-    public const int AspWindowIncrement6 = 1600;
+    public const int AspWindowIncrement2 = 97;
+    public const int AspWindowIncrement3 = 210;
+    public const int AspWindowIncrement4 = 394;
+    public const int AspWindowIncrement5 = 825;
+    public const int AspWindowIncrement6 = 1438;
 #endif
 
     //------------------------------------------------------------

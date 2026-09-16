@@ -59,7 +59,7 @@ public class Evaluation
 
         int perspective = board.colorToMove == Piece.White ? 1 : -1;
 
-        return result * perspective;
+        return result * perspective; //TODO: give tiny tempo bonus to help search instability (5 seems like it could work)
     }
 
     private int CalculateResult(Board board)
