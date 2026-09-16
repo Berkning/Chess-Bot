@@ -218,7 +218,7 @@ public class MoveOrdering
     }
 
 
-    public struct KillerMove //TODO: if only using one killer per ply, try not using struct and these add and contains methods, just pure array - don't see why this would make a difference
+    public struct KillerMove
     {
         public Move moveA; //TODOne: test adding more than 1 per ply - worse apparently
         //public Move moveB;

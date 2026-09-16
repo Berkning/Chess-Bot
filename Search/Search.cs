@@ -330,8 +330,10 @@ public class Search
             uint extensions = 0;
             if (numExtensions < MaxExtensions)
             {
-                //TODO: Search extensions
-                //if (MoveGenerator.inCheck) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
+                if (moveGenerator.inCheck && depth < 2) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
+
+                //TODO: try combining these - as in increment extensions, allowing them to stack (i imagine this will just be slightly worse bc rare but idk)
+
                 int targetRank = BoardHelper.IndexToRank(moves[i].targetSquare);
                 if (Piece.Type(board.Squares[moves[i].targetSquare]) == Piece.Pawn && (targetRank == 1 || targetRank == 6)) extensions = 1; //Extend when about to promote //TODO: test properly
             }
