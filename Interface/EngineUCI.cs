@@ -378,7 +378,16 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
             case "wtime":
                 int white = int.Parse(args[2]);
                 int black = int.Parse(args[4]);
-                TimeManagement.UpdateTimes(white, black);
+                int winc = 0;
+                int binc = 0;
+
+                if (args.Length > 5)
+                {
+                    winc = int.Parse(args[6]);
+                    binc = int.Parse(args[8]);
+                }
+
+                TimeManagement.UpdateTimes(white, black, winc, binc);
 
                 //TODO: Increments
                 engine.InitializeSearch(99, -1);
