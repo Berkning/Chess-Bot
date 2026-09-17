@@ -7,14 +7,13 @@ public class Evaluation
 {
     //TODO: Maybe make non-static for multithreaded performance
 
-    //ALWAYS make sure the length of this array is divisible by 2, 4, 8 and 16 to support all possible vector sizes
     private static readonly int[] Weights = {
-        -11,19,12,-34,19,-26,39,18,-3,2,0,-35,-32,-7,26,10,-3,1,-2,-6,-7,-4,3,-9,-3,1,2,0,0,0,-1,-7,-1,1,3,2,2,4,4,-2,0,4,3,2,2,5,6,0,0,2,1,1,1,3,1,-1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-41,-15,-24,-35,-22,8,29,-22,-37,-23,-8,-15,1,-8,24,-16,-43,-19,-15,6,6,-2,-6,-42,-23,-6,-4,5,19,11,3,-24,-13,-8,-2,-23,-1,24,2,-7,4,-6,-2,0,0,-2,-5,-3,0,0,0,0,0,0,0,0,-7,-11,-19,-17,-17,-7,-13,-6,-9,-10,-4,12,12,10,-3,-3,-15,3,27,16,23,24,25,-15,-5,1,25,24,35,28,6,-11,-1,24,20,57,38,34,16,5,-5,7,17,25,23,10,12,-2,-19,-9,5,4,-1,11,-1,-4,-19,-3,-3,-4,-1,-9,-2,-8,-9,-8,-9,-11,-14,-16,-4,-9,-3,20,6,1,6,10,38,-1,4,12,13,13,14,19,10,7,-7,4,10,21,28,10,3,-14,-9,1,8,19,22,6,4,-5,-9,2,6,8,5,10,5,11,-18,2,-7,-2,1,1,-1,-18,-7,-3,-3,-3,-3,-3,-1,-3,-18,-14,3,8,9,-5,-30,-16,-35,-8,-10,-6,-5,-2,-3,-35,-25,-8,-6,-4,-1,-6,-2,-11,-14,-6,-6,-1,-1,-3,-1,-7,-8,-2,7,8,4,5,0,2,2,4,5,10,6,6,4,2,5,6,13,14,9,10,4,5,5,6,5,6,5,1,2,2,0,-14,-7,12,-9,-13,-6,-5,-15,0,9,7,12,8,2,-1,-12,3,3,4,4,11,11,-1,-12,-4,-3,2,12,6,13,-1,-12,-9,-2,1,8,13,2,11,-11,-4,-5,13,10,14,10,23,-15,-27,-4,1,0,5,-2,4,-9,-1,1,2,4,2,0,1,-21,-21,-16,-18,-31,-12,-34,-51,-16,-7,4,13,16,9,-5,-21,-17,-5,7,16,18,15,5,-15,-17,-5,12,17,21,18,6,-15,-11,4,11,16,15,22,17,-2,-3,7,9,7,9,22,23,2,-4,3,1,1,3,11,7,0,-5,-3,-4,-3,-3,0,-1,-3,0,0,0,0,0,0,0,0,15,4,13,3,10,5,-10,-6,7,4,-4,1,1,1,-10,-5,17,8,-2,-10,-7,-6,-2,3,28,16,5,-12,-10,-3,8,12,49,37,20,-5,-7,8,21,31,40,29,15,4,4,7,17,26,0,0,0,0,0,0,0,0,-8,-29,-16,-14,-16,-11,-25,-7,-10,-11,-10,-7,-7,-7,-8,-10,-11,-4,-6,8,7,-3,-9,-11,-10,-3,11,16,12,8,-1,-9,-9,4,14,19,16,13,3,-8,-13,-6,9,13,4,4,-4,-12,-18,-11,-6,-2,-7,-8,-10,-12,-16,-9,-7,-10,-7,-12,-7,-12,-13,-7,-25,-10,-10,-15,-7,-9,-6,-16,-6,0,4,-2,-11,-9,-7,1,8,12,13,4,-4,-7,-5,2,11,12,9,9,-3,-8,-3,7,8,13,11,4,0,-6,-4,-1,6,6,1,7,2,-2,-12,-3,-3,-7,-1,-3,-2,-12,-7,-8,-8,-6,-6,-5,-4,-5,-7,4,3,6,-2,-9,1,-29,-7,-4,-1,0,-5,-4,-5,-9,-8,-2,-4,-3,-4,-8,-6,-11,-1,0,4,4,0,-4,-5,-9,3,3,9,6,4,4,-3,-3,7,9,8,10,3,2,3,-2,13,18,20,19,9,11,7,5,18,15,17,15,12,6,5,7,-3,-7,-5,-31,-2,-9,-4,-4,-6,-3,-6,1,-1,-2,-3,-2,-5,-7,5,4,6,7,4,0,-3,1,4,12,11,6,7,1,-6,1,1,8,13,11,5,6,-8,-3,3,8,11,9,4,5,-8,-4,1,5,5,6,1,0,-6,0,2,4,4,2,-1,3,89,313,323,516,992,46,-10,-9,-2,1,14,34,80,127,4,-12
+        -17,25,19,-36,24,-29,42,21,-4,4,1,-41,-35,-6,35,19,-5,2,-2,-9,-12,-8,5,-14,-5,2,4,-3,-4,-4,-4,-15,-3,1,4,1,0,2,3,-7,0,7,4,3,2,7,10,0,-1,3,3,2,2,5,3,-1,-1,0,1,0,-1,1,1,-1,0,0,0,0,0,0,0,0,-45,-17,-26,-44,-28,-2,23,-33,-42,-25,-10,-25,-8,-21,14,-31,-47,-21,-17,-1,-1,-13,-14,-55,-31,-10,-4,-4,10,-1,-8,-42,-27,-19,-5,-38,-4,34,-4,-23,-1,-18,-9,-5,-3,-5,-11,-12,0,0,0,0,0,0,0,0,-11,3,-24,-12,-11,-4,-1,-9,-9,-12,8,26,26,21,0,9,-2,15,43,29,38,39,41,-2,8,6,39,39,52,44,16,2,3,41,35,77,52,55,31,12,-8,16,32,45,43,20,25,-1,-26,-11,14,10,0,22,-1,-6,-47,-6,-7,-7,-2,-17,-3,-20,-12,-8,-2,-11,-15,-10,-8,-11,-5,29,14,8,14,17,45,2,12,20,22,20,21,27,17,14,-8,12,17,29,40,18,10,-14,-9,8,17,30,31,14,12,0,-7,4,14,14,11,20,10,18,-20,9,-5,-4,5,1,1,-23,-11,-9,-7,-6,-5,-7,-3,-9,-27,-23,-4,-1,2,-11,-35,-19,-48,-14,-17,-12,-9,-3,-5,-48,-38,-16,-10,-8,-3,-8,-2,-17,-26,-12,-13,-4,-4,-4,-1,-11,-16,-6,8,12,5,7,-1,1,-2,4,7,12,9,10,6,3,2,3,16,18,15,15,6,8,6,9,6,9,8,3,4,3,-1,-17,-8,13,-12,-19,-10,-10,-19,1,10,7,12,11,4,-1,-16,4,2,3,3,10,15,0,-12,-4,-3,2,14,9,19,1,-17,-11,-1,2,13,21,4,16,-16,-7,-5,20,20,26,18,36,-15,-26,-5,2,1,11,0,9,-30,-7,-2,1,4,2,-4,-4,-30,-29,-18,-12,-30,-9,-36,-60,-24,-5,8,19,22,13,-6,-25,-25,-3,10,20,22,19,7,-14,-27,-7,14,19,22,19,7,-18,-20,3,14,17,13,22,19,-6,-6,10,12,7,10,27,34,4,-9,5,3,1,4,19,17,1,-11,-8,-6,-7,-5,0,0,-6,0,0,0,0,0,0,0,0,23,10,16,11,16,10,-4,1,15,10,0,9,9,7,-4,2,25,14,3,-3,-2,-1,3,9,38,24,9,-3,-3,3,14,21,65,53,32,8,-1,10,32,41,51,42,25,5,5,8,26,31,0,0,0,0,0,0,0,0,-15,-46,-24,-18,-23,-17,-38,-12,-17,-18,-17,-13,-13,-13,-15,-18,-19,-10,-14,6,4,-8,-17,-20,-16,-7,7,13,8,3,-3,-15,-15,-2,11,11,11,9,-1,-14,-24,-11,8,9,-3,2,-10,-22,-29,-20,-12,-7,-15,-18,-19,-24,-32,-20,-15,-20,-17,-26,-14,-27,-22,-11,-31,-12,-13,-19,-15,-16,-10,-21,-9,-3,1,-6,-16,-15,-12,-1,5,10,11,1,-8,-14,-9,0,11,12,3,8,-7,-11,-3,6,7,10,10,3,-2,-9,-5,-1,6,6,-2,7,-1,-6,-17,-6,-5,-12,-3,-7,-5,-19,-13,-15,-15,-12,-13,-11,-11,-12,-3,8,8,11,3,-5,4,-27,-1,-3,3,4,-3,-5,-6,-10,-3,0,-3,-2,-4,-9,-9,-12,3,4,8,7,2,-4,-6,-10,8,8,11,7,5,6,-3,0,9,12,10,12,4,3,6,0,14,20,20,21,10,12,10,7,23,21,23,21,18,10,10,11,-6,-10,-8,-42,-2,-14,-7,-8,-9,-5,-10,0,-2,-6,-6,-5,-8,-12,8,6,9,9,5,0,-3,2,7,20,17,10,8,2,-10,2,0,13,23,18,9,8,-14,-5,5,11,20,16,6,7,-12,-4,3,9,10,11,2,1,-18,-5,0,4,5,1,-8,-2,86,318,327,530,1007,55,-6,-9,0,2,16,36,81,130,4,-4,-5,-19,86,-12,-6,1
         };
 
     private Vector<int>[] weightVectors;
 
-    private const int Bias = 1;
+    private const int Bias = 2;
 
     public Evaluation()
     {
@@ -354,21 +353,91 @@ public class Evaluation
     {
         int result = 0;
 
+        ulong whitePawns = board.GetPieceList(Piece.Pawn, 0).bitboard;
+        ulong blackPawns = board.GetPieceList(Piece.Pawn, 1).bitboard;
+
+        int whiteKingFile = BoardHelper.IndexToFile(board.whiteKingSquare);
+        int blackKingFile = BoardHelper.IndexToFile(board.blackKingSquare);
+
+
+
         //TODO: Currently counts pawns above king no matter where he is - if king moves up with the pawn it still sees no pawns missing - we should prob also only apply this when castled to not get weird results in the opening where the king is in the middle
         int missingPawnDefenseDifference = 0;
 
         //                                                      First find pawns in the cover area/mask                             then invert all bits inside the mask to show holes in cover
-        ulong whiteCoverHoles = (PrecomputedData.kingPawnCoverMasks[board.whiteKingSquare] & board.GetPieceList(Piece.Pawn, 0).bitboard) ^ PrecomputedData.kingPawnCoverMasks[board.whiteKingSquare];
+        ulong whiteCoverHoles = (PrecomputedData.kingPawnCoverMasks[board.whiteKingSquare] & whitePawns) ^ PrecomputedData.kingPawnCoverMasks[board.whiteKingSquare];
 
         missingPawnDefenseDifference += BitBoardHelper.BitCount(whiteCoverHoles);
 
 
 
-        ulong blackCoverHoles = (PrecomputedData.kingPawnCoverMasks[board.blackKingSquare + 64] & board.GetPieceList(Piece.Pawn, 1).bitboard) ^ PrecomputedData.kingPawnCoverMasks[board.blackKingSquare + 64];
+        ulong blackCoverHoles = (PrecomputedData.kingPawnCoverMasks[board.blackKingSquare + 64] & blackPawns) ^ PrecomputedData.kingPawnCoverMasks[board.blackKingSquare + 64];
 
         missingPawnDefenseDifference -= BitBoardHelper.BitCount(blackCoverHoles);
 
         result += (Weights[783] * missingPawnDefenseDifference * mgWeight) >> 8;
+
+
+
+        //TODO: Obv optimize everything below this comment with precomputed bitboards instead of all these ugly if's -------------------------------------------------------------------------
+
+        int missingPawnShieldDifference = 0;
+
+        if (whiteKingFile > 0 && !(BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.UpLeft) || BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.UpLeft + PrecomputedData.Up))) missingPawnShieldDifference++;
+
+        if (whiteKingFile < 7 && !(BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.UpRight) || BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.UpRight + PrecomputedData.Up))) missingPawnShieldDifference++;
+
+        if (!(BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.Up) || BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.Up + PrecomputedData.Up))) missingPawnShieldDifference++;
+
+
+        if (blackKingFile > 0 && !(BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.DownLeft) || BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.DownLeft + PrecomputedData.Down))) missingPawnShieldDifference--;
+
+        if (blackKingFile < 7 && !(BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.DownRight) || BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.DownRight + PrecomputedData.Down))) missingPawnShieldDifference--;
+
+        if (!(BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.Down) || BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.Down + PrecomputedData.Down))) missingPawnShieldDifference--;
+
+        result += (Weights[784] * missingPawnShieldDifference * mgWeight) >> 8;
+
+
+
+
+
+        int openFileAboveKingDifference = 0;
+
+        if (whiteKingFile > 0 && ((PrecomputedData.fileMasks[whiteKingFile - 1] & whitePawns) == 0)) openFileAboveKingDifference++;
+
+        if (whiteKingFile < 7 && ((PrecomputedData.fileMasks[whiteKingFile + 1] & whitePawns) == 0)) openFileAboveKingDifference++;
+
+        if ((PrecomputedData.fileMasks[whiteKingFile] & whitePawns) == 0) openFileAboveKingDifference++;
+
+
+        if (blackKingFile > 0 && ((PrecomputedData.fileMasks[blackKingFile - 1] & blackPawns) == 0)) openFileAboveKingDifference--;
+
+        if (blackKingFile < 7 && ((PrecomputedData.fileMasks[blackKingFile + 1] & blackPawns) == 0)) openFileAboveKingDifference--;
+
+        if ((PrecomputedData.fileMasks[blackKingFile] & blackPawns) == 0) openFileAboveKingDifference--;
+
+        result += (Weights[785] * openFileAboveKingDifference * mgWeight) >> 8;
+
+
+
+
+
+        for (int i = 0; i < 4; i++)
+        {
+            int pawnStormRankDifference = 0;
+
+            if (whiteKingFile > 0 && BitBoardHelper.ContainsSquare(blackPawns, board.whiteKingSquare + PrecomputedData.UpLeft + PrecomputedData.Up * i)) pawnStormRankDifference++;
+            if (whiteKingFile < 7 && BitBoardHelper.ContainsSquare(blackPawns, board.whiteKingSquare + PrecomputedData.UpRight + PrecomputedData.Up * i)) pawnStormRankDifference++;
+            if (BitBoardHelper.ContainsSquare(blackPawns, board.whiteKingSquare + PrecomputedData.Up + PrecomputedData.Up * i)) pawnStormRankDifference++;
+
+            if (blackKingFile > 0 && BitBoardHelper.ContainsSquare(whitePawns, board.blackKingSquare + PrecomputedData.DownLeft + PrecomputedData.Down * i)) pawnStormRankDifference--;
+            if (blackKingFile < 7 && BitBoardHelper.ContainsSquare(whitePawns, board.blackKingSquare + PrecomputedData.DownRight + PrecomputedData.Down * i)) pawnStormRankDifference--;
+            if (BitBoardHelper.ContainsSquare(whitePawns, board.blackKingSquare + PrecomputedData.Down + PrecomputedData.Down * i)) pawnStormRankDifference--;
+
+
+            result += (Weights[786 + i] * pawnStormRankDifference * mgWeight) >> 8;
+        }
 
         return result;
     }
