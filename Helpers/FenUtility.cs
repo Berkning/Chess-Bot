@@ -71,7 +71,7 @@ public static class FenUtility
                     }
 
                     //Board.Squares[BoardHelper.CoordToIndex(file, rank)] = pieceType | pieceColor;
-                    board.AddPiece(BoardHelper.CoordToIndex(file, rank), pieceType | pieceColor);
+                    board.AddPiecePublic(BoardHelper.CoordToIndex(file, rank), pieceType | pieceColor);
                     file++;
                 }
             }
@@ -212,7 +212,7 @@ public static class FenUtility
 
         // En-passant
         fen += ' ';
-        int epFile = (int)(board.currentGameState & Board.epFileMask)>>5;
+        int epFile = (int)(board.currentGameState & Board.epFileMask) >> 5;
         if (epFile == 0)
         {
             fen += '-';

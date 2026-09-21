@@ -22,6 +22,13 @@ public static class BitBoardHelper
         bitboard |= 1UL << square;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong RemoveSquare(ulong bitboard, int square)
+    {
+        bitboard &= ~(1UL << square);
+        return bitboard;
+    }
+
     public static ulong BitboardFromPieceList(PieceList pieces)
     {
         ulong bitboard = 0;

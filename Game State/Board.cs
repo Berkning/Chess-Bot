@@ -31,6 +31,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     //public PieceList[] queenList;
 
     public PieceList[] allPieceList;
+    public ulong allPieceBoard { get; private set; }
+
 
     public int whiteKingSquare;
     public int blackKingSquare;
@@ -53,9 +55,21 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         return allPieceList[type - 2 + colorBit * 5];
     }
 
-    public void AddPiece(int square, int piece)
+
+    public void AddPiecePublic(int square, int piece)
     {
+        AddPiece(square, piece);
+
+        UpdateAttackMaps(BitBoardHelper.AddSquare(0UL, square));
+    }
+
+    private void AddPiece(int square, int piece)
+    {
+        if (Piece.IsNone(piece)) return;
+
         Squares[square] = piece;
+        allPieceBoard = BitBoardHelper.AddSquare(allPieceBoard, square);
+        CheckMaps(0);
 
         int type = Piece.Type(piece);
 
@@ -67,7 +81,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
             return;
         }
-        else if (type == Piece.None) return; //TODO: prob remove somehow, bc performance
 
         int colorBit = Piece.ColorBit(piece);
 
@@ -76,25 +89,31 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         GetPieceList(type, colorBit).AddPieceAtSquare(square);
     }
 
-    public void MovePiece(int startSquare, int targetSquare) //WARNING: Target square has to be empty!!!!
+    private void MovePiece(int startSquare, int targetSquare) //WARNING: Target square has to be empty!!!!
     {
         int piece = Squares[startSquare];
         int type = Piece.Type(piece);
         int colorBit = Piece.ColorBit(piece);
 
-        GetPieceList(type, colorBit).MovePiece(startSquare, targetSquare);
 
         currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, startSquare]; //Remove piece from zobrist on startSquare
         currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, targetSquare]; //Add piece to zobrist on targetSquare
 
         Squares[targetSquare] = piece;
         Squares[startSquare] = Piece.None;
+        allPieceBoard = BitBoardHelper.AddSquare(allPieceBoard, targetSquare);
+        allPieceBoard = BitBoardHelper.RemoveSquare(allPieceBoard, startSquare);
+        CheckMaps(1);
+
+        GetPieceList(type, colorBit).MovePiece(startSquare, targetSquare);
     }
 
-    public void RemovePiece(int square)
+    private void RemovePiece(int square)
     {
         int piece = Squares[square];
         Squares[square] = Piece.None;
+        allPieceBoard = BitBoardHelper.RemoveSquare(allPieceBoard, square);
+        CheckMaps(2);
 
         int type = Piece.Type(piece);
         int colorBit = Piece.ColorBit(piece);
@@ -118,6 +137,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     public Board()
     {
         Squares = new int[64];
+        allPieceBoard = 0UL;
+        CheckMaps(3);
 
         gameStateHistory = new Stack<uint>();
         gameStateHistory.Push(currentGameState);
@@ -133,17 +154,17 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         allPieceList = new PieceList[10]
         {
-            new PieceList(8), //White pawnlist
-            new PieceList(10), //White knightlist
-            new PieceList(10), //White bishoplist
-            new PieceList(10), //White rooklist
-            new PieceList(9), //White queenlist
+            new PieceList(this, Piece.Pawn, 8), //White pawnlist
+            new PieceList(this, Piece.Knight, 10), //White knightlist
+            new PieceList(this, Piece.Bishop, 10), //White bishoplist
+            new PieceList(this, Piece.Rook, 10), //White rooklist
+            new PieceList(this, Piece.Queen, 9), //White queenlist
 
-            new PieceList(8), //Black pawnlist
-            new PieceList(10), //Black knightlist
-            new PieceList(10), //Black bishoplist
-            new PieceList(10), //Black rooklist
-            new PieceList(9), //Black queenlist
+            new PieceList(this, Piece.Pawn, 8), //Black pawnlist
+            new PieceList(this, Piece.Knight, 10), //Black knightlist
+            new PieceList(this, Piece.Bishop, 10), //Black bishoplist
+            new PieceList(this, Piece.Rook, 10), //Black rooklist
+            new PieceList(this, Piece.Queen, 9), //Black queenlist
         };
     }
 
@@ -153,6 +174,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     {
         repetitionTable.Clear();
         Array.Clear(Squares, 0, 64);
+        allPieceBoard = 0UL;
+        CheckMaps(5);
 
         foreach (PieceList pieceList in allPieceList)
         {
@@ -167,18 +190,57 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         gameStateHistory.Push(currentGameState);
     }
 
+    public void UpdateAttackMaps(ulong changeBitBoard)
+    {
+        //Update AttackMaps in PieceLists
+        for (int i = 1; i <= 4; i++) //White pieces that need attackmaps updated
+        {
+            if ((allPieceList[i].attackMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
+            {
+                for (int j = 0; j < allPieceList[i].Count; j++)
+                {
+                    if ((allPieceList[i].attackMaps[j] & changeBitBoard) != 0UL) //If move intersects piece at this index specifically
+                    {
+                        allPieceList[i].UpdateAttackMap(j);
+                    }
+                }
+
+
+                allPieceList[i].RecreateCombinedAttackMap();
+            }
+        }
+
+        for (int i = 6; i <= 9; i++) //Black pieces that need attackmaps updated
+        {
+            if ((allPieceList[i].attackMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
+            {
+                for (int j = 0; j < allPieceList[i].Count; j++)
+                {
+                    if ((allPieceList[i].attackMaps[j] & changeBitBoard) != 0UL) //If move intersects piece at this index specifically
+                    {
+                        allPieceList[i].UpdateAttackMap(j);
+                    }
+                }
+
+
+                allPieceList[i].RecreateCombinedAttackMap();
+            }
+        }
+    }
+
 
 
     public void MakeMove(Move move, bool inSearch = false)
     {
         //if (Squares[move.startSquare] == Piece.None) Console.WriteLine("Tried to move null piece " + BoardHelper.GetMoveNameUCI(move) + " " + move.flag); //TODOne: remove for performance
+        ulong moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(0UL, move.startSquare), move.targetSquare); //Bitboard with the moves start and end-square highlighted
 
         uint prevGameState = currentGameState;
         uint prevCastleRights = (prevGameState & castleRightsMask) >> 9;
         int prevEpFile = (int)((prevGameState & epFileMask) >> 5) - 1;
         uint prev50MoveCount = (prevGameState & fiftyMoveCounterMask) >> 13; //TODO: have to implement this differently in search as well - maybe just don't - rarely ever see draws by 50 move rule anyway
 
-        currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Remove previous castling rights
+        currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Remove previous castling righnonets
 
         currentGameState = 0;
 
@@ -209,21 +271,25 @@ public class Board //TODOnt prob: Try maybe changing to struct?
                     //White Shortcastle
                     prevCastleRights ^= 0b0001;
                     MovePiece(BoardHelper.h1, BoardHelper.f1);
+                    moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(moveBitBoard, BoardHelper.h1), BoardHelper.f1);
                     break;
                 case BoardHelper.g8:
                     //Black Shortcastle
                     prevCastleRights ^= 0b0010;
                     MovePiece(BoardHelper.h8, BoardHelper.f8);
+                    moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(moveBitBoard, BoardHelper.h8), BoardHelper.f8);
                     break;
                 case BoardHelper.c1:
                     //White Longcastle
                     prevCastleRights ^= 0b0100;
                     MovePiece(BoardHelper.a1, BoardHelper.d1);
+                    moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(moveBitBoard, BoardHelper.a1), BoardHelper.d1);
                     break;
                 case BoardHelper.c8:
                     //Black Longcastle
                     prevCastleRights ^= 0b1000;
                     MovePiece(BoardHelper.a8, BoardHelper.d8);
+                    moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(moveBitBoard, BoardHelper.a8), BoardHelper.d8);
                     break;
             }
 
@@ -273,11 +339,14 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
             int capturedPawnIndex = BoardHelper.CoordToIndex(prevEpFile, capturedPawnRank);
 
+            moveBitBoard = BitBoardHelper.AddSquare(moveBitBoard, capturedPawnIndex);
+
             currentGameState |= (ushort)Squares[capturedPawnIndex]; //Add captured pawn as the captured piece in the gamestate
             RemovePiece(capturedPawnIndex);
         }
         else if (Squares[move.targetSquare] != Piece.None)
         {
+            if (Piece.Type(Squares[move.targetSquare]) == Piece.King) Console.WriteLine("king taken with move " + BoardHelper.GetMoveNameUCI(move));
             currentGameState |= (ushort)Squares[move.targetSquare];
             RemovePiece(move.targetSquare);
         }
@@ -288,6 +357,9 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         {
             Squares[move.targetSquare] = Squares[move.startSquare];
             Squares[move.startSquare] = Piece.None;
+            allPieceBoard = BitBoardHelper.AddSquare(allPieceBoard, move.targetSquare);
+            allPieceBoard = BitBoardHelper.RemoveSquare(allPieceBoard, move.startSquare);
+            CheckMaps(6);
 
             int pieceColor = Piece.Color(Squares[move.targetSquare]);
             if (pieceColor == Piece.White)
@@ -342,6 +414,9 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         gameStateHistory.Push(currentGameState);
         if (!inSearch) repetitionTable.Push(currentZobrist);
+
+        UpdateAttackMaps(moveBitBoard);
+
         //Debug.Log(Convert.ToString(currentGameState, 2));
 
 
@@ -359,10 +434,14 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         SetColorToMove(Piece.OppositeColor(colorToMove));
         int movedPieceType = Piece.Type(Squares[move.targetSquare]);
 
+        ulong moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(0UL, move.startSquare), move.targetSquare); //Bitboard with the moves start and end-square highlighted
+
         //Move piece back
         if (movedPieceType == Piece.King)
         {
             Squares[move.startSquare] = Squares[move.targetSquare];
+            allPieceBoard = BitBoardHelper.AddSquare(allPieceBoard, move.startSquare);
+            CheckMaps(7);
 
             int pieceColor = Piece.Color(Squares[move.startSquare]);
             if (pieceColor == Piece.White)
@@ -410,15 +489,19 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             {
                 case BoardHelper.g1:
                     MovePiece(BoardHelper.f1, BoardHelper.h1);
+                    moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(moveBitBoard, BoardHelper.f1), BoardHelper.h1);
                     break;
                 case BoardHelper.g8:
                     MovePiece(BoardHelper.f8, BoardHelper.h8);
+                    moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(moveBitBoard, BoardHelper.f8), BoardHelper.h8);
                     break;
                 case BoardHelper.c1:
                     MovePiece(BoardHelper.d1, BoardHelper.a1);
+                    moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(moveBitBoard, BoardHelper.d1), BoardHelper.a1);
                     break;
                 case BoardHelper.c8:
                     MovePiece(BoardHelper.d8, BoardHelper.a8);
+                    moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(moveBitBoard, BoardHelper.d8), BoardHelper.a8);
                     break;
             }
 
@@ -431,8 +514,11 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         if (move.flag == Move.Flag.EnPassantCapture)
         {
             int capturedPieceDirection = colorToMove == Piece.White ? -8 : 8; //Whether the captured pawn is below or above the pawn capturing it (depends on if black/white played the move)
+            int capturedPawnSquare = move.targetSquare + capturedPieceDirection;
 
-            AddPiece(move.targetSquare + capturedPieceDirection, capturedPiece);
+            AddPiece(capturedPawnSquare, capturedPiece);
+
+            moveBitBoard = BitBoardHelper.AddSquare(moveBitBoard, capturedPawnSquare);
             //Squares[move.targetSquare + capturedPieceDirection] = capturedPiece;
 
             //Squares[move.targetSquare] = Piece.None;
@@ -467,6 +553,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         currentZobrist ^= Zobrist.castlingArray[newCastleRights];
 
 
+
+        UpdateAttackMaps(moveBitBoard);
 
         //if (currentZobrist != Zobrist.Hash(this)) Console.WriteLine("Zobrist incorrect");
     }
@@ -506,6 +594,33 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         int newEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
 
         if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
+    }
+
+
+
+
+    private void CheckMaps(int n)
+    {
+        for (int i = 0; i < 64; i++)
+        {
+            if (Piece.IsNone(Squares[i]))
+            {
+                if (BitBoardHelper.ContainsSquare(allPieceBoard, i))
+                {
+                    Console.WriteLine("allpieceBoard shows piece at square: " + i + " but Squares[] shows none, here: " + n);
+
+                    throw new Exception("gg");
+                }
+            }
+            else
+            {
+                if (!BitBoardHelper.ContainsSquare(allPieceBoard, i))
+                {
+                    Console.WriteLine("allpieceBoard shows no piece at square: " + i + " but Squares[] shows piece present, here: " + n);
+                    throw new Exception("gg");
+                }
+            }
+        }
     }
 }
 

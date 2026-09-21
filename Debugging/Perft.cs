@@ -89,10 +89,10 @@ public static class Perft
 
     public static long RunSpecifiedDepth(int depth, Board board)
     {
-        // if (depth == 0)
-        // {
-        //     return 1L;
-        // }
+        if (depth == 0)
+        {
+            return 1L;
+        }
 
         MoveGenerator moveGenerator = new MoveGenerator(board);
 

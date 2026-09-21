@@ -317,6 +317,7 @@ public static class EngineDiagnostics
         private int enemyColor;
         private int whiteKingSquare;
         private int blackKingSquare;
+        private ulong allPieceBoard;
 
         private int opponentColorBit;
         private int friendlyColorBit;
@@ -421,6 +422,32 @@ public static class EngineDiagnostics
                 success = false;
             }
 
+            if (allPieceBoard != board.allPieceBoard)
+            {
+                Console.WriteLine("allpieceBoard Corrupted");
+                success = false;
+            }
+
+            for (int i = 0; i < 64; i++)
+            {
+                if (Piece.IsNone(board.Squares[i]))
+                {
+                    if (BitBoardHelper.ContainsSquare(board.allPieceBoard, i))
+                    {
+                        Console.WriteLine("allpieceBoard shows piece at square: " + i + " but Squares[] shows none");
+                        success = false;
+                    }
+                }
+                else
+                {
+                    if (!BitBoardHelper.ContainsSquare(board.allPieceBoard, i))
+                    {
+                        Console.WriteLine("allpieceBoard shows no piece at square: " + i + " but Squares[] shows piece present");
+                        success = false;
+                    }
+                }
+            }
+
             return success;
         }
 
@@ -437,6 +464,7 @@ public static class EngineDiagnostics
             opponentColorBit = board.opponentColorBit;
             friendlyColorBit = board.friendlyColorBit;
             repetitionTableCount = board.repetitionTable.Count;
+            allPieceBoard = board.allPieceBoard;
         }
     }
 }
