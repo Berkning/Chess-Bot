@@ -88,7 +88,7 @@ public class MoveGenerator
             inDoubleCheck = inCheck;
             inCheck = true;
 
-            checkRayBitMap |= PrecomputedData.knightAttackBitboards[friendlyKingSquare] | enemyKnights.bitboard;
+            checkRayBitMap |= PrecomputedData.knightAttackBitboards[friendlyKingSquare] & enemyKnights.bitboard;
         }
 
 
@@ -235,28 +235,26 @@ public class MoveGenerator
         PieceList rookList = board.GetPieceList(Piece.Rook, board.friendlyColorBit);
         PieceList queenList = board.GetPieceList(Piece.Queen, board.friendlyColorBit); //TODO: Prob keep track of these as a single piecelist as well, as these 3 for-loops are completely identical and could be very easily combined
 
-        //This just avoids having to check if we are in check in every single loop, before checking if we are pinned. This turns 2 if-checks into 1
-        ulong checkPinMap = ulong.MaxValue;
-        if (inCheck) checkPinMap = pinRayBitMap;
-
 
         for (int i = 0; i < bishopList.Count; i++)
         {
             int startSquare = bishopList[i];
 
-            if (!BitBoardHelper.ContainsSquare(checkPinMap, startSquare)) continue; //Pinned pieces cannot move if king is in check //Credit to seb lague for this if statement
-
 
             ulong attackMap = bishopList.attackMaps[i];
-            attackMap &= ~friendlyPieces;
-
-            if (genOnlyCaptures) attackMap &= enemyPieces;
-            else attackMap &= ~friendlyPieces;
 
             if (IsPinned(startSquare))
             {
+                if (inCheck) continue; //Pinned pieces cannot move if king is in check //Credit to seb lague for this if statement
+
                 attackMap &= PrecomputedData.directionalMasks[friendlyKingSquare][startSquare] & pinRayBitMap;
             }
+
+            attackMap &= checkRayBitMap;
+
+
+            if (genOnlyCaptures) attackMap &= enemyPieces;
+            else attackMap &= ~friendlyPieces;
 
             while (attackMap != 0)
             {
@@ -269,19 +267,21 @@ public class MoveGenerator
         {
             int startSquare = rookList[i];
 
-            if (!BitBoardHelper.ContainsSquare(checkPinMap, startSquare)) continue; //Pinned pieces cannot move if king is in check //Credit to seb lague for this if statement
-
 
             ulong attackMap = rookList.attackMaps[i];
-            attackMap &= ~friendlyPieces;
-
-            if (genOnlyCaptures) attackMap &= enemyPieces;
-            else attackMap &= ~friendlyPieces;
 
             if (IsPinned(startSquare))
             {
+                if (inCheck) continue; //Pinned pieces cannot move if king is in check //Credit to seb lague for this if statement
+
                 attackMap &= PrecomputedData.directionalMasks[friendlyKingSquare][startSquare] & pinRayBitMap;
             }
+
+            attackMap &= checkRayBitMap;
+
+
+            if (genOnlyCaptures) attackMap &= enemyPieces;
+            else attackMap &= ~friendlyPieces;
 
             while (attackMap != 0)
             {
@@ -294,19 +294,21 @@ public class MoveGenerator
         {
             int startSquare = queenList[i];
 
-            if (!BitBoardHelper.ContainsSquare(checkPinMap, startSquare)) continue; //Pinned pieces cannot move if king is in check //Credit to seb lague for this if statement
-
 
             ulong attackMap = queenList.attackMaps[i];
-            attackMap &= ~friendlyPieces;
-
-            if (genOnlyCaptures) attackMap &= enemyPieces;
-            else attackMap &= ~friendlyPieces;
 
             if (IsPinned(startSquare))
             {
+                if (inCheck) continue; //Pinned pieces cannot move if king is in check //Credit to seb lague for this if statement
+
                 attackMap &= PrecomputedData.directionalMasks[friendlyKingSquare][startSquare] & pinRayBitMap;
             }
+
+            attackMap &= checkRayBitMap;
+
+
+            if (genOnlyCaptures) attackMap &= enemyPieces;
+            else attackMap &= ~friendlyPieces;
 
             while (attackMap != 0)
             {
@@ -437,11 +439,8 @@ public class MoveGenerator
         if (IsPinned(startSquare)) return; //Knight cant move at all if pinned
 
 
-        attackMap &= ~friendlyPieces;
-
-        if (BitBoardHelper.ContainsSquare(attackMap, friendlyKingSquare)) Console.WriteLine("gkorejkgokreogergerergergerg");
-
         if (genOnlyCaptures) attackMap &= enemyPieces;
+        else attackMap &= ~friendlyPieces;
 
         if (inCheck) attackMap &= checkRayBitMap;
 

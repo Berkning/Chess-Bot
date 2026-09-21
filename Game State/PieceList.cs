@@ -21,10 +21,11 @@ public class PieceList
 
     private bool updateAttackMaps;
     private int pieceType; //TODO: Can store as byte
+    private bool isWhite; //TODO: Can store as byte
 
 
 
-    public PieceList(Board _board, int _pieceType, int maxPieceCount = 10) //One side can never have more than 10 of the same piece-type
+    public PieceList(Board _board, int _piece, int maxPieceCount = 10) //One side can never have more than 10 of the same piece-type
     {
         board = _board;
         occupiedSquares = new int[maxPieceCount];
@@ -33,8 +34,9 @@ public class PieceList
         numPieces = 0;
         bitboard = 0;
         attackMap = 0;
-        updateAttackMaps = Piece.IsSlidingPiece(_pieceType) || _pieceType == Piece.Knight;
-        pieceType = _pieceType;
+        pieceType = Piece.Type(_piece);
+        updateAttackMaps = Piece.IsSlidingPiece(pieceType) || pieceType == Piece.Knight;
+        isWhite = Piece.Color(_piece) == Piece.White;
     }
 
     public void AddPieceAtSquare(int square)
@@ -94,17 +96,25 @@ public class PieceList
     {
         ulong attackBoard = 0;
 
+        ulong blockerBoard = board.allPieceBoard;
+
+        //Remove enemy king from blockerlist (because allows passthrough rays so king doesn't walk backwards while still in view of a sliding piece)
+        //TODO: move into switch bc doesn't apply to horses
+        //This also isn't necessary at all if using pseudo-legal movegen, bc uses separate "in-check" check
+        if (isWhite) blockerBoard ^= 1UL << board.blackKingSquare;
+        else blockerBoard ^= 1UL << board.whiteKingSquare;
+
         switch (pieceType)
         {
             case Piece.Queen:
-                attackBoard = MagicData.GetRookMoveBoard(board.allPieceBoard, occupiedSquares[index]);
-                attackBoard = MagicData.GetBishopMoveBoard(board.allPieceBoard, occupiedSquares[index]);
+                attackBoard = MagicData.GetRookMoveBoard(blockerBoard, occupiedSquares[index]);
+                attackBoard |= MagicData.GetBishopMoveBoard(blockerBoard, occupiedSquares[index]);
                 break;
             case Piece.Rook:
-                attackBoard = MagicData.GetRookMoveBoard(board.allPieceBoard, occupiedSquares[index]);
+                attackBoard = MagicData.GetRookMoveBoard(blockerBoard, occupiedSquares[index]);
                 break;
             case Piece.Bishop:
-                attackBoard = MagicData.GetBishopMoveBoard(board.allPieceBoard, occupiedSquares[index]);
+                attackBoard = MagicData.GetBishopMoveBoard(blockerBoard, occupiedSquares[index]);
                 break;
             case Piece.Knight:
                 attackBoard = PrecomputedData.knightAttackBitboards[occupiedSquares[index]];

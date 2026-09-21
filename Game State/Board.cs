@@ -65,9 +65,14 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
     private void AddPiece(int square, int piece)
     {
-        if (Piece.IsNone(piece)) return;
-
         Squares[square] = piece;
+
+        if (Piece.IsNone(piece))
+        {
+            allPieceBoard = BitBoardHelper.RemoveSquare(allPieceBoard, square);
+            return;
+        }
+
         allPieceBoard = BitBoardHelper.AddSquare(allPieceBoard, square);
         CheckMaps(0);
 
@@ -154,17 +159,17 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         allPieceList = new PieceList[10]
         {
-            new PieceList(this, Piece.Pawn, 8), //White pawnlist
-            new PieceList(this, Piece.Knight, 10), //White knightlist
-            new PieceList(this, Piece.Bishop, 10), //White bishoplist
-            new PieceList(this, Piece.Rook, 10), //White rooklist
-            new PieceList(this, Piece.Queen, 9), //White queenlist
+            new PieceList(this, Piece.Pawn | Piece.White, 8), //White pawnlist
+            new PieceList(this, Piece.Knight | Piece.White, 10), //White knightlist
+            new PieceList(this, Piece.Bishop | Piece.White, 10), //White bishoplist
+            new PieceList(this, Piece.Rook | Piece.White, 10), //White rooklist
+            new PieceList(this, Piece.Queen | Piece.White, 9), //White queenlist
 
-            new PieceList(this, Piece.Pawn, 8), //Black pawnlist
-            new PieceList(this, Piece.Knight, 10), //Black knightlist
-            new PieceList(this, Piece.Bishop, 10), //Black bishoplist
-            new PieceList(this, Piece.Rook, 10), //Black rooklist
-            new PieceList(this, Piece.Queen, 9), //Black queenlist
+            new PieceList(this, Piece.Pawn | Piece.Black, 8), //Black pawnlist
+            new PieceList(this, Piece.Knight | Piece.Black, 10), //Black knightlist
+            new PieceList(this, Piece.Bishop | Piece.Black, 10), //Black bishoplist
+            new PieceList(this, Piece.Rook | Piece.Black, 10), //Black rooklist
+            new PieceList(this, Piece.Queen | Piece.Black, 9), //Black queenlist
         };
     }
 
@@ -346,7 +351,11 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
         else if (Squares[move.targetSquare] != Piece.None)
         {
-            if (Piece.Type(Squares[move.targetSquare]) == Piece.King) Console.WriteLine("king taken with move " + BoardHelper.GetMoveNameUCI(move));
+            if (Piece.Type(Squares[move.targetSquare]) == Piece.King)
+            {
+                Console.WriteLine("king taken with move " + BoardHelper.GetMoveNameUCI(move));
+                throw new Exception("gergre");
+            }
             currentGameState |= (ushort)Squares[move.targetSquare];
             RemovePiece(move.targetSquare);
         }
