@@ -289,13 +289,13 @@ public class Search
         if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
         {
             //Debug.Log("Found Mate");
-            if (moveGenerator.inCheck) return -(ImmediateMateScore - plyFromRoot); //Checkmate
+            if (board.IsCheck()) return -(ImmediateMateScore - plyFromRoot); //Checkmate
 
             return 0; //Stalemate
         }
 
         //Null-Move pruning
-        if (depth > 3 && !moveGenerator.inCheck)
+        if (depth > 3 && !board.IsCheck())
         {
             if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {
@@ -324,13 +324,14 @@ public class Search
         for (int i = 0; i < moveCount; i++)
         {
             //Move move = moves[i];
+            if (!board.MakeIfLegal(moves[i])) continue;
 
-            board.MakeMove(moves[i], true); //TODOne: test having ref to move instead of accesing array - prob already done by compiler though
 
             uint extensions = 0;
             if (numExtensions < MaxExtensions)
             {
-                if (moveGenerator.inCheck && depth < 2) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
+                //TODO: Try removing again bc slow ass IsCheck()
+                if (depth < 2 && board.IsCheck()) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
 
                 //TODO: try combining these - as in increment extensions, allowing them to stack (i imagine this will just be slightly worse bc rare but idk)
 

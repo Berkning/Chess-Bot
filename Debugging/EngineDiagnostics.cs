@@ -239,7 +239,7 @@ public static class EngineDiagnostics
 
         if (moveCount == 0) return true; //Checkmate/Stalemate
 
-        bool checkedPosition = moveGenerator.inCheck || moveGenerator.inDoubleCheck || moveGenerator.checkRayBitMap != ulong.MaxValue || BoardHelper.InCheckSlow(board) || BoardHelper.OpponentInCheckSlow(board);
+        bool checkedPosition = board.IsCheck();
 
         for (int i = 0; i < Math.Min(movesPerPos, moveCount); i++)
         {

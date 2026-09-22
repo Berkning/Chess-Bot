@@ -21,7 +21,7 @@ public class PieceList
 
     private bool updateAttackMaps;
     private int pieceType; //TODO: Can store as byte
-    private bool isWhite; //TODO: Can store as byte
+    private bool isWhite;
 
 
 

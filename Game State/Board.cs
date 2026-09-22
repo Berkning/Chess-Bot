@@ -350,6 +350,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
         else if (Squares[move.targetSquare] != Piece.None)
         {
+            if (Piece.Type(Squares[move.targetSquare]) == Piece.King) Console.WriteLine(Squares[move.startSquare]);
             currentGameState |= (ushort)Squares[move.targetSquare];
             RemovePiece(move.targetSquare);
         }
@@ -595,6 +596,111 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         int newEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
 
         if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
+    }
+
+
+    public bool MakeIfLegal(Move move) //TODO: Try just using MakeMove with PV and TT moves, as we can assume these are legal. Slightly dangerous but when we go back to 64bit keys should be fine ig
+    {
+        if (Piece.Type(Squares[move.startSquare]) != Piece.King)
+        {
+            int kingSquare = colorToMove == Piece.White ? whiteKingSquare : blackKingSquare;
+
+            MakeMove(move, true);
+
+            if (IsAttacked(kingSquare))
+            {
+                UnMakeMove(move, true);
+                return false;
+            }
+
+            return true;
+        }
+        else if (move.flag == Move.Flag.Castling)
+        {
+            ulong bitBoard = 1UL << move.startSquare;
+
+            switch (move.targetSquare)
+            {
+                case BoardHelper.g1:
+                    bitBoard |= PrecomputedData.castleMasks[0];
+                    break;
+                case BoardHelper.g8:
+                    bitBoard |= PrecomputedData.castleMasks[1];
+                    break;
+                case BoardHelper.c1:
+                    bitBoard |= PrecomputedData.castleMasks[2];
+                    break;
+                case BoardHelper.c8:
+                    bitBoard |= PrecomputedData.castleMasks[3];
+                    break;
+            }
+
+            if (IsAttacked(bitBoard)) return false;
+            else
+            {
+                MakeMove(move, true);
+                return true;
+            }
+        }
+        else //Non-castling king move
+        {
+            if (IsAttacked(move.targetSquare)) return false;
+            else
+            {
+                MakeMove(move, true);
+                return true;
+            }
+        }
+    }
+
+    public bool IsCheck()
+    {
+        int kingSquare = colorToMove == Piece.White ? whiteKingSquare : blackKingSquare;
+
+        return IsAttacked(kingSquare);
+    }
+
+    private bool IsAttacked(int square)
+    {
+        ulong bitBoard = 1UL << square;
+
+
+        if ((GetPieceList(Piece.Queen, opponentColorBit).attackMap & bitBoard) != 0) return true;
+
+        if ((GetPieceList(Piece.Rook, opponentColorBit).attackMap & bitBoard) != 0) return true;
+
+        if ((GetPieceList(Piece.Bishop, opponentColorBit).attackMap & bitBoard) != 0) return true;
+
+        if ((GetPieceList(Piece.Knight, opponentColorBit).bitboard & PrecomputedData.knightAttackBitboards[square]) != 0) return true;
+
+        int pawnIndexOffset = colorToMove == Piece.White ? 64 : 0;
+
+        if ((GetPieceList(Piece.Pawn, opponentColorBit).bitboard & PrecomputedData.pawnAttackBitboards[square + pawnIndexOffset]) != 0) return true;
+
+        return false;
+    }
+
+    private bool IsAttacked(ulong bitBoard) //Returns true if any square in the given bitboard is attacked
+    {
+        if ((GetPieceList(Piece.Queen, opponentColorBit).attackMap & bitBoard) != 0) return true;
+
+        if ((GetPieceList(Piece.Rook, opponentColorBit).attackMap & bitBoard) != 0) return true;
+
+        if ((GetPieceList(Piece.Bishop, opponentColorBit).attackMap & bitBoard) != 0) return true;
+
+
+        int pawnIndexOffset = colorToMove == Piece.White ? 64 : 0;
+
+        while (bitBoard != 0)
+        {
+            int square = BitBoardHelper.PopFirstBit(ref bitBoard);
+
+            if ((GetPieceList(Piece.Knight, opponentColorBit).bitboard & PrecomputedData.knightAttackBitboards[square]) != 0) return true;
+
+            if ((GetPieceList(Piece.Pawn, opponentColorBit).bitboard & PrecomputedData.pawnAttackBitboards[square + pawnIndexOffset]) != 0) return true;
+        }
+
+        return false;
     }
 }
 

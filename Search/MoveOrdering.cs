@@ -90,7 +90,12 @@ public class MoveOrdering
                 //moveScore += 10 * Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
                 int valueDelta = (Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue) * TunableConstants.CaptureValueDeltaMultiplier;
 
-                bool canRecaptureGuess = BitBoardHelper.ContainsSquare(moveGenerator.opponentAttackMap, moves[i].targetSquare);
+                //TODO: Can do some crazy SEE here bc we know exactly what type of piece can recapture
+                ulong opponentSlidingAttackMap = board.GetPieceList(Piece.Queen, board.opponentColorBit).attackMap | board.GetPieceList(Piece.Rook, board.opponentColorBit).attackMap | board.GetPieceList(Piece.Bishop, board.opponentColorBit).attackMap;
+
+                bool canRecaptureGuess = BitBoardHelper.ContainsSquare(opponentSlidingAttackMap, moves[i].targetSquare) || (PrecomputedData.knightAttackBitboards[moves[i].targetSquare] & board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard) != 0 || (PrecomputedData.pawnAttackBitboards[board.colorToMove == Piece.White ? moves[i].targetSquare : moves[i].targetSquare + 64] & board.GetPieceList(Piece.Pawn, board.opponentColorBit).bitboard) != 0;
+
+
                 if (canRecaptureGuess)
                 {
                     moveScore += valueDelta >= 0 ? TunableConstants.GoodCaptureBias : TunableConstants.BadCaptureBias;
@@ -143,7 +148,8 @@ public class MoveOrdering
             else
             {
                 // Penalize moving piece to a square attacked by opponent pawn
-                if (BitBoardHelper.ContainsSquare(moveGenerator.oponnentPawnAttackMap, moves[i].targetSquare))
+                //if (BitBoardHelper.ContainsSquare(moveGenerator.oponnentPawnAttackMap, moves[i].targetSquare))
+                if ((PrecomputedData.pawnAttackBitboards[board.colorToMove == Piece.White ? moves[i].targetSquare : moves[i].targetSquare + 64] & board.GetPieceList(Piece.Pawn, board.opponentColorBit).bitboard) != 0)
                 {
                     moveScore += TunableConstants.AttackedByPawnBias;
                 }
@@ -221,7 +227,7 @@ public class MoveOrdering
     public struct KillerMove
     {
         public Move moveA; //TODOne: test adding more than 1 per ply - worse apparently
-        //public Move moveB;
+                           //public Move moveB;
 
         public void Add(Move move)
         {

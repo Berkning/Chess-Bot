@@ -23,10 +23,10 @@ public static class Perft
         long totalCount = 0;
         for (int i = 0; i < moveCountInCurrentPosition; i++)
         {
-
             ulong before = board.currentGameState;
+
+            if (!board.MakeIfLegal(moves[i])) continue;
             //Debug.Log("Trying to play " + BoardHelper.NameMove(move));
-            board.MakeMove(moves[i], true);
             long result = RunSpecifiedDepth(depth - 1, board);
             Console.WriteLine(BoardHelper.GetMoveNameUCI(moves[i]) + ": " + result);
             results += BoardHelper.GetMoveNameUCI(moves[i]) + ": " + result + "\n";
@@ -100,14 +100,15 @@ public static class Perft
 
         int moveCount = moveGenerator.GenerateMoves(ref moves);
 
-        if (depth == 1) return moveCount;
+        //if (depth == 1) return moveCount; No bulk-counting bc of pseudo-legal move-gen :(
 
 
         long numPositions = 0L;
 
         for (int i = 0; i < moveCount; i++)
         {
-            board.MakeMove(moves[i], true);
+            if (!board.MakeIfLegal(moves[i])) continue;
+
             numPositions += RunSpecifiedDepth(depth - 1, board);
             board.UnMakeMove(moves[i], true);
         }

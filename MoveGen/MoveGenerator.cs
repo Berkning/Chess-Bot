@@ -14,23 +14,10 @@ public class MoveGenerator
     private ulong enemyOrthos;
     private ulong enemyDiags;
 
-
-    public ulong opponentKingAttackMap;
-    public ulong oponnentPawnAttackMap;
-    public ulong opponentKnightAttackMap;
-    public ulong opponentSlidingAttackMap;
-    public ulong opponentAttackMapNoPawns;
-    public ulong opponentAttackMap;
-
-    public ulong checkRayBitMap;
-    public ulong pinRayBitMap;
-    public bool inCheck;
-    public bool inDoubleCheck;
-
     private int friendlyKingSquare;
     private int enemyKingSquare;
     private int friendlyIndexOffset;
-    private int opponentIndexOffset;
+    //private int opponentIndexOffset;
 
     private Board board;
 
@@ -39,96 +26,6 @@ public class MoveGenerator
         board = _board;
     }
 
-
-    #region LegalityMaps
-
-    private void GenerateAttackMaps()
-    {
-        opponentSlidingAttackMap = board.GetPieceList(Piece.Bishop, board.opponentColorBit).attackMap | board.GetPieceList(Piece.Rook, board.opponentColorBit).attackMap | board.GetPieceList(Piece.Queen, board.opponentColorBit).attackMap;
-
-        ulong kingOrthoAttackMask = MagicData.GetRookMoveBoard(enemyPieces, friendlyKingSquare); //Bitboard of potential ortho attack directions
-
-        ulong kingDiagAttackMask = MagicData.GetBishopMoveBoard(enemyPieces, friendlyKingSquare); //Bitboard of potential diag attack directions
-
-        ulong kingAttackMask = kingOrthoAttackMask | kingDiagAttackMask; //Bitboard of enemy slider attack blcoks - ignoring slider behind slider
-        ulong potentialKingAttackers = (kingOrthoAttackMask & enemyOrthos) | (kingDiagAttackMask & enemyDiags); //Bitboard of all enemy sliders that could be checking or pinning
-
-        //TODO: have precomputed moveBitboard array in MagicData for queen moves - prevents having to do all this for both orthos and diags at runtime -> would prob only be faster with PEXT, but still prob a speedup in that case
-
-        while (potentialKingAttackers != 0) //TODOnt: Massive optimisation - could just precompute a directionMask array that doesn't go to board edge - just to piece - no need to do magic stuff above -> we need attack mask - look above and think
-        {
-            int startSquare = BitBoardHelper.PopFirstBit(ref potentialKingAttackers);
-            ulong directionMask = PrecomputedData.directionalMasks[friendlyKingSquare][startSquare]; //Mask of line from king through piece to board edge
-            ulong pinMask = kingAttackMask & directionMask; //Bitboard of line from king to attacking slider - includes slider itself
-
-            ulong pinBoard = pinMask & friendlyPieces; //Bitboard of all potentially pinned pieces between this slider and the king - if none; were in check
-
-            int pinCount = BitBoardHelper.BitCount(pinBoard); //Number of pieces in pinboard
-
-            if (pinCount > 1) continue; //More than 1 piece means no pin and no check
-            else if (pinCount == 1)
-            {
-                pinRayBitMap |= pinMask;
-            }
-            else
-            {
-                inDoubleCheck = inCheck;
-                inCheck = true;
-                checkRayBitMap |= pinMask;
-            }
-        }
-
-
-        //Knight attacks
-        PieceList enemyKnights = board.GetPieceList(Piece.Knight, board.opponentColorBit);
-        opponentKnightAttackMap = 0;
-        bool isKnightCheck = false;
-
-        for (int knightIndex = 0; knightIndex < enemyKnights.Count; knightIndex++)
-        {
-            int startSquare = enemyKnights[knightIndex];
-            opponentKnightAttackMap |= PrecomputedData.knightAttackBitboards[startSquare];
-
-            if (!isKnightCheck && BitBoardHelper.ContainsSquare(opponentKnightAttackMap, friendlyKingSquare))
-            {
-                isKnightCheck = true;
-                inDoubleCheck = inCheck;
-                inCheck = true;
-                checkRayBitMap = BitBoardHelper.AddSquare(checkRayBitMap, startSquare);
-            }
-        }
-
-
-        //Pawn attacks
-        PieceList enemyPawns = board.GetPieceList(Piece.Pawn, board.opponentColorBit);
-        oponnentPawnAttackMap = 0;
-        bool isPawnCheck = false;
-
-        for (int pawnIndex = 0; pawnIndex < enemyPawns.Count; pawnIndex++)
-        {
-            int startSquare = enemyPawns[pawnIndex];
-            oponnentPawnAttackMap |= PrecomputedData.pawnAttackBitboards[startSquare + opponentIndexOffset];
-
-            if (!isPawnCheck && BitBoardHelper.ContainsSquare(oponnentPawnAttackMap, friendlyKingSquare))
-            {
-                isPawnCheck = true;
-                inDoubleCheck = inCheck;
-                inCheck = true;
-                checkRayBitMap = BitBoardHelper.AddSquare(checkRayBitMap, startSquare);
-            }
-        }
-
-
-        //King attacks
-        opponentKingAttackMap = PrecomputedData.kingAttackBitboards[enemyKingSquare];
-
-        opponentAttackMapNoPawns = opponentSlidingAttackMap | opponentKnightAttackMap | opponentKingAttackMap;
-        opponentAttackMap = opponentAttackMapNoPawns | oponnentPawnAttackMap;
-
-        if (!inCheck) checkRayBitMap = ulong.MaxValue; //Make all squares available to move to if not in check
-    }
-
-    #endregion
 
     #region PieceBoards
 
@@ -201,21 +98,11 @@ public class MoveGenerator
         }
 
         friendlyIndexOffset = board.friendlyColorBit * 64;
-        opponentIndexOffset = board.opponentColorBit * 64;
-
-        pinRayBitMap = 0;
-        checkRayBitMap = 0;
-        inCheck = false;
-        inDoubleCheck = false;
+        //opponentIndexOffset = board.opponentColorBit * 64;
 
         GeneratePieceBoards();
 
-        //TODOnt: Pass genOnlyCaptures bc we then should also only worry about if the opponent can REcapture our king if he captures a piece bc only his capturing moves are generated - should cause slight speedup bc we don't need to worry about non attacking moves? - can't see any way it could be useful when using magic bitboards
-        GenerateAttackMaps();
-
         GenerateKingMoves(ref moves, genOnlyCaptures);
-
-        if (inDoubleCheck) return moveCount; //Only king moves valid when in double check
 
         for (int i = 0; i < board.GetPieceList(Piece.Pawn, board.friendlyColorBit).Count; i++)
         {
@@ -246,19 +133,7 @@ public class MoveGenerator
         for (int i = 0; i < bishopList.Count; i++)
         {
             int startSquare = bishopList[i];
-
-
             ulong attackMap = bishopList.attackMaps[i];
-
-            if (IsPinned(startSquare))
-            {
-                if (inCheck) continue; //Pinned pieces cannot move if king is in check //Credit to seb lague for this if statement
-
-                attackMap &= PrecomputedData.directionalMasks[friendlyKingSquare][startSquare] & pinRayBitMap;
-            }
-
-            attackMap &= checkRayBitMap;
-
 
             if (genOnlyCaptures) attackMap &= enemyPieces;
             else attackMap &= ~friendlyPieces;
@@ -273,19 +148,7 @@ public class MoveGenerator
         for (int i = 0; i < rookList.Count; i++)
         {
             int startSquare = rookList[i];
-
-
             ulong attackMap = rookList.attackMaps[i];
-
-            if (IsPinned(startSquare))
-            {
-                if (inCheck) continue; //Pinned pieces cannot move if king is in check //Credit to seb lague for this if statement
-
-                attackMap &= PrecomputedData.directionalMasks[friendlyKingSquare][startSquare] & pinRayBitMap;
-            }
-
-            attackMap &= checkRayBitMap;
-
 
             if (genOnlyCaptures) attackMap &= enemyPieces;
             else attackMap &= ~friendlyPieces;
@@ -300,19 +163,7 @@ public class MoveGenerator
         for (int i = 0; i < queenList.Count; i++)
         {
             int startSquare = queenList[i];
-
-
             ulong attackMap = queenList.attackMaps[i];
-
-            if (IsPinned(startSquare))
-            {
-                if (inCheck) continue; //Pinned pieces cannot move if king is in check //Credit to seb lague for this if statement
-
-                attackMap &= PrecomputedData.directionalMasks[friendlyKingSquare][startSquare] & pinRayBitMap;
-            }
-
-            attackMap &= checkRayBitMap;
-
 
             if (genOnlyCaptures) attackMap &= enemyPieces;
             else attackMap &= ~friendlyPieces;
@@ -330,28 +181,24 @@ public class MoveGenerator
     private void GenerateKingMoves(ref Span<Move> moves, bool genOnlyCaptures)
     {
         ulong moveBoard = PrecomputedData.kingAttackBitboards[friendlyKingSquare] & (~friendlyPieces);
-        ulong safetyMap = ~opponentAttackMap; //All squares not attacked by opponent
 
-        moveBoard &= safetyMap; //Remove attacked squares from moveboard
 
         if (genOnlyCaptures) moveBoard &= enemyPieces; //Keep only capture squares
-        else if (!inCheck)
+
+        ulong castleSquares = ~board.allPieceBoard; //All empty squares
+
+        ulong shortCastleBoard = PrecomputedData.castleMasks[board.friendlyColorBit] & castleSquares;
+
+        if (ShortCastleAllowed() && BitBoardHelper.BitCount(shortCastleBoard) == 2) //If short allowed and both castle squares are empty
         {
-            ulong castleSquares = safetyMap & (~board.allPieceBoard); //All safe and empty squares
+            moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.g1 : BoardHelper.g8, Move.Flag.Castling);
+        }
 
-            ulong shortCastleBoard = PrecomputedData.castleMasks[board.friendlyColorBit] & castleSquares;
+        ulong longCastleBoard = PrecomputedData.castleMasks[2 + board.friendlyColorBit] & castleSquares;
 
-            if (ShortCastleAllowed() && BitBoardHelper.BitCount(shortCastleBoard) == 2) //If short allowed and both castle squares are safe and empty
-            {
-                moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.g1 : BoardHelper.g8, Move.Flag.Castling);
-            }
-
-            ulong longCastleBoard = PrecomputedData.castleMasks[2 + board.friendlyColorBit] & castleSquares;
-
-            if (LongCastleAllowed() && BitBoardHelper.BitCount(longCastleBoard) == 2 && (board.allPieceBoard & PrecomputedData.castleMasks[4 + board.friendlyColorBit]) == 0) //If long allowed and both castle squares are safe and empty and the last one is empty
-            {
-                moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.c1 : BoardHelper.c8, Move.Flag.Castling);
-            }
+        if (LongCastleAllowed() && BitBoardHelper.BitCount(longCastleBoard) == 2 && (board.allPieceBoard & PrecomputedData.castleMasks[4 + board.friendlyColorBit]) == 0) //If long allowed and both castle squares are empty and the last one is empty
+        {
+            moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.c1 : BoardHelper.c8, Move.Flag.Castling);
         }
 
 
@@ -381,22 +228,14 @@ public class MoveGenerator
 
             if (Piece.IsNone(board.Squares[targetSquare]))
             {
-                if (!IsPinned(startSquare) || IsMovingAlongRay(friendlyKingSquare, startSquare, moveDir))
+                if (oneStepFromPromotion) AddPromotionMoves(ref moves, startSquare, targetSquare);
+                else moves[moveCount++] = new Move(startSquare, targetSquare);
+
+                if (rank == startRank) //If on start rank
                 {
-                    if (!inCheck || SquareIsInCheckRay(targetSquare))
-                    {
-                        if (oneStepFromPromotion) AddPromotionMoves(ref moves, startSquare, targetSquare);
-                        else moves[moveCount++] = new Move(startSquare, targetSquare);
-                    }
+                    int squareTwoForward = targetSquare + moveDir; //One additional move up/down
 
-
-
-                    if (rank == startRank) //If on start rank
-                    {
-                        int squareTwoForward = targetSquare + moveDir; //One additional move up/down
-
-                        if (Piece.IsNone(board.Squares[squareTwoForward]) && (!inCheck || SquareIsInCheckRay(squareTwoForward))) moves[moveCount++] = new Move(startSquare, squareTwoForward, Move.Flag.PawnTwoForward); //If no pieces on target square, add move
-                    }
+                    if (Piece.IsNone(board.Squares[squareTwoForward])) moves[moveCount++] = new Move(startSquare, squareTwoForward, Move.Flag.PawnTwoForward); //If no pieces on target square, add move
                 }
             }
         }
@@ -411,33 +250,17 @@ public class MoveGenerator
         for (int i = 0; i < PrecomputedData.PawnAttackSquares[attackIndex].Length; i++)
         {
             targetSquare = PrecomputedData.PawnAttackSquares[attackIndex][i];
-            int captureDirection = targetSquare - startSquare;
-
-            //TODO:                      Can replace this with a simple check for the square being in pinRayBoard bc that will always be true if moving along ray with pawns?
-            if (IsPinned(startSquare) && !IsMovingAlongRay(friendlyKingSquare, startSquare, captureDirection)) continue; //Pawn is pinned and cant move in this direction
 
             int targetPiece = board.Squares[targetSquare];
 
             if (Piece.Color(targetPiece) == board.enemyColor)
             {
-                if (inCheck && !SquareIsInCheckRay(targetSquare)) continue; //Skip direction if were in check and this move doesn't block it
-
                 if (oneStepFromPromotion) AddPromotionMoves(ref moves, startSquare, targetSquare);
                 else moves[moveCount++] = new Move(startSquare, targetSquare);
             }
 
             //En passant
-            if (targetSquare == epAttackSquare)
-            {
-                int capturedPawnSquare = targetSquare - moveDir;
-
-                if (inCheck && !SquareIsInCheckRay(targetSquare) && !SquareIsInCheckRay(capturedPawnSquare)) continue;
-
-                int epStartRank = board.friendlyColor == Piece.White ? 4 : 3;
-
-
-                if (!InCheckAfterEnPassant(startSquare, epStartRank, capturedPawnSquare)) moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture);
-            }
+            if (targetSquare == epAttackSquare) moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture);
         }
     }
 
@@ -446,8 +269,6 @@ public class MoveGenerator
         //TODO: Bitboards
         for (int i = 0; i < PrecomputedData.KnightMoves[startSquare].Length; i++)
         {
-            if (IsPinned(startSquare)) return; //Knight cant move at all if pinned //TODO: Just move outside loop
-
             int targetSquare = PrecomputedData.KnightMoves[startSquare][i];
             int pieceOnTarget = board.Squares[targetSquare];
 
@@ -455,7 +276,7 @@ public class MoveGenerator
 
             bool isCapture = !Piece.IsNone(pieceOnTarget);
 
-            if ((isCapture || !genOnlyCaptures) && (!inCheck || SquareIsInCheckRay(targetSquare))) moves[moveCount++] = new Move(startSquare, targetSquare);
+            if (isCapture || !genOnlyCaptures) moves[moveCount++] = new Move(startSquare, targetSquare);
         }
     }
 
@@ -479,31 +300,6 @@ public class MoveGenerator
 
     #region Helpers
 
-    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsPinned(int square)
-    {
-        return BitBoardHelper.ContainsSquare(pinRayBitMap, square);
-        //return (pinRayBitMap & (1UL << square)) != 0;
-    }
-
-    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsMovingAlongRay(int startSquare, int targetSquare, int directionOffset)
-    {
-        int rayDirection = PrecomputedData.directionLookup[targetSquare - startSquare + 63];
-        return directionOffset == rayDirection || -directionOffset == rayDirection;
-    }
-
-    private bool SquareIsInCheckRay(int square)
-    {
-        return BitBoardHelper.ContainsSquare(checkRayBitMap, square);
-        //return (checkRayBitMap & (1UL << square)) != 0; //&& inCheck - Included in SebLague's code but don't see why it would be necessary as the bitmaps are reset when we start generating moves
-    }
-
-    private bool SquareIsAttacked(int square)
-    {
-        return BitBoardHelper.ContainsSquare(opponentAttackMap, square);
-    }
-
     private bool ShortCastleAllowed() //TODO: Move to board class
     {
         return (board.currentGameState & (1U << (9 + board.friendlyColorBit))) > 0;
@@ -512,60 +308,6 @@ public class MoveGenerator
     private bool LongCastleAllowed() //TODO: Move to board class
     {
         return (board.currentGameState & (1U << (11 + board.friendlyColorBit))) > 0;
-    }
-
-    private bool InCheckAfterEnPassant(int square, int startRank, int capturedPawnSquare) //TODO: Seemingly doesn't work in "3k4/8/r7/1KPp4/8/8/8/8 w - d6 0 4"
-    {
-        int kingRank = BoardHelper.IndexToRank(friendlyKingSquare);
-
-        if (kingRank != startRank) return false; //If king is on the same rank as the en passant, a discovered king attack is possible when capturing ep
-
-        //Check horizontally for rooks and queens
-        int directionIncrement = (square - friendlyKingSquare) > 0 ? PrecomputedData.Right : PrecomputedData.Left;
-
-        int startFile = BoardHelper.IndexToFile(friendlyKingSquare);
-        int fileCount = directionIncrement == 1 ? 7 - startFile : startFile; //number of files to check
-
-        //TODO: pretty sure the fix is to set this to "int startSquare = friendlyKingSquare"
-        int startSquare = friendlyKingSquare + directionIncrement; //We start at the friendly kings square and move one square away from the king; this is the first square where a piece could be blocking a potential check
-
-        //TODO: ... and let i start at 1 instead
-        for (int i = 0; i < fileCount; i++)
-        {
-            int index = startSquare + i * directionIncrement;
-
-            int pieceOnSquare = board.Squares[index];
-
-            if (pieceOnSquare != Piece.None && index != capturedPawnSquare && index != square)
-            {
-                if (Piece.Color(pieceOnSquare) == board.enemyColor) return Piece.IsRookOrQueen(pieceOnSquare); //Will put us in check if it's a rook or a queen
-                else return false; //Ran into a friendly piece which will be blocking any attack
-            }
-        }
-
-        return false; //Empty rank - no attackers
-
-
-        //Thought all the following was correct, but realised that it is impossible to be in a position where it actually holds true, and therefore the only necessary check is the horizontal one above ^
-        /*else
-        {
-            //Here we already know (from code calling this function) that the pawn is either not pinned, or moving along the pin ray - Means no discovered attack through friendly pawn.
-            //Only way a discovered attack is possible, is through the captured pawn - This can also only happen through a single diagonal in this case, as the friendly pawn will block any vertical-
-            //attacks, and we have already ruled out horizontal attacks in the enclosing if-statement. The diagonal where this is possible, is the passing through both the friendly king and the-
-            //pawn being captured. If such a diagonal exists.
-
-            int kingFile = BoardHelper.IndexToFile(friendlyKingSquare);
-
-            //For the diagonal to be valid, ΔFile has to be equal to ΔRank - As in if the king is 2 down, and 2 right from the pawn,
-
-            int fileDelta = file - kingFile;
-            int rankDelta = rank - kingRank;
-
-            if (fileDelta == rankDelta || -fileDelta == rankDelta) //If valid diagonal exists between king an pawn being captured
-            {
-
-            }
-        }*/
     }
 
     #endregion
