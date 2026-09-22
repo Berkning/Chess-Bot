@@ -74,7 +74,7 @@ public class PieceList
             RemovePieceAtSquare(square);
         }
 
-        attackMap = 0UL;
+        attackMap = 0UL; //Not technically necessary but for good measure ig
     }
 
     public void MovePiece(int startSquare, int targetSquare)

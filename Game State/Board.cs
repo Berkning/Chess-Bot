@@ -74,7 +74,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
 
         allPieceBoard = BitBoardHelper.AddSquare(allPieceBoard, square);
-        CheckMaps(0);
 
         int type = Piece.Type(piece);
 
@@ -108,7 +107,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         Squares[startSquare] = Piece.None;
         allPieceBoard = BitBoardHelper.AddSquare(allPieceBoard, targetSquare);
         allPieceBoard = BitBoardHelper.RemoveSquare(allPieceBoard, startSquare);
-        CheckMaps(1);
 
         GetPieceList(type, colorBit).MovePiece(startSquare, targetSquare);
     }
@@ -118,7 +116,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         int piece = Squares[square];
         Squares[square] = Piece.None;
         allPieceBoard = BitBoardHelper.RemoveSquare(allPieceBoard, square);
-        CheckMaps(2);
 
         int type = Piece.Type(piece);
         int colorBit = Piece.ColorBit(piece);
@@ -143,7 +140,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     {
         Squares = new int[64];
         allPieceBoard = 0UL;
-        CheckMaps(3);
 
         gameStateHistory = new Stack<uint>();
         gameStateHistory.Push(currentGameState);
@@ -180,7 +176,10 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         repetitionTable.Clear();
         Array.Clear(Squares, 0, 64);
         allPieceBoard = 0UL;
-        CheckMaps(5);
+
+        //King needs to be on edge of the board otherwise this can screw with the attack maps in piecelists when loading a two fens consequetively
+        whiteKingSquare = 0;
+        blackKingSquare = 0;
 
         foreach (PieceList pieceList in allPieceList)
         {
@@ -351,11 +350,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
         else if (Squares[move.targetSquare] != Piece.None)
         {
-            if (Piece.Type(Squares[move.targetSquare]) == Piece.King)
-            {
-                Console.WriteLine("king taken with move " + BoardHelper.GetMoveNameUCI(move));
-                throw new Exception("gergre");
-            }
             currentGameState |= (ushort)Squares[move.targetSquare];
             RemovePiece(move.targetSquare);
         }
@@ -368,7 +362,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             Squares[move.startSquare] = Piece.None;
             allPieceBoard = BitBoardHelper.AddSquare(allPieceBoard, move.targetSquare);
             allPieceBoard = BitBoardHelper.RemoveSquare(allPieceBoard, move.startSquare);
-            CheckMaps(6);
 
             int pieceColor = Piece.Color(Squares[move.targetSquare]);
             if (pieceColor == Piece.White)
@@ -450,7 +443,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         {
             Squares[move.startSquare] = Squares[move.targetSquare];
             allPieceBoard = BitBoardHelper.AddSquare(allPieceBoard, move.startSquare);
-            CheckMaps(7);
 
             int pieceColor = Piece.Color(Squares[move.startSquare]);
             if (pieceColor == Piece.White)
@@ -603,33 +595,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         int newEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
 
         if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
-    }
-
-
-
-
-    private void CheckMaps(int n)
-    {
-        for (int i = 0; i < 64; i++)
-        {
-            if (Piece.IsNone(Squares[i]))
-            {
-                if (BitBoardHelper.ContainsSquare(allPieceBoard, i))
-                {
-                    Console.WriteLine("allpieceBoard shows piece at square: " + i + " but Squares[] shows none, here: " + n);
-
-                    throw new Exception("gg");
-                }
-            }
-            else
-            {
-                if (!BitBoardHelper.ContainsSquare(allPieceBoard, i))
-                {
-                    Console.WriteLine("allpieceBoard shows no piece at square: " + i + " but Squares[] shows piece present, here: " + n);
-                    throw new Exception("gg");
-                }
-            }
-        }
     }
 }
 
