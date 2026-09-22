@@ -23,6 +23,8 @@ public class PieceList
     private int pieceType; //TODO: Can store as byte
     private bool isWhite; //TODO: Can store as byte
 
+    private Stack<AttackHistoryEntry> attackMapHistory;
+
 
 
     public PieceList(Board _board, int _piece, int maxPieceCount = 10) //One side can never have more than 10 of the same piece-type
@@ -37,15 +39,17 @@ public class PieceList
         pieceType = Piece.Type(_piece);
         updateAttackMaps = Piece.IsSlidingPiece(pieceType) || pieceType == Piece.Knight;
         isWhite = Piece.Color(_piece) == Piece.White;
+
+        attackMapHistory = new Stack<AttackHistoryEntry>();
     }
 
-    public void AddPieceAtSquare(int square)
+    public void AddPieceAtSquare(int square, bool update)
     {
         occupiedSquares[numPieces] = square;
         indexMap[square] = numPieces;
         bitboard ^= 1UL << square;
 
-        if (updateAttackMaps) UpdateAttackMap(numPieces);
+        if (update && updateAttackMaps) UpdateAttackMap(numPieces);
 
         numPieces++;
     }
@@ -63,7 +67,6 @@ public class PieceList
             attackMaps[removedPieceIndex] = attackMaps[numPieces];
             RecreateCombinedAttackMap();
         }
-
     }
 
     public void Clear()
@@ -75,6 +78,7 @@ public class PieceList
         }
 
         attackMap = 0UL; //Not technically necessary but for good measure ig
+        attackMapHistory.Clear();
     }
 
     public void MovePiece(int startSquare, int targetSquare)
@@ -89,6 +93,27 @@ public class PieceList
             UpdateAttackMap(index);
             RecreateCombinedAttackMap();
         }*/
+    }
+
+    public void PushAttackMaps()
+    {
+        for (int i = 0; i < numPieces; i++)
+        {
+            attackMapHistory.Push(new AttackHistoryEntry(attackMaps[i], occupiedSquares[i]));
+        }
+    }
+
+    public void PopAttackMaps()
+    {
+        for (int i = 0; i < numPieces; i++)
+        {
+            AttackHistoryEntry entry = attackMapHistory.Pop();
+
+            int index = indexMap[entry.square];
+            attackMaps[index] = entry.attackMap;
+        }
+
+        RecreateCombinedAttackMap();
     }
 
 
@@ -135,6 +160,19 @@ public class PieceList
         for (int i = 0; i < numPieces; i++)
         {
             attackMap |= attackMaps[i];
+        }
+    }
+
+
+    private struct AttackHistoryEntry
+    {
+        public ulong attackMap;
+        public byte square;
+
+        public AttackHistoryEntry(ulong map, int sq)
+        {
+            attackMap = map;
+            square = (byte)sq;
         }
     }
 }

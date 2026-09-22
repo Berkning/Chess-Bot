@@ -58,12 +58,12 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
     public void AddPiecePublic(int square, int piece)
     {
-        AddPiece(square, piece);
+        AddPiece(square, piece, true);
 
         UpdateAttackMaps(BitBoardHelper.AddSquare(0UL, square));
     }
 
-    private void AddPiece(int square, int piece)
+    private void AddPiece(int square, int piece, bool updateAttacks)
     {
         Squares[square] = piece;
 
@@ -90,7 +90,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         currentZobrist ^= Zobrist.piecesArray[type - 1, colorBit, square]; //Add piece to zobrist
 
-        GetPieceList(type, colorBit).AddPieceAtSquare(square);
+        GetPieceList(type, colorBit).AddPieceAtSquare(square, updateAttacks);
     }
 
     private void MovePiece(int startSquare, int targetSquare) //WARNING: Target square has to be empty!!!!
@@ -194,7 +194,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         gameStateHistory.Push(currentGameState);
     }
 
-    public void UpdateAttackMaps(ulong changeBitBoard)
+    public void UpdateAttackMaps(ulong changeBitBoard) //TODO://TODO://TODO: Don't update knight attack boards with this, won't change them at all unless the knight itself has moved
     {
         //Update AttackMaps in PieceLists
         for (int i = 1; i <= 4; i++) //White pieces that need attackmaps updated
@@ -232,10 +232,40 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
     }
 
+    private void PopAttackMaps()
+    {
+        //Pop AttackMaps in PieceLists
+        for (int i = 1; i <= 4; i++)
+        {
+            allPieceList[i].PopAttackMaps();
+        }
+
+        for (int i = 6; i <= 9; i++)
+        {
+            allPieceList[i].PopAttackMaps();
+        }
+    }
+
+    private void PushAttackMaps()
+    {
+        //Pop AttackMaps in PieceLists
+        for (int i = 1; i <= 4; i++)
+        {
+            allPieceList[i].PushAttackMaps();
+        }
+
+        for (int i = 6; i <= 9; i++)
+        {
+            allPieceList[i].PushAttackMaps();
+        }
+    }
+
 
 
     public void MakeMove(Move move, bool inSearch = false)
     {
+        PushAttackMaps();
+
         //if (Squares[move.startSquare] == Piece.None) Console.WriteLine("Tried to move null piece " + BoardHelper.GetMoveNameUCI(move) + " " + move.flag); //TODOne: remove for performance
         ulong moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(0UL, move.startSquare), move.targetSquare); //Bitboard with the moves start and end-square highlighted
 
@@ -388,19 +418,19 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             {
                 case Move.Flag.PromoteToQueen:
                     //queenList[opponentColorBit].AddPieceAtSquare(move.targetSquare);
-                    AddPiece(move.targetSquare, enemyColor | Piece.Queen);
+                    AddPiece(move.targetSquare, enemyColor | Piece.Queen, true);
                     break;
                 case Move.Flag.PromoteToKnight:
                     //knightList[opponentColorBit].AddPieceAtSquare(move.targetSquare);
-                    AddPiece(move.targetSquare, enemyColor | Piece.Knight);
+                    AddPiece(move.targetSquare, enemyColor | Piece.Knight, true);
                     break;
                 case Move.Flag.PromoteToBishop:
                     //bishopList[opponentColorBit].AddPieceAtSquare(move.targetSquare);
-                    AddPiece(move.targetSquare, enemyColor | Piece.Bishop);
+                    AddPiece(move.targetSquare, enemyColor | Piece.Bishop, true);
                     break;
                 case Move.Flag.PromoteToRook:
                     //rookList[opponentColorBit].AddPieceAtSquare(move.targetSquare);
-                    AddPiece(move.targetSquare, enemyColor | Piece.Rook);
+                    AddPiece(move.targetSquare, enemyColor | Piece.Rook, true);
                     break;
             }
         }
@@ -479,7 +509,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             RemovePiece(move.targetSquare);
 
             //pawnList[friendlyColorBit].AddPieceAtSquare(move.startSquare);
-            AddPiece(move.startSquare, Piece.Pawn | friendlyColor);
+            AddPiece(move.startSquare, Piece.Pawn | friendlyColor, false);
         }
         else MovePiece(move.targetSquare, move.startSquare);
         //Squares[move.startSquare] = Squares[move.targetSquare];
@@ -517,7 +547,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             int capturedPieceDirection = colorToMove == Piece.White ? -8 : 8; //Whether the captured pawn is below or above the pawn capturing it (depends on if black/white played the move)
             int capturedPawnSquare = move.targetSquare + capturedPieceDirection;
 
-            AddPiece(capturedPawnSquare, capturedPiece);
+            AddPiece(capturedPawnSquare, capturedPiece, false);
 
             moveBitBoard = BitBoardHelper.AddSquare(moveBitBoard, capturedPawnSquare);
             //Squares[move.targetSquare + capturedPieceDirection] = capturedPiece;
@@ -526,7 +556,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
         else
         {
-            AddPiece(move.targetSquare, capturedPiece);
+            AddPiece(move.targetSquare, capturedPiece, false);
             //Squares[move.targetSquare] = (int)(currentGameState & capturedPieceMask);
         }
 
@@ -554,8 +584,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         currentZobrist ^= Zobrist.castlingArray[newCastleRights];
 
 
-
-        UpdateAttackMaps(moveBitBoard);
+        PopAttackMaps();
 
         //if (currentZobrist != Zobrist.Hash(this)) Console.WriteLine("Zobrist incorrect");
     }
