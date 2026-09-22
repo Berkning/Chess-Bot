@@ -197,7 +197,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     public void UpdateAttackMaps(ulong changeBitBoard)
     {
         //Update AttackMaps in PieceLists
-        for (int i = 1; i <= 4; i++) //White pieces that need attackmaps updated
+        for (int i = 2; i <= 4; i++) //White pieces that need attackmaps updated
         {
             if ((allPieceList[i].attackMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
             {
@@ -214,7 +214,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             }
         }
 
-        for (int i = 6; i <= 9; i++) //Black pieces that need attackmaps updated
+        for (int i = 7; i <= 9; i++) //Black pieces that need attackmaps updated
         {
             if ((allPieceList[i].attackMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
             {
@@ -417,6 +417,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         gameStateHistory.Push(currentGameState);
         if (!inSearch) repetitionTable.Push(currentZobrist);
 
+
         UpdateAttackMaps(moveBitBoard);
 
         //Debug.Log(Convert.ToString(currentGameState, 2));
@@ -552,7 +553,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
 
         currentZobrist ^= Zobrist.castlingArray[newCastleRights];
-
 
 
         UpdateAttackMaps(moveBitBoard);

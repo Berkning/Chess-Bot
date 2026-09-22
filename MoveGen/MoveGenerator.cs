@@ -81,14 +81,21 @@ public class MoveGenerator
 
         //Knight attacks
         PieceList enemyKnights = board.GetPieceList(Piece.Knight, board.opponentColorBit);
-        opponentKnightAttackMap = enemyKnights.attackMap;
+        opponentKnightAttackMap = 0;
+        bool isKnightCheck = false;
 
-        if (BitBoardHelper.ContainsSquare(opponentKnightAttackMap, friendlyKingSquare))
+        for (int knightIndex = 0; knightIndex < enemyKnights.Count; knightIndex++)
         {
-            inDoubleCheck = inCheck;
-            inCheck = true;
+            int startSquare = enemyKnights[knightIndex];
+            opponentKnightAttackMap |= PrecomputedData.knightAttackBitboards[startSquare];
 
-            checkRayBitMap |= PrecomputedData.knightAttackBitboards[friendlyKingSquare] & enemyKnights.bitboard;
+            if (!isKnightCheck && BitBoardHelper.ContainsSquare(opponentKnightAttackMap, friendlyKingSquare))
+            {
+                isKnightCheck = true;
+                inDoubleCheck = inCheck;
+                inCheck = true;
+                checkRayBitMap = BitBoardHelper.AddSquare(checkRayBitMap, startSquare);
+            }
         }
 
 
@@ -220,7 +227,7 @@ public class MoveGenerator
 
         for (int i = 0; i < knightList.Count; i++)
         {
-            GenerateKnightMoves(ref moves, knightList[i], genOnlyCaptures, knightList.attackMaps[i]);
+            GenerateKnightMoves(ref moves, knightList[i], genOnlyCaptures);
         }
 
         GenerateSlidingMoves(ref moves, genOnlyCaptures);
@@ -434,21 +441,21 @@ public class MoveGenerator
         }
     }
 
-    private void GenerateKnightMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures, ulong attackMap)
+    private void GenerateKnightMoves(ref Span<Move> moves, int startSquare, bool genOnlyCaptures)
     {
-        if (IsPinned(startSquare)) return; //Knight cant move at all if pinned
-
-
-        if (genOnlyCaptures) attackMap &= enemyPieces;
-        else attackMap &= ~friendlyPieces;
-
-        if (inCheck) attackMap &= checkRayBitMap;
-
-        while (attackMap != 0)
+        //TODO: Bitboards
+        for (int i = 0; i < PrecomputedData.KnightMoves[startSquare].Length; i++)
         {
-            int targetSquare = BitBoardHelper.PopFirstBit(ref attackMap);
+            if (IsPinned(startSquare)) return; //Knight cant move at all if pinned //TODO: Just move outside loop
 
-            moves[moveCount++] = new Move(startSquare, targetSquare);
+            int targetSquare = PrecomputedData.KnightMoves[startSquare][i];
+            int pieceOnTarget = board.Squares[targetSquare];
+
+            if (Piece.Color(pieceOnTarget) == board.friendlyColor) continue;
+
+            bool isCapture = !Piece.IsNone(pieceOnTarget);
+
+            if ((isCapture || !genOnlyCaptures) && (!inCheck || SquareIsInCheckRay(targetSquare))) moves[moveCount++] = new Move(startSquare, targetSquare);
         }
     }
 

@@ -35,7 +35,7 @@ public class PieceList
         bitboard = 0;
         attackMap = 0;
         pieceType = Piece.Type(_piece);
-        updateAttackMaps = Piece.IsSlidingPiece(pieceType) || pieceType == Piece.Knight;
+        updateAttackMaps = Piece.IsSlidingPiece(pieceType);
         isWhite = Piece.Color(_piece) == Piece.White;
     }
 
@@ -115,9 +115,6 @@ public class PieceList
                 break;
             case Piece.Bishop:
                 attackBoard = MagicData.GetBishopMoveBoard(blockerBoard, occupiedSquares[index]);
-                break;
-            case Piece.Knight:
-                attackBoard = PrecomputedData.knightAttackBitboards[occupiedSquares[index]];
                 break;
             default:
                 Console.WriteLine("UpdateAttackMap wrongfully called in PieceList on piece of type: " + pieceType);
