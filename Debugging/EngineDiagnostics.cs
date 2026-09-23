@@ -132,7 +132,7 @@ public static class EngineDiagnostics
 
             moveHistory.Push(moves[randomMoveIndex]);
 
-            board.MakeMove(moves[randomMoveIndex], true);
+            if (!board.MakeIfLegal(moves[randomMoveIndex])) continue;
 
 
             if (depth > 0)
@@ -255,7 +255,14 @@ public static class EngineDiagnostics
             {
                 board.MakeNullMove();
             }
-            else board.MakeMove(moves[randomMoveIndex], true);
+            else
+            {
+                if (!board.MakeIfLegal(moves[randomMoveIndex]))
+                {
+                    moveHistory.Pop();
+                    continue;
+                }
+            }
 
 
             if (depth > 0)
