@@ -350,7 +350,12 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
         else if (Squares[move.targetSquare] != Piece.None)
         {
-            if (Piece.Type(Squares[move.targetSquare]) == Piece.King) Console.WriteLine(Squares[move.startSquare]);
+            /*if (Piece.Type(Squares[move.targetSquare]) == Piece.King)
+            {
+                Console.WriteLine(Squares[move.startSquare]);
+                Console.WriteLine("King captured by move " + BoardHelper.GetMoveNameUCI(move));
+            }*/
+
             currentGameState |= (ushort)Squares[move.targetSquare];
             RemovePiece(move.targetSquare);
         }
@@ -628,7 +633,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
             return true;
         }
-        else if (move.flag == Move.Flag.Castling)//TODO: Have to account for enemy king attacks as well
+        else if (move.flag == Move.Flag.Castling)
         {
             ulong bitBoard = 1UL << move.startSquare;
 
@@ -648,16 +653,16 @@ public class Board //TODOnt prob: Try maybe changing to struct?
                     break;
             }
 
-            if (IsAttacked(bitBoard)) return false;
+            if (IsAttackedKing(bitBoard)) return false;
             else
             {
                 MakeMove(move, true);
                 return true;
             }
         }
-        else //Non-castling king move //TODO: Have to account for enemy king attacks as well
+        else //Non-castling king move
         {
-            if (IsAttacked(move.targetSquare, opponentColorBit)) return false;
+            if (IsAttackedKing(move.targetSquare)) return false;
             else
             {
                 MakeMove(move, true);
@@ -686,14 +691,48 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         if ((GetPieceList(Piece.Knight, attackerColorBit).bitboard & PrecomputedData.knightAttackBitboards[square]) != 0) return true;
 
-        int pawnIndexOffset = colorToMove == Piece.White ? 64 : 0;
+        int pawnIndexOffset = attackerColorBit == 0 ? 64 : 0;
 
         if ((GetPieceList(Piece.Pawn, attackerColorBit).bitboard & PrecomputedData.pawnAttackBitboards[square + pawnIndexOffset]) != 0) return true;
 
         return false;
     }
 
-    private bool IsAttacked(ulong bitBoard) //Returns true if any square in the given bitboard is attacked
+    private bool IsAttackedKing(int square)
+    {
+        ulong bitBoard = 1UL << square;
+
+
+        if ((GetPieceList(Piece.Queen, opponentColorBit).attackMap & bitBoard) != 0) return true;
+
+        if ((GetPieceList(Piece.Rook, opponentColorBit).attackMap & bitBoard) != 0) return true;
+
+        if ((GetPieceList(Piece.Bishop, opponentColorBit).attackMap & bitBoard) != 0) return true;
+
+        if ((GetPieceList(Piece.Knight, opponentColorBit).bitboard & PrecomputedData.knightAttackBitboards[square]) != 0) return true;
+
+        int pawnIndexOffset;
+        int enemyKingSquare;
+
+        if (colorToMove == Piece.White)
+        {
+            pawnIndexOffset = 0;
+            enemyKingSquare = blackKingSquare;
+        }
+        else
+        {
+            pawnIndexOffset = 64;
+            enemyKingSquare = whiteKingSquare;
+        }
+
+        if ((PrecomputedData.kingAttackBitboards[enemyKingSquare] & bitBoard) != 0) return true;
+
+        if ((GetPieceList(Piece.Pawn, opponentColorBit).bitboard & PrecomputedData.pawnAttackBitboards[square + pawnIndexOffset]) != 0) return true;
+
+        return false;
+    }
+
+    private bool IsAttackedKing(ulong bitBoard) //Returns true if any square in the given bitboard is attacked
     {
         if ((GetPieceList(Piece.Queen, opponentColorBit).attackMap & bitBoard) != 0) return true;
 
@@ -702,7 +741,22 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         if ((GetPieceList(Piece.Bishop, opponentColorBit).attackMap & bitBoard) != 0) return true;
 
 
-        int pawnIndexOffset = colorToMove == Piece.White ? 64 : 0;
+        int pawnIndexOffset;
+        int enemyKingSquare;
+
+        if (colorToMove == Piece.White)
+        {
+            pawnIndexOffset = 0;
+            enemyKingSquare = blackKingSquare;
+        }
+        else
+        {
+            pawnIndexOffset = 64;
+            enemyKingSquare = whiteKingSquare;
+        }
+
+        if ((PrecomputedData.kingAttackBitboards[enemyKingSquare] & bitBoard) != 0) return true;
+
 
         while (bitBoard != 0)
         {

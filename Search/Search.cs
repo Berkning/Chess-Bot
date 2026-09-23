@@ -286,14 +286,15 @@ public class Search
         //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
 
         //TODOnt: move this above move ordering bc obv no reason to try to do move ordering if there aren't any moves - somehow basically makes zero to worse difference
-        if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move
+        if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move //FIXME://FIXME://FIXME://FIXME://FIXME://FIXME://FIXME: This check DOES NOT work with pseudo-legal movegen
         {
             //Debug.Log("Found Mate");
-            if (board.IsCheck()) return -(ImmediateMateScore - plyFromRoot); //Checkmate
+            if (board.IsCheck()) return -(ImmediateMateScore - plyFromRoot); //Checkmate 
 
             return 0; //Stalemate
         }
 
+        //TODO: We check here if the position is in check, which could maybe mean we can do some special movegen stuff to eliminate most of the obviously illegal moves to avoid having to do the IsLegal check on a bunch of them
         //Null-Move pruning
         if (depth > 3 && !board.IsCheck())
         {
