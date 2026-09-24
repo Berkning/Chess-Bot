@@ -288,6 +288,7 @@ public class Search
 
 
         //TODO: We check here if the position is in check, which could maybe mean we can do some special movegen stuff to eliminate most of the obviously illegal moves to avoid having to do the IsLegal check on a bunch of them
+        //TODO: ^^^ generate evasions - should be quite fast with the incrementally updated attack maps to quickly exclude friendly pieces that can't block
         bool isCheckedPosition = board.IsCheck();
 
 
@@ -398,14 +399,13 @@ public class Search
             }
         }
 
+        if (plyFromRoot > 0) repetitionTable.PopNoRtn();
+
         if (legalMoveCount == 0)
         {
             if (isCheckedPosition) return -(ImmediateMateScore - plyFromRoot);
             else return 0;
         }
-
-
-        if (plyFromRoot > 0) repetitionTable.PopNoRtn();
 
         transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);
 
