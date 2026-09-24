@@ -330,8 +330,7 @@ public class Search
             uint extensions = 0;
             if (numExtensions < MaxExtensions)
             {
-                //TODO: Try removing again bc slow ass IsCheck()
-                if (depth < 2 && board.IsCheck()) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
+                if (depth < 2 && isCheckedPosition) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
 
                 //TODO: try combining these - as in increment extensions, allowing them to stack (i imagine this will just be slightly worse bc rare but idk)
 
