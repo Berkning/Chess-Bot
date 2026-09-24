@@ -184,21 +184,24 @@ public class MoveGenerator
 
 
         if (genOnlyCaptures) moveBoard &= enemyPieces; //Keep only capture squares
-
-        ulong castleSquares = ~board.allPieceBoard; //All empty squares
-
-        ulong shortCastleBoard = PrecomputedData.castleMasks[board.friendlyColorBit] & castleSquares;
-
-        if (ShortCastleAllowed() && BitBoardHelper.BitCount(shortCastleBoard) == 2) //If short allowed and both castle squares are empty
+        else
         {
-            moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.g1 : BoardHelper.g8, Move.Flag.Castling);
-        }
 
-        ulong longCastleBoard = PrecomputedData.castleMasks[2 + board.friendlyColorBit] & castleSquares;
+            ulong castleSquares = ~board.allPieceBoard; //All empty squares
 
-        if (LongCastleAllowed() && BitBoardHelper.BitCount(longCastleBoard) == 2 && (board.allPieceBoard & PrecomputedData.castleMasks[4 + board.friendlyColorBit]) == 0) //If long allowed and both castle squares are empty and the last one is empty
-        {
-            moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.c1 : BoardHelper.c8, Move.Flag.Castling);
+            ulong shortCastleBoard = PrecomputedData.castleMasks[board.friendlyColorBit] & castleSquares;
+
+            if (ShortCastleAllowed() && BitBoardHelper.BitCount(shortCastleBoard) == 2) //If short allowed and both castle squares are empty
+            {
+                moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.g1 : BoardHelper.g8, Move.Flag.Castling);
+            }
+
+            ulong longCastleBoard = PrecomputedData.castleMasks[2 + board.friendlyColorBit] & castleSquares;
+
+            if (LongCastleAllowed() && BitBoardHelper.BitCount(longCastleBoard) == 2 && (board.allPieceBoard & PrecomputedData.castleMasks[4 + board.friendlyColorBit]) == 0) //If long allowed and both castle squares are empty and the last one is empty
+            {
+                moves[moveCount++] = new Move(friendlyKingSquare, board.colorToMove == Piece.White ? BoardHelper.c1 : BoardHelper.c8, Move.Flag.Castling);
+            }
         }
 
 
