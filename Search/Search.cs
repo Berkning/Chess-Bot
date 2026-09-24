@@ -285,18 +285,14 @@ public class Search
         //TODO: Could prob optimize to avoid this if statement
         //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
 
-        //TODOnt: move this above move ordering bc obv no reason to try to do move ordering if there aren't any moves - somehow basically makes zero to worse difference
-        if (moveCount == 0) //Maybe check if moveCount = 1 && plyFromRoot == 0 to return bc force move //FIXME://FIXME://FIXME://FIXME://FIXME://FIXME://FIXME: This check DOES NOT work with pseudo-legal movegen
-        {
-            //Debug.Log("Found Mate");
-            if (board.IsCheck()) return -(ImmediateMateScore - plyFromRoot); //Checkmate 
 
-            return 0; //Stalemate
-        }
 
         //TODO: We check here if the position is in check, which could maybe mean we can do some special movegen stuff to eliminate most of the obviously illegal moves to avoid having to do the IsLegal check on a bunch of them
+        bool isCheckedPosition = board.IsCheck();
+
+
         //Null-Move pruning
-        if (depth > 3 && !board.IsCheck())
+        if (depth > 3 && !isCheckedPosition)
         {
             if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {
@@ -321,11 +317,14 @@ public class Search
 
         if (plyFromRoot > 0) repetitionTable.Push(board.currentZobrist);
 
+        int legalMoveCount = 0;
+
 
         for (int i = 0; i < moveCount; i++)
         {
             //Move move = moves[i];
             if (!board.MakeIfLegal(moves[i])) continue;
+            legalMoveCount++;
 
 
             uint extensions = 0;
@@ -400,6 +399,13 @@ public class Search
             }
         }
 
+        if (legalMoveCount == 0)
+        {
+            if (isCheckedPosition) return -(ImmediateMateScore - plyFromRoot);
+            else return 0;
+        }
+
+
         if (plyFromRoot > 0) repetitionTable.PopNoRtn();
 
         transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);
@@ -439,9 +445,10 @@ public class Search
 
         for (int i = 0; i < moveCount; i++)
         {
+            if (!board.MakeIfLegal(moves[i])) continue;
+
             nodeCount++;
 
-            board.MakeMove(moves[i], true);
             eval = -SearchAllCaptures(-beta, -alpha);
             board.UnMakeMove(moves[i], true);
             //numQNodes++;
