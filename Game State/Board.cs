@@ -671,11 +671,39 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         }
     }
 
-    public bool IsCheck()
+    //0 == no check,    1 == queen+ check,    2 == rook+ check,   3 == bishop+ check,   4 == knight check,    5 == pawn check    (+ means king could be in double check)
+    public CheckType GetCheckType()
     {
-        int kingSquare = colorToMove == Piece.White ? whiteKingSquare : blackKingSquare;
+        int kingSquare;
+        int pawnIndexOffset;
 
-        return IsAttacked(kingSquare, opponentColorBit);
+
+        if (colorToMove == Piece.White)
+        {
+            kingSquare = whiteKingSquare;
+            pawnIndexOffset = 0;
+        }
+        else
+        {
+            kingSquare = blackKingSquare;
+            pawnIndexOffset = 64;
+        }
+
+        ulong bitBoard = 1UL << kingSquare;
+
+
+
+        if ((GetPieceList(Piece.Queen, opponentColorBit).attackMap & bitBoard) != 0) return new CheckType(1);
+
+        if ((GetPieceList(Piece.Rook, opponentColorBit).attackMap & bitBoard) != 0) return new CheckType(2);
+
+        if ((GetPieceList(Piece.Bishop, opponentColorBit).attackMap & bitBoard) != 0) return new CheckType(3);
+
+        if ((GetPieceList(Piece.Knight, opponentColorBit).bitboard & PrecomputedData.knightAttackBitboards[kingSquare]) != 0) return new CheckType(4);
+
+        if ((GetPieceList(Piece.Pawn, opponentColorBit).bitboard & PrecomputedData.pawnAttackBitboards[kingSquare + pawnIndexOffset]) != 0) return new CheckType(5);
+
+        return new CheckType(0);
     }
 
     private bool IsAttacked(int square, int attackerColorBit)
@@ -828,5 +856,38 @@ public class Piece
     public static bool IsRookOrQueen(int piece)
     {
         return (piece & TypeMask) > 4;
+    }
+}
+
+
+
+//0 == no check,    1 == queen+ check,    2 == rook+ check,   3 == bishop+ check,   4 == knight check,    5 == pawn check    (+ means king could be in double check)
+public struct CheckType
+{
+    private byte data;
+
+    public CheckType(byte type)
+    {
+        data = type;
+    }
+
+    public bool NoCheck()
+    {
+        return data == 0;
+    }
+
+    public bool IsSlidingCheck()
+    {
+        return data < 4;
+    }
+
+    public bool IsKnightCheck()
+    {
+        return data == 4;
+    }
+
+    public bool IsPawnCheck()
+    {
+        return data == 5;
     }
 }

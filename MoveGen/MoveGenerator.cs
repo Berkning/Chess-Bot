@@ -20,6 +20,7 @@ public class MoveGenerator
     //private int opponentIndexOffset;
 
     private Board board;
+    private EvasionGenerator evasionGenerator = new EvasionGenerator();
 
     public MoveGenerator(Board _board)
     {
@@ -79,6 +80,12 @@ public class MoveGenerator
         Span<Move> moves = new Move[256];
         GenerateMoves(ref moves);
         return moves;
+    }
+
+    //TODO: Remove ref here bc unnecessary - span is ref to array anyway so just return a span like normal
+    public int GenerateEvasions(ref Span<Move> moves, CheckType checkType)
+    {
+        return evasionGenerator.Generate(ref moves, checkType);
     }
 
     //TODO: Remove ref here bc unnecessary - span is ref to array anyway so just return a span like normal

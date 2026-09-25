@@ -14,8 +14,21 @@ public static class Perft
         MoveGenerator.PromotionMode prevPromotionMode = MoveGenerator.promotionMode; //Save what the promotionmode was set to
         MoveGenerator.promotionMode = MoveGenerator.PromotionMode.All; //Set the promotion mode to all to ensure we get all possible moves
 
-        Span<Move> moves = stackalloc Move[256];
-        int moveCountInCurrentPosition = moveGenerator.GenerateMoves(ref moves);
+
+        CheckType positionCheckType = board.GetCheckType();
+
+        Span<Move> moves = stackalloc Move[positionCheckType.NoCheck() ? 256 : 64];
+
+        int moveCountInCurrentPosition;
+
+        if (positionCheckType.NoCheck())
+        {
+            moveCountInCurrentPosition = moveGenerator.GenerateMoves(ref moves);
+        }
+        else
+        {
+            moveCountInCurrentPosition = moveGenerator.GenerateEvasions(ref moves, positionCheckType);
+        }
 
 
         string results = "";

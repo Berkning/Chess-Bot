@@ -269,9 +269,22 @@ public class Search
         }
 
 
-        Span<Move> moves = stackalloc Move[256];
+        CheckType positionCheckType = board.GetCheckType();
 
-        int moveCount = moveGenerator.GenerateMoves(ref moves);
+        Span<Move> moves = stackalloc Move[positionCheckType.NoCheck() ? 256 : 64]; //TODO: Can be reduced to 218 and 42
+        int moveCount = 0;
+
+
+        if (positionCheckType.NoCheck())
+        {
+            moveCount = moveGenerator.GenerateMoves(ref moves);
+        }
+        else
+        {
+            moveCount = moveGenerator.GenerateEvasions(ref moves, positionCheckType);
+
+            if (moveCount == 0) return -(ImmediateMateScore - plyFromRoot); //No evasions from check => checkmate
+        }
 
 
         //TODO: Try setting hash move to the global bestmove if plyfromroot == 0
@@ -286,14 +299,8 @@ public class Search
         //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
 
 
-
-        //TODO: We check here if the position is in check, which could maybe mean we can do some special movegen stuff to eliminate most of the obviously illegal moves to avoid having to do the IsLegal check on a bunch of them
-        //TODO: ^^^ generate evasions - should be quite fast with the incrementally updated attack maps to quickly exclude friendly pieces that can't block
-        bool isCheckedPosition = board.IsCheck();
-
-
         //Null-Move pruning
-        if (depth > 3 && !isCheckedPosition)
+        if (depth > 3 && positionCheckType.NoCheck())
         {
             if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {
@@ -317,21 +324,27 @@ public class Search
         ulong transpositionBound = TranspositionTable.UpperBound;
 
         if (plyFromRoot > 0) repetitionTable.Push(board.currentZobrist);
-
         int legalMoveCount = 0;
 
 
         for (int i = 0; i < moveCount; i++)
         {
             //Move move = moves[i];
-            if (!board.MakeIfLegal(moves[i])) continue;
+            if (positionCheckType.NoCheck())
+            {
+                if (!board.MakeIfLegal(moves[i])) continue;
+            }
+            else
+            {
+                board.MakeMove(moves[i], true); //We can always assume all moves generated in a checked position are legal, bc of our evasion gen
+            }
             legalMoveCount++;
 
 
             uint extensions = 0;
             if (numExtensions < MaxExtensions)
             {
-                if (depth < 2 && isCheckedPosition) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
+                if (depth < 2 && positionCheckType.NoCheck()) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
 
                 //TODO: try combining these - as in increment extensions, allowing them to stack (i imagine this will just be slightly worse bc rare but idk)
 
@@ -399,13 +412,12 @@ public class Search
             }
         }
 
+
         if (plyFromRoot > 0) repetitionTable.PopNoRtn();
 
-        if (legalMoveCount == 0)
-        {
-            if (isCheckedPosition) return -(ImmediateMateScore - plyFromRoot);
-            else return 0;
-        }
+
+        if (legalMoveCount == 0) return 0; //Stalemate
+
 
         transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);
 
@@ -434,6 +446,8 @@ public class Search
         {
             alpha = eval;
         }
+
+        //TODO: Also add check evasions, both speeds up search (bc only gen legal evasions while in check), and should just improve q-search in general
 
         Span<Move> moves = stackalloc Move[256];
 
