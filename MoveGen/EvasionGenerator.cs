@@ -7,6 +7,19 @@ public class EvasionGenerator
     private int enemyKingSquare;
     private Board board;
 
+    //PieceList refs
+    PieceList enemyQueens;
+    PieceList enemyRooks;
+    PieceList enemyBishops;
+    PieceList enemyKnights;
+    PieceList enemyPawns;
+    PieceList friendlyQueens;
+    PieceList friendlyRooks;
+    PieceList friendlyBishops;
+    PieceList friendlyKnights;
+    PieceList friendlyPawns;
+
+
     public EvasionGenerator(Board _board)
     {
         board = _board;
@@ -30,8 +43,7 @@ public class EvasionGenerator
 
             if (checkInfo.data == 1) //Queen check
             {
-                PieceList queenList = board.GetPieceList(Piece.Queen, board.opponentColorBit);
-                attackerBoard = PrecomputedData.queenAttackBitboards[friendlyKingSquare] & queenList.bitboard;
+                attackerBoard = PrecomputedData.queenAttackBitboards[friendlyKingSquare] & enemyQueens.bitboard;
 
                 if (BitBoardHelper.BitCount(attackerBoard) == 1) attackerSquare = BitBoardHelper.GetFirstBit(attackerBoard);
                 else
@@ -42,14 +54,13 @@ public class EvasionGenerator
                     {
                         attackerSquare = BitBoardHelper.PopFirstBit(ref board);
 
-                        if (BitBoardHelper.ContainsSquare(queenList.attackMaps[queenList.indexMap[attackerSquare]], friendlyKingSquare)) break; //Found actual attacker
+                        if (BitBoardHelper.ContainsSquare(enemyQueens.attackMaps[enemyQueens.indexMap[attackerSquare]], friendlyKingSquare)) break; //Found actual attacker
                     }
                 }
             }
             else if (checkInfo.data == 2) //Rook check
             {
-                PieceList rookList = board.GetPieceList(Piece.Rook, board.opponentColorBit);
-                attackerBoard = PrecomputedData.rookAttackBitboards[friendlyKingSquare] & rookList.bitboard;
+                attackerBoard = PrecomputedData.rookAttackBitboards[friendlyKingSquare] & enemyRooks.bitboard;
 
                 if (BitBoardHelper.BitCount(attackerBoard) == 1) attackerSquare = BitBoardHelper.GetFirstBit(attackerBoard);
                 else
@@ -60,14 +71,13 @@ public class EvasionGenerator
                     {
                         attackerSquare = BitBoardHelper.PopFirstBit(ref board);
 
-                        if (BitBoardHelper.ContainsSquare(rookList.attackMaps[rookList.indexMap[attackerSquare]], friendlyKingSquare)) break; //Found actual attacker
+                        if (BitBoardHelper.ContainsSquare(enemyRooks.attackMaps[enemyRooks.indexMap[attackerSquare]], friendlyKingSquare)) break; //Found actual attacker
                     }
                 }
             }
             else //Bishop check
             {
-                PieceList bishopList = board.GetPieceList(Piece.Bishop, board.opponentColorBit);
-                attackerBoard = PrecomputedData.bishopAttackBitboards[friendlyKingSquare] & bishopList.bitboard;
+                attackerBoard = PrecomputedData.bishopAttackBitboards[friendlyKingSquare] & enemyBishops.bitboard;
 
                 if (BitBoardHelper.BitCount(attackerBoard) == 1) attackerSquare = BitBoardHelper.GetFirstBit(attackerBoard);
                 else
@@ -78,7 +88,7 @@ public class EvasionGenerator
                     {
                         attackerSquare = BitBoardHelper.PopFirstBit(ref board);
 
-                        if (BitBoardHelper.ContainsSquare(bishopList.attackMaps[bishopList.indexMap[attackerSquare]], friendlyKingSquare)) break; //Found actual attacker
+                        if (BitBoardHelper.ContainsSquare(enemyBishops.attackMaps[enemyBishops.indexMap[attackerSquare]], friendlyKingSquare)) break; //Found actual attacker
                     }
                 }
             }
@@ -108,7 +118,7 @@ public class EvasionGenerator
                 int epAttackRank = board.friendlyColor == Piece.White ? 5 : 2;
                 int epAttackSquare = epFile != -1 ? BoardHelper.CoordToIndex(epFile, epAttackRank) : -1;
 
-                ulong pawnCaptureCandidates = PrecomputedData.pawnAttackBitboards[epAttackSquare + board.opponentColorBit * 64] & board.GetPieceList(Piece.Pawn, board.friendlyColorBit).bitboard;
+                ulong pawnCaptureCandidates = PrecomputedData.pawnAttackBitboards[epAttackSquare + board.opponentColorBit * 64] & friendlyPawns.bitboard;
 
                 while (pawnCaptureCandidates != 0)
                 {
@@ -125,7 +135,20 @@ public class EvasionGenerator
     {
         moveCount = 0;
 
-        friendlyPieces = board.GetPieceList(Piece.Pawn, board.friendlyColorBit).bitboard | board.GetPieceList(Piece.Knight, board.friendlyColorBit).bitboard | board.GetPieceList(Piece.Bishop, board.friendlyColorBit).bitboard | board.GetPieceList(Piece.Rook, board.friendlyColorBit).bitboard | board.GetPieceList(Piece.Queen, board.friendlyColorBit).bitboard;
+
+        enemyQueens = board.GetPieceList(Piece.Queen, board.opponentColorBit);
+        enemyRooks = board.GetPieceList(Piece.Rook, board.opponentColorBit);
+        enemyBishops = board.GetPieceList(Piece.Bishop, board.opponentColorBit);
+        enemyKnights = board.GetPieceList(Piece.Knight, board.opponentColorBit);
+        enemyPawns = board.GetPieceList(Piece.Pawn, board.opponentColorBit);
+        friendlyQueens = board.GetPieceList(Piece.Queen, board.friendlyColorBit);
+        friendlyRooks = board.GetPieceList(Piece.Rook, board.friendlyColorBit);
+        friendlyBishops = board.GetPieceList(Piece.Bishop, board.friendlyColorBit);
+        friendlyKnights = board.GetPieceList(Piece.Knight, board.friendlyColorBit);
+        friendlyPawns = board.GetPieceList(Piece.Pawn, board.friendlyColorBit);
+
+
+        friendlyPieces = friendlyPawns.bitboard | friendlyKnights.bitboard | friendlyBishops.bitboard | friendlyRooks.bitboard | friendlyQueens.bitboard;
 
         if (board.colorToMove == Piece.White)
         {
@@ -143,20 +166,20 @@ public class EvasionGenerator
     {
         ulong moveBoard = PrecomputedData.kingAttackBitboards[friendlyKingSquare] & (~friendlyPieces);
 
-        ulong opponentSlidingAttackMap = board.GetPieceList(Piece.Bishop, board.opponentColorBit).attackMap | board.GetPieceList(Piece.Rook, board.opponentColorBit).attackMap | board.GetPieceList(Piece.Queen, board.opponentColorBit).attackMap;
+        ulong opponentSlidingAttackMap = enemyBishops.attackMap | enemyRooks.attackMap | enemyQueens.attackMap;
 
         moveBoard &= ~opponentSlidingAttackMap;
         moveBoard &= ~PrecomputedData.kingAttackBitboards[enemyKingSquare];
 
-        ulong enemyKnights = board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard;
-        ulong enemyPawns = board.GetPieceList(Piece.Pawn, board.opponentColorBit).bitboard;
+        ulong enemyKnightBoard = enemyKnights.bitboard;
+        ulong enemyPawnBoard = enemyPawns.bitboard;
 
         while (moveBoard != 0)
         {
             int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
 
-            if ((PrecomputedData.knightAttackBitboards[targetSquare] & enemyKnights) != 0) continue;
-            else if ((PrecomputedData.pawnAttackBitboards[targetSquare + board.friendlyColorBit * 64] & enemyPawns) != 0) continue;
+            if ((PrecomputedData.knightAttackBitboards[targetSquare] & enemyKnightBoard) != 0) continue;
+            else if ((PrecomputedData.pawnAttackBitboards[targetSquare + board.friendlyColorBit * 64] & enemyPawnBoard) != 0) continue;
 
             moves[moveCount++] = new Move(friendlyKingSquare, targetSquare);
         }
@@ -167,15 +190,15 @@ public class EvasionGenerator
         switch (checkInfo.data)
         {
             case 1: //Queen check so second attacker can be a rook, knight or bishop
-                if ((board.GetPieceList(Piece.Rook, board.opponentColorBit).attackMap & 1UL << friendlyKingSquare) == 0 && (board.GetPieceList(Piece.Bishop, board.opponentColorBit).attackMap & 1UL << friendlyKingSquare) == 0 && (PrecomputedData.knightAttackBitboards[friendlyKingSquare] & board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard) == 0) return false;
+                if ((enemyRooks.attackMap & 1UL << friendlyKingSquare) == 0 && (enemyBishops.attackMap & 1UL << friendlyKingSquare) == 0 && (PrecomputedData.knightAttackBitboards[friendlyKingSquare] & enemyKnights.bitboard) == 0) return false;
 
                 return true;
             case 2:  //Rook check so second attacker can only be a knight or bishop
-                if ((board.GetPieceList(Piece.Bishop, board.opponentColorBit).attackMap & 1UL << friendlyKingSquare) == 0 && (PrecomputedData.knightAttackBitboards[friendlyKingSquare] & board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard) == 0) return false;
+                if ((enemyBishops.attackMap & 1UL << friendlyKingSquare) == 0 && (PrecomputedData.knightAttackBitboards[friendlyKingSquare] & enemyKnights.bitboard) == 0) return false;
 
                 return true;
             case 3: //Bishop check so second attacker can only be a knight
-                if ((PrecomputedData.knightAttackBitboards[friendlyKingSquare] & board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard) == 0) return false;
+                if ((PrecomputedData.knightAttackBitboards[friendlyKingSquare] & enemyKnights.bitboard) == 0) return false;
 
                 return true;
         }
@@ -187,43 +210,12 @@ public class EvasionGenerator
     {
         ulong combinedBoard = blockBoard | attackerBoard;
 
-        PieceList queenList = board.GetPieceList(Piece.Queen, board.friendlyColorBit);
 
         //TODO: Try testing if pieceList.attackMap & targets == 0 - could easily skip it if true (which it will be most of the time i imagine)
-        for (int i = 0; i < queenList.Count; i++)
+        for (int i = 0; i < friendlyQueens.Count; i++)
         {
-            int startSquare = queenList[i];
-            ulong moveBoard = queenList.attackMaps[i] & combinedBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
-
-            while (moveBoard != 0)
-            {
-                int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
-                moves[moveCount++] = new Move(startSquare, targetSquare);
-            }
-        }
-
-        PieceList rookList = board.GetPieceList(Piece.Rook, board.friendlyColorBit);
-
-        //TODO: Try testing if pieceList.attackMap & targets == 0 - could easily skip it if true (which it will be most of the time i imagine)
-        for (int i = 0; i < rookList.Count; i++)
-        {
-            int startSquare = rookList[i];
-            ulong moveBoard = rookList.attackMaps[i] & combinedBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
-
-            while (moveBoard != 0)
-            {
-                int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
-                moves[moveCount++] = new Move(startSquare, targetSquare);
-            }
-        }
-
-        PieceList bishopList = board.GetPieceList(Piece.Bishop, board.friendlyColorBit);
-
-        //TODO: Try testing if pieceList.attackMap & targets == 0 - could easily skip it if true (which it will be most of the time i imagine)
-        for (int i = 0; i < bishopList.Count; i++)
-        {
-            int startSquare = bishopList[i];
-            ulong moveBoard = bishopList.attackMaps[i] & combinedBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
+            int startSquare = friendlyQueens[i];
+            ulong moveBoard = friendlyQueens.attackMaps[i] & combinedBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
 
             while (moveBoard != 0)
             {
@@ -233,11 +225,38 @@ public class EvasionGenerator
         }
 
 
-        PieceList knightList = board.GetPieceList(Piece.Knight, board.friendlyColorBit);
-
-        for (int i = 0; i < knightList.Count; i++)
+        //TODO: Try testing if pieceList.attackMap & targets == 0 - could easily skip it if true (which it will be most of the time i imagine)
+        for (int i = 0; i < friendlyRooks.Count; i++)
         {
-            int startSquare = knightList[i];
+            int startSquare = friendlyRooks[i];
+            ulong moveBoard = friendlyRooks.attackMaps[i] & combinedBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
+
+            while (moveBoard != 0)
+            {
+                int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
+                moves[moveCount++] = new Move(startSquare, targetSquare);
+            }
+        }
+
+
+        //TODO: Try testing if pieceList.attackMap & targets == 0 - could easily skip it if true (which it will be most of the time i imagine)
+        for (int i = 0; i < friendlyBishops.Count; i++)
+        {
+            int startSquare = friendlyBishops[i];
+            ulong moveBoard = friendlyBishops.attackMaps[i] & combinedBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
+
+            while (moveBoard != 0)
+            {
+                int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
+                moves[moveCount++] = new Move(startSquare, targetSquare);
+            }
+        }
+
+
+
+        for (int i = 0; i < friendlyKnights.Count; i++)
+        {
+            int startSquare = friendlyKnights[i];
             ulong moveBoard = PrecomputedData.knightAttackBitboards[startSquare] & combinedBoard;
 
             while (moveBoard != 0)
@@ -249,14 +268,13 @@ public class EvasionGenerator
 
 
         //TODO: Could exclude this completely if vertical check, bc pawns can't block
-        PieceList pawnList = board.GetPieceList(Piece.Pawn, board.friendlyColorBit);
         int upDirection = board.friendlyColor == Piece.White ? PrecomputedData.Up : PrecomputedData.Down;
         int promotionRank = board.friendlyColor == Piece.White ? 6 : 1;
         int startRank = board.friendlyColor == Piece.White ? 1 : 6;
 
-        for (int i = 0; i < pawnList.Count; i++)
+        for (int i = 0; i < friendlyPawns.Count; i++)
         {
-            int startSquare = pawnList[i];
+            int startSquare = friendlyPawns[i];
             int rank = BoardHelper.IndexToRank(startSquare);
             int targetSquare = startSquare + upDirection;
 
@@ -276,7 +294,7 @@ public class EvasionGenerator
             }
         }
 
-        ulong pawnCaptureCandidates = PrecomputedData.pawnAttackBitboards[attackerSquare + board.opponentColorBit * 64] & pawnList.bitboard;
+        ulong pawnCaptureCandidates = PrecomputedData.pawnAttackBitboards[attackerSquare + board.opponentColorBit * 64] & friendlyPawns.bitboard;
         bool promotionCapture = BoardHelper.IndexToRank(attackerSquare) == board.opponentColorBit * 7;
 
         while (pawnCaptureCandidates != 0)
@@ -292,43 +310,11 @@ public class EvasionGenerator
         ulong targetBoard = 1UL << target;
 
 
-        PieceList queenList = board.GetPieceList(Piece.Queen, board.friendlyColorBit);
-
         //TODO: Try testing if pieceList.attackMap & targets == 0 - could easily skip it if true (which it will be most of the time i imagine)
-        for (int i = 0; i < queenList.Count; i++)
+        for (int i = 0; i < friendlyQueens.Count; i++)
         {
-            int startSquare = queenList[i];
-            ulong moveBoard = queenList.attackMaps[i] & targetBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
-
-            while (moveBoard != 0)
-            {
-                int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
-                moves[moveCount++] = new Move(startSquare, targetSquare);
-            }
-        }
-
-        PieceList rookList = board.GetPieceList(Piece.Rook, board.friendlyColorBit);
-
-        //TODO: Try testing if pieceList.attackMap & targets == 0 - could easily skip it if true (which it will be most of the time i imagine)
-        for (int i = 0; i < rookList.Count; i++)
-        {
-            int startSquare = rookList[i];
-            ulong moveBoard = rookList.attackMaps[i] & targetBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
-
-            while (moveBoard != 0)
-            {
-                int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
-                moves[moveCount++] = new Move(startSquare, targetSquare);
-            }
-        }
-
-        PieceList bishopList = board.GetPieceList(Piece.Bishop, board.friendlyColorBit);
-
-        //TODO: Try testing if pieceList.attackMap & targets == 0 - could easily skip it if true (which it will be most of the time i imagine)
-        for (int i = 0; i < bishopList.Count; i++)
-        {
-            int startSquare = bishopList[i];
-            ulong moveBoard = bishopList.attackMaps[i] & targetBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
+            int startSquare = friendlyQueens[i];
+            ulong moveBoard = friendlyQueens.attackMaps[i] & targetBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
 
             while (moveBoard != 0)
             {
@@ -338,7 +324,35 @@ public class EvasionGenerator
         }
 
 
-        ulong knightCaptureCandidates = PrecomputedData.knightAttackBitboards[target] & board.GetPieceList(Piece.Knight, board.friendlyColorBit).bitboard;
+        //TODO: Try testing if pieceList.attackMap & targets == 0 - could easily skip it if true (which it will be most of the time i imagine)
+        for (int i = 0; i < friendlyRooks.Count; i++)
+        {
+            int startSquare = friendlyRooks[i];
+            ulong moveBoard = friendlyRooks.attackMaps[i] & targetBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
+
+            while (moveBoard != 0)
+            {
+                int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
+                moves[moveCount++] = new Move(startSquare, targetSquare);
+            }
+        }
+
+
+        //TODO: Try testing if pieceList.attackMap & targets == 0 - could easily skip it if true (which it will be most of the time i imagine)
+        for (int i = 0; i < friendlyBishops.Count; i++)
+        {
+            int startSquare = friendlyBishops[i];
+            ulong moveBoard = friendlyBishops.attackMaps[i] & targetBoard; //Would normally do & ~friendlyPieces, but targets would never contain a friendly piece, so doesn't matter
+
+            while (moveBoard != 0)
+            {
+                int targetSquare = BitBoardHelper.PopFirstBit(ref moveBoard);
+                moves[moveCount++] = new Move(startSquare, targetSquare);
+            }
+        }
+
+
+        ulong knightCaptureCandidates = PrecomputedData.knightAttackBitboards[target] & friendlyKnights.bitboard;
         while (knightCaptureCandidates != 0)
         {
             int startSquare = BitBoardHelper.PopFirstBit(ref knightCaptureCandidates);
@@ -346,7 +360,7 @@ public class EvasionGenerator
         }
 
 
-        ulong pawnCaptureCandidates = PrecomputedData.pawnAttackBitboards[target + board.opponentColorBit * 64] & board.GetPieceList(Piece.Pawn, board.friendlyColorBit).bitboard;
+        ulong pawnCaptureCandidates = PrecomputedData.pawnAttackBitboards[target + board.opponentColorBit * 64] & friendlyPawns.bitboard;
         bool promotionCapture = BoardHelper.IndexToRank(target) == board.opponentColorBit * 7;
 
         while (pawnCaptureCandidates != 0)
