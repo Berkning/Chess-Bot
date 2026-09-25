@@ -15,19 +15,19 @@ public static class Perft
         MoveGenerator.promotionMode = MoveGenerator.PromotionMode.All; //Set the promotion mode to all to ensure we get all possible moves
 
 
-        CheckType positionCheckType = board.GetCheckType();
+        CheckInfo positionCheckInfo = board.GetCheckType();
 
-        Span<Move> moves = stackalloc Move[positionCheckType.NoCheck() ? 256 : 64];
+        Span<Move> moves = stackalloc Move[positionCheckInfo.NoCheck() ? 256 : 64];
 
         int moveCountInCurrentPosition;
 
-        if (positionCheckType.NoCheck())
+        if (positionCheckInfo.NoCheck())
         {
             moveCountInCurrentPosition = moveGenerator.GenerateMoves(ref moves);
         }
         else
         {
-            moveCountInCurrentPosition = moveGenerator.GenerateEvasions(ref moves, positionCheckType);
+            moveCountInCurrentPosition = moveGenerator.GenerateEvasions(ref moves, positionCheckInfo);
         }
 
 
@@ -109,9 +109,20 @@ public static class Perft
 
         MoveGenerator moveGenerator = new MoveGenerator(board);
 
-        Span<Move> moves = stackalloc Move[256];
+        CheckInfo positionCheckInfo = board.GetCheckType();
 
-        int moveCount = moveGenerator.GenerateMoves(ref moves);
+        Span<Move> moves = stackalloc Move[positionCheckInfo.NoCheck() ? 256 : 64];
+
+        int moveCount;
+
+        if (positionCheckInfo.NoCheck())
+        {
+            moveCount = moveGenerator.GenerateMoves(ref moves);
+        }
+        else
+        {
+            moveCount = moveGenerator.GenerateEvasions(ref moves, positionCheckInfo);
+        }
 
         //if (depth == 1) return moveCount; No bulk-counting bc of pseudo-legal move-gen :(
 

@@ -269,19 +269,19 @@ public class Search
         }
 
 
-        CheckType positionCheckType = board.GetCheckType();
+        CheckInfo positionCheckInfo = board.GetCheckType();
 
-        Span<Move> moves = stackalloc Move[positionCheckType.NoCheck() ? 256 : 64]; //TODO: Can be reduced to 218 and 42
+        Span<Move> moves = stackalloc Move[positionCheckInfo.NoCheck() ? 256 : 64]; //TODO: Can be reduced to 218 and 42
         int moveCount = 0;
 
 
-        if (positionCheckType.NoCheck())
+        if (positionCheckInfo.NoCheck())
         {
             moveCount = moveGenerator.GenerateMoves(ref moves);
         }
         else
         {
-            moveCount = moveGenerator.GenerateEvasions(ref moves, positionCheckType);
+            moveCount = moveGenerator.GenerateEvasions(ref moves, positionCheckInfo);
 
             if (moveCount == 0) return -(ImmediateMateScore - plyFromRoot); //No evasions from check => checkmate
         }
@@ -300,7 +300,7 @@ public class Search
 
 
         //Null-Move pruning
-        if (depth > 3 && positionCheckType.NoCheck())
+        if (depth > 3 && positionCheckInfo.NoCheck())
         {
             if (evaluator.GetRawPhase(board) < 24) // if still reasonably far from being in the endgame
             {
@@ -329,22 +329,14 @@ public class Search
 
         for (int i = 0; i < moveCount; i++)
         {
-            //Move move = moves[i];
-            if (positionCheckType.NoCheck())
-            {
-                if (!board.MakeIfLegal(moves[i])) continue;
-            }
-            else
-            {
-                board.MakeMove(moves[i], true); //We can always assume all moves generated in a checked position are legal, bc of our evasion gen
-            }
+            if (!board.MakeIfLegal(moves[i])) continue;
             legalMoveCount++;
 
 
             uint extensions = 0;
             if (numExtensions < MaxExtensions)
             {
-                if (depth < 2 && positionCheckType.NoCheck()) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
+                if (depth < 2 && positionCheckInfo.NoCheck()) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
 
                 //TODO: try combining these - as in increment extensions, allowing them to stack (i imagine this will just be slightly worse bc rare but idk)
 
@@ -416,7 +408,12 @@ public class Search
         if (plyFromRoot > 0) repetitionTable.PopNoRtn();
 
 
-        if (legalMoveCount == 0) return 0; //Stalemate
+        if (legalMoveCount == 0)
+        {
+            if (!positionCheckInfo.NoCheck()) return -(ImmediateMateScore - plyFromRoot);
+
+            return 0; //Stalemate
+        }
 
 
         transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);

@@ -672,7 +672,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     }
 
     //0 == no check,    1 == queen+ check,    2 == rook+ check,   3 == bishop+ check,   4 == knight check,    5 == pawn check    (+ means king could be in double check)
-    public CheckType GetCheckType()
+    public CheckInfo GetCheckType()
     {
         int kingSquare;
         int pawnIndexOffset;
@@ -693,17 +693,24 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
 
 
-        if ((GetPieceList(Piece.Queen, opponentColorBit).attackMap & bitBoard) != 0) return new CheckType(1);
+        if ((GetPieceList(Piece.Queen, opponentColorBit).attackMap & bitBoard) != 0) return new CheckInfo(1, byte.MaxValue);
 
-        if ((GetPieceList(Piece.Rook, opponentColorBit).attackMap & bitBoard) != 0) return new CheckType(2);
+        if ((GetPieceList(Piece.Rook, opponentColorBit).attackMap & bitBoard) != 0) return new CheckInfo(2, byte.MaxValue);
 
-        if ((GetPieceList(Piece.Bishop, opponentColorBit).attackMap & bitBoard) != 0) return new CheckType(3);
+        if ((GetPieceList(Piece.Bishop, opponentColorBit).attackMap & bitBoard) != 0) return new CheckInfo(3, byte.MaxValue);
 
-        if ((GetPieceList(Piece.Knight, opponentColorBit).bitboard & PrecomputedData.knightAttackBitboards[kingSquare]) != 0) return new CheckType(4);
 
-        if ((GetPieceList(Piece.Pawn, opponentColorBit).bitboard & PrecomputedData.pawnAttackBitboards[kingSquare + pawnIndexOffset]) != 0) return new CheckType(5);
+        ulong attackBoard = GetPieceList(Piece.Knight, opponentColorBit).bitboard & PrecomputedData.knightAttackBitboards[kingSquare];
 
-        return new CheckType(0);
+        if (attackBoard != 0) return new CheckInfo(4, (byte)BitBoardHelper.GetFirstBit(attackBoard));
+
+
+        attackBoard = GetPieceList(Piece.Pawn, opponentColorBit).bitboard & PrecomputedData.pawnAttackBitboards[kingSquare + pawnIndexOffset];
+
+        if (attackBoard != 0) return new CheckInfo(5, (byte)BitBoardHelper.GetFirstBit(attackBoard));
+
+
+        return new CheckInfo(0, byte.MaxValue);
     }
 
     private bool IsAttacked(int square, int attackerColorBit)
@@ -719,7 +726,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         if ((GetPieceList(Piece.Knight, attackerColorBit).bitboard & PrecomputedData.knightAttackBitboards[square]) != 0) return true;
 
-        int pawnIndexOffset = attackerColorBit == 0 ? 64 : 0;
+        int pawnIndexOffset = attackerColorBit == 0 ? 64 : 0; //TODO: Can just use attackerColorBit*64 instead
 
         if ((GetPieceList(Piece.Pawn, attackerColorBit).bitboard & PrecomputedData.pawnAttackBitboards[square + pawnIndexOffset]) != 0) return true;
 
@@ -862,13 +869,15 @@ public class Piece
 
 
 //0 == no check,    1 == queen+ check,    2 == rook+ check,   3 == bishop+ check,   4 == knight check,    5 == pawn check    (+ means king could be in double check)
-public struct CheckType
+public struct CheckInfo
 {
-    private byte data;
+    public byte data;
+    public byte attackerSquare;
 
-    public CheckType(byte type)
+    public CheckInfo(byte type, byte attackingPieceSquare)
     {
         data = type;
+        attackerSquare = attackingPieceSquare;
     }
 
     public bool NoCheck()
