@@ -22,9 +22,14 @@ public static class PrecomputedData
     public static readonly ulong[] castleMasks; //0 wShort, 1 bShort, 2 wLong, 3 bLong, 4 wLongExtraSquare, 5 bLongExtraSquare
 
     public static readonly int[] directionLookup = new int[127];
-    public static readonly ulong[][] directionalMasks = new ulong[64][]; //King Square , Piece Square
+    public static readonly ulong[][] directionalMasks = new ulong[64][]; //King Square , Piece Square  //Startss one step in front of kingSquare and goes through pieceSquare to board edge
+    public static readonly ulong[][] blockMasks = new ulong[64][]; //King Square , Piece Square //Starts one step in front of kingSquare and goes to pieceSquare without including it
 
     public static readonly int[][] kingDistanceLookup = new int[64][];
+
+    public static readonly ulong[] queenAttackBitboards = new ulong[64];
+    public static readonly ulong[] rookAttackBitboards = new ulong[64];
+    public static readonly ulong[] bishopAttackBitboards = new ulong[64];
 
 
     //Mopup
@@ -161,6 +166,40 @@ public static class PrecomputedData
 
 
 
+                //Sliding attack masks
+                ulong bishopAttackBitboard = 0;
+                ulong rookAttackBitboard = 0;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    int direction = DirectionOffsets[i];
+
+                    for (int n = 0; n < NumSquaresToEdge[squareIndex][i]; n++)
+                    {
+                        int targetSquare = squareIndex + direction * (n + 1);
+
+                        rookAttackBitboard |= 1UL << targetSquare;
+                    }
+                }
+
+                for (int i = 4; i < 8; i++)
+                {
+                    int direction = DirectionOffsets[i];
+
+                    for (int n = 0; n < NumSquaresToEdge[squareIndex][i]; n++)
+                    {
+                        int targetSquare = squareIndex + direction * (n + 1);
+
+                        bishopAttackBitboard |= 1UL << targetSquare;
+                    }
+                }
+
+                bishopAttackBitboards[squareIndex] = bishopAttackBitboard;
+                rookAttackBitboards[squareIndex] = rookAttackBitboard;
+                queenAttackBitboards[squareIndex] = bishopAttackBitboard | rookAttackBitboard;
+
+
+
 
 
 
@@ -191,12 +230,15 @@ public static class PrecomputedData
                 //Direction Mask Lookup
                 //TODOnt: Could theoretically be optimized since we only need a direction, and not the actual square the piece is on
                 directionalMasks[squareIndex] = new ulong[64]; //King is on squareIndex
+                blockMasks[squareIndex] = new ulong[64];
+
                 for (int pieceSquare = 0; pieceSquare < 64; pieceSquare++)
                 {
                     //if (squareIndex == pieceSquare) continue; //If king- and pieceSquare are the same we skip this square
 
                     //int direction = directionLookup[pieceSquare - squareIndex + 63]; //59-60+63 = 62     Can't fucking do this for some reason so have to do it manually ig
                     ulong mask = 0;
+                    ulong blockMask = 0;
                     int cap = 7;
 
 
@@ -243,16 +285,32 @@ public static class PrecomputedData
                     //if (direction == Left || direction == UpLeft || direction == DownLeft) cap = BoardHelper.IndexToFile(squareIndex);
                     //else if (direction == Right || direction == UpRight || direction == DownRight) cap = 7 - BoardHelper.IndexToFile(squareIndex);
 
+                    bool passedPiece = false;
 
-                    for (int i = 1; i <= cap; i++) //Start at king square and move in the direction of the piece
+                    for (int i = 1; i <= cap; i++) //Start one step in front of king square and move in the direction of the piece
                     {
                         int targetSquare = squareIndex + direction * i;
-                        if (targetSquare < 64 && targetSquare >= 0) mask = BitBoardHelper.AddSquare(mask, targetSquare);
+                        if (targetSquare < 64 && targetSquare >= 0)
+                        {
+                            mask = BitBoardHelper.AddSquare(mask, targetSquare);
+
+                            if (passedPiece) continue;
+                            else if (targetSquare == pieceSquare)
+                            {
+                                passedPiece = true;
+                                continue;
+                            }
+                            else
+                            {
+                                blockMask = BitBoardHelper.AddSquare(blockMask, targetSquare);
+                            }
+                        }
 
                         //if (targetSquare == pieceSquare) break;
                     }
 
                     directionalMasks[squareIndex][pieceSquare] = mask;
+                    blockMasks[squareIndex][pieceSquare] = blockMask;
                 }
 
 

@@ -7,7 +7,7 @@ public class PieceList
     public int[] occupiedSquares; //Long as count
     public ulong[] attackMaps; //Semi-legal attack maps //Long as count //ONLY used for knights, bishops, rooks and queens //Overlaps both friendly and enemy pieces as if they were all captureable
 
-    private int[] indexMap; //64 length
+    public int[] indexMap; //64 length
     private int numPieces;
 
     public ulong bitboard;
