@@ -239,7 +239,7 @@ public static class EngineDiagnostics
 
         if (moveCount == 0) return true; //Checkmate/Stalemate
 
-        bool checkedPosition = board.GetCheckType().NoCheck();
+        bool checkedPosition = !board.GetCheckType().NoCheck();
 
         for (int i = 0; i < Math.Min(movesPerPos, moveCount); i++)
         {

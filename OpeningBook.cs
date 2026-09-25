@@ -12,7 +12,6 @@ public static class OpeningBook
 
     public static Move GetMove(ulong zobrist) //TODO: http://hgm.nubati.net/book_format.html  "The entries are ordered according to key. Lowest key first. " - Could speed up search an insane amount - doesn't seem to be the case with current book
     {
-        return Move.nullMove;
         int startIndex = random.Next() % bookEntries.Length; //Random starting index to search from
         int direction = random.Next() % 2 == 1 ? -1 : 1; //Randomly picks whether to search up or down from starting index, based on whether the random number turns out even or odd
 
@@ -112,7 +111,6 @@ public static class OpeningBook
 
     public static void Initialize()
     {
-        return;
         if (isInitialized) return;
 
         byte[] book = File.ReadAllBytes(bookPath);

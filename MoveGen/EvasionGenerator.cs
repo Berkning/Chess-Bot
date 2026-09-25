@@ -272,7 +272,7 @@ public class EvasionGenerator
             {
                 targetSquare += upDirection;
 
-                if (BitBoardHelper.ContainsSquare(blockBoard, targetSquare)) moves[moveCount++] = new Move(startSquare, targetSquare);
+                if (BitBoardHelper.ContainsSquare(blockBoard, targetSquare)) moves[moveCount++] = new Move(startSquare, targetSquare, Move.Flag.PawnTwoForward);
             }
         }
 
