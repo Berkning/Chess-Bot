@@ -329,8 +329,7 @@ public class Search
 
         for (int i = 0; i < moveCount; i++)
         {
-            if (!positionCheckInfo.NoCheck() && Piece.Type(board.Squares[moves[i].startSquare]) == Piece.King) board.MakeMove(moves[i], true);
-            else if (!board.MakeIfLegal(moves[i])) continue;
+            if (!board.MakeIfLegal(moves[i])) continue;
             legalMoveCount++;
 
 

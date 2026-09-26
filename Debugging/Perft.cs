@@ -38,8 +38,7 @@ public static class Perft
         {
             ulong before = board.currentGameState;
 
-            if (!positionCheckInfo.NoCheck() && Piece.Type(board.Squares[moves[i].startSquare]) == Piece.King) board.MakeMove(moves[i], true);
-            else if (!board.MakeIfLegal(moves[i])) continue;
+            if (!board.MakeIfLegal(moves[i])) continue;
             //Debug.Log("Trying to play " + BoardHelper.NameMove(move));
             long result = RunSpecifiedDepth(depth - 1, board);
             Console.WriteLine(BoardHelper.GetMoveNameUCI(moves[i]) + ": " + result);
@@ -132,8 +131,7 @@ public static class Perft
 
         for (int i = 0; i < moveCount; i++)
         {
-            if (!positionCheckInfo.NoCheck() && Piece.Type(board.Squares[moves[i].startSquare]) == Piece.King) board.MakeMove(moves[i], true);
-            else if (!board.MakeIfLegal(moves[i])) continue;
+            if (!board.MakeIfLegal(moves[i])) continue;
 
             numPositions += RunSpecifiedDepth(depth - 1, board);
             board.UnMakeMove(moves[i], true);
