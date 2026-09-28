@@ -606,32 +606,139 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
     public bool MakeIfLegal(Move move) //TODO: Try just using MakeMove with PV and TT moves, as we can assume these are legal. Slightly dangerous but when we go back to 64bit keys should be fine ig
     {
-        if (Piece.Type(Squares[move.startSquare]) != Piece.King)
+        if (Piece.Type(Squares[move.startSquare]) != Piece.King) //We only have to worry about discovered checks here, and not the king being in check already (bc of evasion gen)
         {
-            int kingSquare;
-            int attackerColorBit;
+            ulong kingBoard;
+
+            ulong changeBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(0UL, move.startSquare), move.targetSquare);
 
             if (colorToMove == Piece.White)
             {
-                kingSquare = whiteKingSquare;
-                attackerColorBit = 1;
+                kingBoard = 1UL << whiteKingSquare;
+
+                if (move.flag == Move.Flag.EnPassantCapture) changeBitBoard = BitBoardHelper.AddSquare(changeBitBoard, move.targetSquare - PrecomputedData.Down);
+
+                allPieceBoard ^= changeBitBoard;
+
+                int i;
+                bool illegal = false;
+
+
+                for (i = 7; i <= 9; i++) //Black pieces that need attackmaps updated
+                {
+                    if ((allPieceList[i].attackMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
+                    {
+                        for (int j = 0; j < allPieceList[i].Count; j++)
+                        {
+                            if ((allPieceList[i].attackMaps[j] & changeBitBoard) != 0UL) //If move intersects piece at this index specifically
+                            {
+                                allPieceList[i].UpdateAttackMap(j);
+
+                                if ((allPieceList[i].attackMaps[j] & kingBoard) != 0)
+                                {
+                                    illegal = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        allPieceList[i].RecreateCombinedAttackMap();
+
+                        if (illegal) break;
+                    }
+                }
+
+                //Revert changes
+                allPieceBoard ^= changeBitBoard;
+
+                //TODO: We could, i guess, in theory avoid reverting the attack maps if the move is legal, as we are going to be making these changes anyway, but don't currently see a clean way to do it
+                for (int k = 7; k < i; k++)
+                {
+                    if ((allPieceList[k].attackMap & changeBitBoard) != 0UL)
+                    {
+                        for (int j = 0; j < allPieceList[k].Count; j++)
+                        {
+                            if ((allPieceList[k].attackMaps[j] & changeBitBoard) != 0UL)
+                            {
+                                allPieceList[k].UpdateAttackMap(j);
+                            }
+                        }
+
+                        allPieceList[k].RecreateCombinedAttackMap();
+                    }
+                }
+
+                if (illegal) return false;
+                else
+                {
+                    MakeMove(move, true);
+                    return true;
+                }
             }
             else
             {
-                kingSquare = blackKingSquare;
-                attackerColorBit = 0;
+                kingBoard = 1UL << blackKingSquare;
+
+                if (move.flag == Move.Flag.EnPassantCapture) changeBitBoard = BitBoardHelper.AddSquare(changeBitBoard, move.targetSquare - PrecomputedData.Up);
+
+                allPieceBoard ^= changeBitBoard;
+
+                int i;
+                bool illegal = false;
+
+
+                for (i = 2; i <= 4; i++) //White pieces that need attackmaps updated
+                {
+                    if ((allPieceList[i].attackMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
+                    {
+                        for (int j = 0; j < allPieceList[i].Count; j++)
+                        {
+                            if ((allPieceList[i].attackMaps[j] & changeBitBoard) != 0UL) //If move intersects piece at this index specifically
+                            {
+                                allPieceList[i].UpdateAttackMap(j);
+
+                                if ((allPieceList[i].attackMaps[j] & kingBoard) != 0)
+                                {
+                                    illegal = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        allPieceList[i].RecreateCombinedAttackMap();
+
+                        if (illegal) break;
+                    }
+                }
+
+
+                //Revert changes
+                allPieceBoard ^= changeBitBoard;
+
+                //TODO: We could, i guess, in theory avoid reverting the attack maps if the move is legal, as we are going to be making these changes anyway, but don't currently see a clean way to do it
+                for (int k = 2; k < i; k++)
+                {
+                    if ((allPieceList[k].attackMap & changeBitBoard) != 0UL)
+                    {
+                        for (int j = 0; j < allPieceList[k].Count; j++)
+                        {
+                            if ((allPieceList[k].attackMaps[j] & changeBitBoard) != 0UL)
+                            {
+                                allPieceList[k].UpdateAttackMap(j);
+                            }
+                        }
+
+                        allPieceList[k].RecreateCombinedAttackMap();
+                    }
+                }
+
+                if (illegal) return false;
+                else
+                {
+                    MakeMove(move, true);
+                    return true;
+                }
             }
-
-
-            MakeMove(move, true);
-
-            if (IsAttacked(kingSquare, attackerColorBit))
-            {
-                UnMakeMove(move, true);
-                return false;
-            }
-
-            return true;
         }
         else if (move.flag == Move.Flag.Castling)
         {
