@@ -120,9 +120,21 @@ public static class EngineDiagnostics
     {
         bool passed = true;
 
-        Span<Move> moves = stackalloc Move[256];
+        CheckInfo positionCheckInfo = board.GetCheckType();
 
-        int moveCount = moveGenerator.GenerateMoves(ref moves);
+        Span<Move> moves = stackalloc Move[positionCheckInfo.NoCheck() ? 256 : 64];
+
+        int moveCount;
+
+        if (positionCheckInfo.NoCheck())
+        {
+            moveCount = moveGenerator.GenerateMoves(ref moves);
+        }
+        else
+        {
+            moveCount = moveGenerator.GenerateEvasions(ref moves, positionCheckInfo);
+        }
+
 
         for (int i = 0; i < Math.Min(movesPerPos, moveCount); i++)
         {
@@ -316,19 +328,25 @@ public static class EngineDiagnostics
 
     private struct BoardSnapshot
     {
-        private ulong zobrist;
-        private uint gameState;
-        private int[] squares;
-        private int colorToMove;
-        private int friendlyColor;
-        private int enemyColor;
-        private int whiteKingSquare;
-        private int blackKingSquare;
-        private ulong allPieceBoard;
+        private readonly ulong zobrist; //TODO: Also recalculate zobrist from scratch to make sure we are updating it correctly
+        private readonly uint gameState;
+        private readonly int[] squares;
+        private readonly int colorToMove;
+        private readonly int friendlyColor;
+        private readonly int enemyColor;
+        private readonly int whiteKingSquare;
+        private readonly int blackKingSquare;
+        private readonly ulong allPieceBoard;
 
-        private int opponentColorBit;
-        private int friendlyColorBit;
-        private int repetitionTableCount;
+        private readonly int opponentColorBit;
+        private readonly int friendlyColorBit;
+        private readonly int repetitionTableCount;
+
+
+        //PieceLists
+        private readonly (int, ulong)[] attackMaps; //Stores piece square and attack map //Indexed by PieceListIndex + PieceIndex * 8
+        private readonly ulong[] accumulatedAttackMaps;
+
 
         public bool Verify(Board board)
         {
@@ -455,6 +473,31 @@ public static class EngineDiagnostics
                 }
             }
 
+
+
+            for (int i = 0; i < board.allPieceList.Length; i++)
+            {
+                if (accumulatedAttackMaps[i] != board.allPieceList[i].attackMap)
+                {
+                    Console.WriteLine("Accumulated attack map in piecelist #" + i + " is corrupted. Expected: " + accumulatedAttackMaps[i] + " found: " + board.allPieceList[i].attackMap);
+                    success = false;
+                }
+
+
+                for (int j = 0; j < board.allPieceList[i].Count; j++)
+                {
+                    (int square, ulong attackMap) = attackMaps[i + j * 8];
+
+                    int index = board.allPieceList[i].indexMap[square];
+
+                    if (attackMap != board.allPieceList[i].attackMaps[index])
+                    {
+                        Console.WriteLine("Attack map in piecelist #" + i + " for piece on square " + square + " is corrupted. Expected: " + attackMap + " found: " + board.allPieceList[i].attackMaps[index]);
+                        success = false;
+                    }
+                }
+            }
+
             return success;
         }
 
@@ -472,6 +515,19 @@ public static class EngineDiagnostics
             friendlyColorBit = board.friendlyColorBit;
             repetitionTableCount = board.repetitionTable.Count;
             allPieceBoard = board.allPieceBoard;
+
+            accumulatedAttackMaps = new ulong[board.allPieceList.Length];
+            attackMaps = new (int, ulong)[board.allPieceList.Length * 10]; //Just assume there can be 10 of each piece bc easy and cheap
+
+            for (int i = 0; i < board.allPieceList.Length; i++)
+            {
+                accumulatedAttackMaps[i] = board.allPieceList[i].attackMap;
+
+                for (int j = 0; j < board.allPieceList[i].Count; j++)
+                {
+                    attackMaps[i + j * 8] = (board.allPieceList[i][j], board.allPieceList[i].attackMaps[j]);
+                }
+            }
         }
     }
 }

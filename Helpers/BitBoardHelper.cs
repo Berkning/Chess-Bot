@@ -62,7 +62,7 @@ public static class BitBoardHelper
         return z;
     }
 
-    // Get index of least significant set bit in given 64bit value. Also clears the bit to zero.
+    // Get index of least significant set bit in given 64bit value.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetFirstBit(ulong board)
     {
