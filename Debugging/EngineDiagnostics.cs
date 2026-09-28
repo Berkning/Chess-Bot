@@ -344,7 +344,7 @@ public static class EngineDiagnostics
 
 
         //PieceLists
-        private readonly (int, ulong)[] attackMaps; //Stores piece square and attack map //Indexed by PieceListIndex + PieceIndex * 8
+        private readonly (int, ulong)[][] attackMaps; //Stores piece square and attack map //Indexed by PieceListIndex + PieceIndex * 8
         private readonly ulong[] accumulatedAttackMaps;
 
 
@@ -486,7 +486,7 @@ public static class EngineDiagnostics
 
                 for (int j = 0; j < board.allPieceList[i].Count; j++)
                 {
-                    (int square, ulong attackMap) = attackMaps[i + j * 8];
+                    (int square, ulong attackMap) = attackMaps[i][j];
 
                     int index = board.allPieceList[i].indexMap[square];
 
@@ -517,15 +517,16 @@ public static class EngineDiagnostics
             allPieceBoard = board.allPieceBoard;
 
             accumulatedAttackMaps = new ulong[board.allPieceList.Length];
-            attackMaps = new (int, ulong)[board.allPieceList.Length * 10]; //Just assume there can be 10 of each piece bc easy and cheap
+            attackMaps = new (int, ulong)[board.allPieceList.Length][];
 
             for (int i = 0; i < board.allPieceList.Length; i++)
             {
                 accumulatedAttackMaps[i] = board.allPieceList[i].attackMap;
+                attackMaps[i] = new (int, ulong)[10]; //Just assume there can be 10 of each piece bc easy and cheap
 
                 for (int j = 0; j < board.allPieceList[i].Count; j++)
                 {
-                    attackMaps[i + j * 8] = (board.allPieceList[i][j], board.allPieceList[i].attackMaps[j]);
+                    attackMaps[i][j] = (board.allPieceList[i][j], board.allPieceList[i].attackMaps[j]);
                 }
             }
         }

@@ -630,6 +630,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
                     {
                         for (int j = 0; j < allPieceList[i].Count; j++)
                         {
+                            if (allPieceList[i][j] == move.targetSquare) continue; //Skip checking if this piece is still checking the king, if the move we are going to play captures the piece
+
                             ulong prevMap = allPieceList[i].attackMaps[j];
 
                             if ((prevMap & changeBitBoard) != 0UL) //If move intersects piece at this index specifically
@@ -680,6 +682,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
                     {
                         for (int j = 0; j < allPieceList[i].Count; j++)
                         {
+                            if (allPieceList[i][j] == move.targetSquare) continue; //Skip checking if this piece is still checking the king, if the move we are going to play captures the piece
+
                             ulong prevMap = allPieceList[i].attackMaps[j];
 
                             if ((prevMap & changeBitBoard) != 0UL) //If move intersects piece at this index specifically
