@@ -630,43 +630,30 @@ public class Board //TODOnt prob: Try maybe changing to struct?
                     {
                         for (int j = 0; j < allPieceList[i].Count; j++)
                         {
-                            if ((allPieceList[i].attackMaps[j] & changeBitBoard) != 0UL) //If move intersects piece at this index specifically
+                            ulong prevMap = allPieceList[i].attackMaps[j];
+
+                            if ((prevMap & changeBitBoard) != 0UL) //If move intersects piece at this index specifically
                             {
                                 allPieceList[i].UpdateAttackMap(j);
 
                                 if ((allPieceList[i].attackMaps[j] & kingBoard) != 0)
                                 {
+                                    allPieceList[i].attackMaps[j] = prevMap;
                                     illegal = true;
                                     break;
                                 }
+
+                                allPieceList[i].attackMaps[j] = prevMap;
                             }
                         }
-
-                        allPieceList[i].RecreateCombinedAttackMap();
 
                         if (illegal) break;
                     }
                 }
 
+
                 //Revert changes
                 allPieceBoard ^= changeBitBoard;
-
-                //TODO: We could, i guess, in theory avoid reverting the attack maps if the move is legal, as we are going to be making these changes anyway, but don't currently see a clean way to do it
-                for (int k = 7; k < i; k++)
-                {
-                    if ((allPieceList[k].attackMap & changeBitBoard) != 0UL)
-                    {
-                        for (int j = 0; j < allPieceList[k].Count; j++)
-                        {
-                            if ((allPieceList[k].attackMaps[j] & changeBitBoard) != 0UL)
-                            {
-                                allPieceList[k].UpdateAttackMap(j);
-                            }
-                        }
-
-                        allPieceList[k].RecreateCombinedAttackMap();
-                    }
-                }
 
                 if (illegal) return false;
                 else
@@ -687,25 +674,28 @@ public class Board //TODOnt prob: Try maybe changing to struct?
                 bool illegal = false;
 
 
-                for (i = 2; i <= 4; i++) //White pieces that need attackmaps updated
+                for (i = 2; i <= 4; i++) //Black pieces that need attackmaps updated
                 {
                     if ((allPieceList[i].attackMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
                     {
                         for (int j = 0; j < allPieceList[i].Count; j++)
                         {
-                            if ((allPieceList[i].attackMaps[j] & changeBitBoard) != 0UL) //If move intersects piece at this index specifically
+                            ulong prevMap = allPieceList[i].attackMaps[j];
+
+                            if ((prevMap & changeBitBoard) != 0UL) //If move intersects piece at this index specifically
                             {
                                 allPieceList[i].UpdateAttackMap(j);
 
                                 if ((allPieceList[i].attackMaps[j] & kingBoard) != 0)
                                 {
+                                    allPieceList[i].attackMaps[j] = prevMap;
                                     illegal = true;
                                     break;
                                 }
+
+                                allPieceList[i].attackMaps[j] = prevMap;
                             }
                         }
-
-                        allPieceList[i].RecreateCombinedAttackMap();
 
                         if (illegal) break;
                     }
@@ -714,23 +704,6 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
                 //Revert changes
                 allPieceBoard ^= changeBitBoard;
-
-                //TODO: We could, i guess, in theory avoid reverting the attack maps if the move is legal, as we are going to be making these changes anyway, but don't currently see a clean way to do it
-                for (int k = 2; k < i; k++)
-                {
-                    if ((allPieceList[k].attackMap & changeBitBoard) != 0UL)
-                    {
-                        for (int j = 0; j < allPieceList[k].Count; j++)
-                        {
-                            if ((allPieceList[k].attackMaps[j] & changeBitBoard) != 0UL)
-                            {
-                                allPieceList[k].UpdateAttackMap(j);
-                            }
-                        }
-
-                        allPieceList[k].RecreateCombinedAttackMap();
-                    }
-                }
 
                 if (illegal) return false;
                 else
