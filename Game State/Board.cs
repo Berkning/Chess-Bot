@@ -626,7 +626,9 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
                 for (i = 7; i <= 9; i++) //Black pieces that need attackmaps updated
                 {
-                    if ((allPieceList[i].attackMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
+                    ulong accumulatedMap = allPieceList[i].attackMap;
+
+                    if ((accumulatedMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
                     {
                         for (int j = 0; j < allPieceList[i].Count; j++)
                         {
@@ -648,6 +650,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
                                 allPieceList[i].attackMaps[j] = prevMap;
                             }
                         }
+
+                        allPieceList[i].attackMap = accumulatedMap;
 
                         if (illegal) break;
                     }
@@ -678,7 +682,9 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
                 for (i = 2; i <= 4; i++) //Black pieces that need attackmaps updated
                 {
-                    if ((allPieceList[i].attackMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
+                    ulong accumulatedMap = allPieceList[i].attackMap;
+
+                    if ((accumulatedMap & changeBitBoard) != 0UL) //If move intersects anything in the attack map
                     {
                         for (int j = 0; j < allPieceList[i].Count; j++)
                         {
@@ -700,6 +706,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
                                 allPieceList[i].attackMaps[j] = prevMap;
                             }
                         }
+
+                        allPieceList[i].attackMap = accumulatedMap;
 
                         if (illegal) break;
                     }
