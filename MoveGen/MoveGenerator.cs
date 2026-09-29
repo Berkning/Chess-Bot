@@ -254,7 +254,7 @@ public class MoveGenerator
 
 
         int attackIndex = startSquare + friendlyIndexOffset;
-        int epFile = (int)((board.currentGameState & Board.epFileMask) >> 5) - 1;
+        int epFile = (int)((board.currentGameState & Board.EpFileMask) >> 5) - 1;
         int epAttackRank = board.friendlyColor == Piece.White ? 5 : 2;
         int epAttackSquare = epFile != -1 ? BoardHelper.CoordToIndex(epFile, epAttackRank) : -1;
 

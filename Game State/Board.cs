@@ -14,13 +14,15 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     //6-9 = EP file
     //10-13 = Castling Rights - 10 = Wshort, 11 = Bshort, 12 = Wlong, 13 = Blong
     //14-19 = fifty move counter //TODO:
+    //20-22 = promotion info - 0 = last move wasn't a promotion, 1 = last move was a queen promotion, 2 = last move was a rook promotion, 3 = last move was a bishop promotion
     public Stack<uint> gameStateHistory;
     public uint currentGameState = 0;//0b1111000000000; //Castles allowed by default 
 
-    public const uint capturedPieceMask = 0b11111;
-    public const uint epFileMask = 0b111100000;
-    public const uint castleRightsMask = 0b1111000000000;
-    public const uint fiftyMoveCounterMask = 0b1111110000000000000;
+    public const uint CapturedPieceMask = 0b11111;
+    public const uint EpFileMask = 0b111100000;
+    public const uint CastleRightsMask = 0b1111000000000;
+    public const uint FiftyMoveCounterMask = 0b1111110000000000000;
+    public const uint PromotionInfoMask = 0b110000000000000000000;
 
     //Piece lists
     //TODOne: Try getting rid of these and just using GetPieceList bc faster for movegen at least for some reason (guess cache locality from it being used before calling movegen?)
@@ -46,6 +48,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
     //Repetition Table
     public RepetitionTable repetitionTable;
+
 
 
 
@@ -240,9 +243,9 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         ulong moveBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(0UL, move.startSquare), move.targetSquare); //Bitboard with the moves start and end-square highlighted
 
         uint prevGameState = currentGameState;
-        uint prevCastleRights = (prevGameState & castleRightsMask) >> 9;
-        int prevEpFile = (int)((prevGameState & epFileMask) >> 5) - 1;
-        uint prev50MoveCount = (prevGameState & fiftyMoveCounterMask) >> 13; //TODO: have to implement this differently in search as well - maybe just don't - rarely ever see draws by 50 move rule anyway
+        uint prevCastleRights = (prevGameState & CastleRightsMask) >> 9;
+        int prevEpFile = (int)((prevGameState & EpFileMask) >> 5) - 1;
+        uint prev50MoveCount = (prevGameState & FiftyMoveCounterMask) >> 13; //TODO: have to implement this differently in search as well - maybe just don't - rarely ever see draws by 50 move rule anyway
 
         currentZobrist ^= Zobrist.castlingArray[prevCastleRights]; //Remove previous castling righnonets
 
@@ -393,19 +396,18 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             switch (move.flag)
             {
                 case Move.Flag.PromoteToQueen:
-                    //queenList[opponentColorBit].AddPieceAtSquare(move.targetSquare);
+                    currentGameState |= 1 << 19;
                     AddPiece(move.targetSquare, enemyColor | Piece.Queen);
                     break;
                 case Move.Flag.PromoteToKnight:
-                    //knightList[opponentColorBit].AddPieceAtSquare(move.targetSquare);
                     AddPiece(move.targetSquare, enemyColor | Piece.Knight);
                     break;
                 case Move.Flag.PromoteToBishop:
-                    //bishopList[opponentColorBit].AddPieceAtSquare(move.targetSquare);
+                    currentGameState |= 3 << 19;
                     AddPiece(move.targetSquare, enemyColor | Piece.Bishop);
                     break;
                 case Move.Flag.PromoteToRook:
-                    //rookList[opponentColorBit].AddPieceAtSquare(move.targetSquare);
+                    currentGameState |= 2 << 19;
                     AddPiece(move.targetSquare, enemyColor | Piece.Rook);
                     break;
             }
@@ -517,7 +519,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
 
 
-        int capturedPiece = (int)(currentGameState & capturedPieceMask);
+        int capturedPiece = (int)(currentGameState & CapturedPieceMask);
 
         if (move.flag == Move.Flag.EnPassantCapture)
         {
@@ -539,8 +541,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
 
 
-        uint prevCastleRights = (currentGameState & castleRightsMask) >> 9;
-        int prevEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
+        uint prevCastleRights = (currentGameState & CastleRightsMask) >> 9;
+        int prevEpFile = (int)((currentGameState & EpFileMask) >> 5) - 1;
 
         currentZobrist ^= Zobrist.sideToMove;
         if (prevEpFile != -1) currentZobrist ^= Zobrist.epArray[prevEpFile];
@@ -553,8 +555,8 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         currentGameState = gameStateHistory.Peek();
 
-        uint newCastleRights = (currentGameState & castleRightsMask) >> 9;
-        int newEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
+        uint newCastleRights = (currentGameState & CastleRightsMask) >> 9;
+        int newEpFile = (int)((currentGameState & EpFileMask) >> 5) - 1;
 
         if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
 
@@ -571,7 +573,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     public void MakeNullMove()
     {
         uint prevGameState = currentGameState;
-        int prevEpFile = (int)((prevGameState & epFileMask) >> 5) - 1;
+        int prevEpFile = (int)((prevGameState & EpFileMask) >> 5) - 1;
 
         SetColorToMove(Piece.OppositeColor(colorToMove));
         currentZobrist ^= Zobrist.sideToMove; //Toggle side to move
@@ -579,7 +581,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         if (prevEpFile != -1)
         {
             currentZobrist ^= Zobrist.epArray[prevEpFile]; //Remove old ep file
-            currentGameState ^= prevGameState & epFileMask;
+            currentGameState ^= prevGameState & EpFileMask;
         }
 
         gameStateHistory.Push(currentGameState);
@@ -589,7 +591,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
     {
         SetColorToMove(Piece.OppositeColor(colorToMove));
 
-        int prevEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
+        int prevEpFile = (int)((currentGameState & EpFileMask) >> 5) - 1;
 
         currentZobrist ^= Zobrist.sideToMove;
         if (prevEpFile != -1) currentZobrist ^= Zobrist.epArray[prevEpFile];
@@ -598,7 +600,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         currentGameState = gameStateHistory.Peek();
 
-        int newEpFile = (int)((currentGameState & epFileMask) >> 5) - 1;
+        int newEpFile = (int)((currentGameState & EpFileMask) >> 5) - 1;
 
         if (newEpFile != -1) currentZobrist ^= Zobrist.epArray[newEpFile];
     }

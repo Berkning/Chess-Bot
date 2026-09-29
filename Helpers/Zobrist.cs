@@ -292,10 +292,10 @@ public static class Zobrist
         }
 
         //Add castling rights to key
-        key ^= castlingArray[(board.currentGameState & Board.castleRightsMask) >> 9];
+        key ^= castlingArray[(board.currentGameState & Board.CastleRightsMask) >> 9];
 
         //Add ep file to key
-        int epFile = (int)((board.currentGameState & Board.epFileMask) >> 5) - 1;
+        int epFile = (int)((board.currentGameState & Board.EpFileMask) >> 5) - 1;
         if (epFile != -1) key ^= epArray[epFile]; //Should be conditional on whether an enemy pawn is able to capture the ep pawn
 
         //Add colorToMove to key

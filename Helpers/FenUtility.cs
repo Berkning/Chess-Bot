@@ -85,7 +85,7 @@ public static class FenUtility
 
     private static void LoadCastleRights(Board board, string castleRightsString)
     {
-        board.currentGameState &= ~Board.castleRightsMask; //Inverts castle mask and and's it with the current state to only turn off all castle rights
+        board.currentGameState &= ~Board.CastleRightsMask; //Inverts castle mask and and's it with the current state to only turn off all castle rights
 
         if (castleRightsString == "-") return;
 
@@ -118,7 +118,7 @@ public static class FenUtility
 
     private static void LoadEnPassantFile(Board board, string epString)
     {
-        board.currentGameState &= ~Board.epFileMask; //Inverts ep mask and turns off all ep file bits
+        board.currentGameState &= ~Board.EpFileMask; //Inverts ep mask and turns off all ep file bits
 
         if (epString == "-") return;
 
@@ -197,7 +197,7 @@ public static class FenUtility
         fen += (board.colorToMove == Piece.White) ? 'w' : 'b';
 
         // Castling
-        uint castleRight = (board.currentGameState & Board.castleRightsMask) >> 9;
+        uint castleRight = (board.currentGameState & Board.CastleRightsMask) >> 9;
 
         bool whiteKingside = (castleRight & 0b0001) != 0;
         bool blackKingside = (castleRight & 0b0010) != 0;
@@ -212,7 +212,7 @@ public static class FenUtility
 
         // En-passant
         fen += ' ';
-        int epFile = (int)(board.currentGameState & Board.epFileMask) >> 5;
+        int epFile = (int)(board.currentGameState & Board.EpFileMask) >> 5;
         if (epFile == 0)
         {
             fen += '-';

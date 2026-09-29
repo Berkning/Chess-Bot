@@ -102,7 +102,7 @@ public class EvasionGenerator
             GenerateCaptures(ref moves, checkInfo.attackerSquare);
 
             //En-passant capture to capture checking pawn
-            int epFile = (int)((board.currentGameState & Board.epFileMask) >> 5) - 1;
+            int epFile = (int)((board.currentGameState & Board.EpFileMask) >> 5) - 1;
 
             if (epFile != -1) //EP possible
             {
@@ -165,23 +165,72 @@ public class EvasionGenerator
 
     private bool HasSecondAttacker(CheckInfo checkInfo)
     {
+
         switch (checkInfo.data)
         {
-            case 1: //Queen check so second attacker can be a rook, knight or bishop
-                if ((board.GetPieceList(Piece.Rook, board.opponentColorBit).attackMap & 1UL << friendlyKingSquare) == 0 && (board.GetPieceList(Piece.Bishop, board.opponentColorBit).attackMap & 1UL << friendlyKingSquare) == 0 && (PrecomputedData.knightAttackBitboards[friendlyKingSquare] & board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard) == 0) return false;
+            case 1: //Queen check so second attacker can be a rook, knight or bishop, or, in very rare cases, a pawn that has promoted to a queen/rook/bishop/knight close to the king (We already check every one of these except the queen)
+                if ((board.GetPieceList(Piece.Rook, board.opponentColorBit).attackMap & 1UL << friendlyKingSquare) == 0 && (board.GetPieceList(Piece.Bishop, board.opponentColorBit).attackMap & 1UL << friendlyKingSquare) == 0 && (PrecomputedData.knightAttackBitboards[friendlyKingSquare] & board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard) == 0)
+                {
+                    //Rare promotion double check. Only have to worry about a double-queen-check, as every other combination is already accounted for
+                    //2Q1r3/3P4/4k3/8/3K4/8/8/8 w - - 0 1
+                    if (((board.currentGameState & Board.PromotionInfoMask) >> 19) == 1) //If last move was a queen promotion, it is possible that this promotion has revealed a discovered check from another queen, meaning we would be in queen-double-check
+                    {
+                        PieceList queenList = board.GetPieceList(Piece.Queen, board.opponentColorBit);
+
+                        if (queenList.Count == 1) return false; //Only one queen on the board, therefore we cannot be in double-queen-check
+
+                        int checkCount = 0;
+
+                        for (int i = 0; i < queenList.Count; i++)
+                        {
+                            if ((queenList.attackMaps[i] & (1UL << friendlyKingSquare)) != 0)
+                            {
+                                checkCount++;
+
+                                if (checkCount > 1) return true;
+                            }
+                        }
+                    }
+
+                    return false;
+                }
 
                 return true;
-            case 2:  //Rook check so second attacker can only be a knight or bishop
-                if ((board.GetPieceList(Piece.Bishop, board.opponentColorBit).attackMap & 1UL << friendlyKingSquare) == 0 && (PrecomputedData.knightAttackBitboards[friendlyKingSquare] & board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard) == 0) return false;
+            case 2:  //Rook check so second attacker can only be a knight or bishop, or, in very rare cases, a pawn that has promoted to a rook on the same rank as the king
+                if ((board.GetPieceList(Piece.Bishop, board.opponentColorBit).attackMap & 1UL << friendlyKingSquare) == 0 && (PrecomputedData.knightAttackBitboards[friendlyKingSquare] & board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard) == 0)
+                {
+                    //Rare promotion double check. Only have to worry about a double-rook-check, as every other combination is already accounted for
+                    //2rk4/3P4/3R4/8/3K4/8/8/8 w - - 0 1
+                    if (((board.currentGameState & Board.PromotionInfoMask) >> 19) == 2) //If last move was a rook promotion, it is possible that this promotion has revealed a discovered check from another rook, meaning we would be in rook-double-check
+                    {
+                        PieceList rookList = board.GetPieceList(Piece.Rook, board.opponentColorBit);
+
+                        if (rookList.Count == 1) return false; //Only one rook on the board, therefore we cannot be in double-rook-check
+
+                        int checkCount = 0;
+
+                        for (int i = 0; i < rookList.Count; i++)
+                        {
+                            if ((rookList.attackMaps[i] & (1UL << friendlyKingSquare)) != 0)
+                            {
+                                checkCount++;
+
+                                if (checkCount > 1) return true;
+                            }
+                        }
+                    }
+
+                    return false;
+                }
 
                 return true;
             case 3: //Bishop check so second attacker can only be a knight
                 if ((PrecomputedData.knightAttackBitboards[friendlyKingSquare] & board.GetPieceList(Piece.Knight, board.opponentColorBit).bitboard) == 0) return false;
 
                 return true;
+            default:
+                return false;
         }
-
-        return false;
     }
 
     private void GenerateBlocksAndCaptures(ref Span<Move> moves, ulong blockBoard, ulong attackerBoard, int attackerSquare)
