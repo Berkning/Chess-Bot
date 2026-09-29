@@ -620,7 +620,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             {
                 kingBoard = 1UL << whiteKingSquare;
 
-                if (move.flag == Move.Flag.EnPassantCapture) changeBitBoard = BitBoardHelper.AddSquare(changeBitBoard, move.targetSquare - PrecomputedData.Down);
+                if (move.flag == Move.Flag.EnPassantCapture) changeBitBoard = BitBoardHelper.AddSquare(changeBitBoard, move.targetSquare + PrecomputedData.Down);
 
                 allPieceBoard ^= changeBitBoard;
 
@@ -676,7 +676,7 @@ public class Board //TODOnt prob: Try maybe changing to struct?
             {
                 kingBoard = 1UL << blackKingSquare;
 
-                if (move.flag == Move.Flag.EnPassantCapture) changeBitBoard = BitBoardHelper.AddSquare(changeBitBoard, move.targetSquare - PrecomputedData.Up);
+                if (move.flag == Move.Flag.EnPassantCapture) changeBitBoard = BitBoardHelper.AddSquare(changeBitBoard, move.targetSquare + PrecomputedData.Up);
 
                 allPieceBoard ^= changeBitBoard;
 
