@@ -85,6 +85,7 @@ public class EvasionGenerator
 
 
             ulong blockBoard = PrecomputedData.blockMasks[friendlyKingSquare][attackerSquare];
+            attackerBoard = 1UL << attackerSquare;
 
             GenerateBlocksAndCaptures(ref moves, blockBoard, attackerBoard, attackerSquare);
         }
