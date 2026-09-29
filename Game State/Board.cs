@@ -610,7 +610,11 @@ public class Board //TODOnt prob: Try maybe changing to struct?
         {
             ulong kingBoard;
 
-            ulong changeBitBoard = BitBoardHelper.AddSquare(BitBoardHelper.AddSquare(0UL, move.startSquare), move.targetSquare);
+            ulong changeBitBoard = BitBoardHelper.AddSquare(0UL, move.startSquare);
+
+            //If is capture, we don't want to turn "off" the square we are capturing by mistake when xor'ing
+            //We can also assume, that because this is not a king move, updating attack maps on the capture square wouldn't change them at all
+            if (!BitBoardHelper.ContainsSquare(allPieceBoard, move.targetSquare)) changeBitBoard = BitBoardHelper.AddSquare(changeBitBoard, move.targetSquare);
 
             if (colorToMove == Piece.White)
             {
