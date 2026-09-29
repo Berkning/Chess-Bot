@@ -142,9 +142,9 @@ public static class EngineDiagnostics
 
             BoardSnapshot snapshot = new BoardSnapshot(board);
 
-            moveHistory.Push(moves[randomMoveIndex]);
-
             if (!board.MakeIfLegal(moves[randomMoveIndex])) continue;
+
+            moveHistory.Push(moves[randomMoveIndex]);
 
 
             if (depth > 0)
