@@ -419,7 +419,7 @@ public class Search
         int eval = evaluator.Evaluate(board);
         //positionCount++;
 
-        if (eval >= beta)
+        if (eval >= beta) //TODO: Should not be allowed to return standing pat when in check i believe
         {
             return beta;
         }

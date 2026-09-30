@@ -8,12 +8,12 @@ public class Evaluation
     //TODO: Maybe make non-static for multithreaded performance
 
     private static readonly int[] Weights = {
-        -17,25,19,-36,24,-29,42,21,-4,4,1,-41,-35,-6,35,19,-5,2,-2,-9,-12,-8,5,-14,-5,2,4,-3,-4,-4,-4,-15,-3,1,4,1,0,2,3,-7,0,7,4,3,2,7,10,0,-1,3,3,2,2,5,3,-1,-1,0,1,0,-1,1,1,-1,0,0,0,0,0,0,0,0,-45,-17,-26,-44,-28,-2,23,-33,-42,-25,-10,-25,-8,-21,14,-31,-47,-21,-17,-1,-1,-13,-14,-55,-31,-10,-4,-4,10,-1,-8,-42,-27,-19,-5,-38,-4,34,-4,-23,-1,-18,-9,-5,-3,-5,-11,-12,0,0,0,0,0,0,0,0,-11,3,-24,-12,-11,-4,-1,-9,-9,-12,8,26,26,21,0,9,-2,15,43,29,38,39,41,-2,8,6,39,39,52,44,16,2,3,41,35,77,52,55,31,12,-8,16,32,45,43,20,25,-1,-26,-11,14,10,0,22,-1,-6,-47,-6,-7,-7,-2,-17,-3,-20,-12,-8,-2,-11,-15,-10,-8,-11,-5,29,14,8,14,17,45,2,12,20,22,20,21,27,17,14,-8,12,17,29,40,18,10,-14,-9,8,17,30,31,14,12,0,-7,4,14,14,11,20,10,18,-20,9,-5,-4,5,1,1,-23,-11,-9,-7,-6,-5,-7,-3,-9,-27,-23,-4,-1,2,-11,-35,-19,-48,-14,-17,-12,-9,-3,-5,-48,-38,-16,-10,-8,-3,-8,-2,-17,-26,-12,-13,-4,-4,-4,-1,-11,-16,-6,8,12,5,7,-1,1,-2,4,7,12,9,10,6,3,2,3,16,18,15,15,6,8,6,9,6,9,8,3,4,3,-1,-17,-8,13,-12,-19,-10,-10,-19,1,10,7,12,11,4,-1,-16,4,2,3,3,10,15,0,-12,-4,-3,2,14,9,19,1,-17,-11,-1,2,13,21,4,16,-16,-7,-5,20,20,26,18,36,-15,-26,-5,2,1,11,0,9,-30,-7,-2,1,4,2,-4,-4,-30,-29,-18,-12,-30,-9,-36,-60,-24,-5,8,19,22,13,-6,-25,-25,-3,10,20,22,19,7,-14,-27,-7,14,19,22,19,7,-18,-20,3,14,17,13,22,19,-6,-6,10,12,7,10,27,34,4,-9,5,3,1,4,19,17,1,-11,-8,-6,-7,-5,0,0,-6,0,0,0,0,0,0,0,0,23,10,16,11,16,10,-4,1,15,10,0,9,9,7,-4,2,25,14,3,-3,-2,-1,3,9,38,24,9,-3,-3,3,14,21,65,53,32,8,-1,10,32,41,51,42,25,5,5,8,26,31,0,0,0,0,0,0,0,0,-15,-46,-24,-18,-23,-17,-38,-12,-17,-18,-17,-13,-13,-13,-15,-18,-19,-10,-14,6,4,-8,-17,-20,-16,-7,7,13,8,3,-3,-15,-15,-2,11,11,11,9,-1,-14,-24,-11,8,9,-3,2,-10,-22,-29,-20,-12,-7,-15,-18,-19,-24,-32,-20,-15,-20,-17,-26,-14,-27,-22,-11,-31,-12,-13,-19,-15,-16,-10,-21,-9,-3,1,-6,-16,-15,-12,-1,5,10,11,1,-8,-14,-9,0,11,12,3,8,-7,-11,-3,6,7,10,10,3,-2,-9,-5,-1,6,6,-2,7,-1,-6,-17,-6,-5,-12,-3,-7,-5,-19,-13,-15,-15,-12,-13,-11,-11,-12,-3,8,8,11,3,-5,4,-27,-1,-3,3,4,-3,-5,-6,-10,-3,0,-3,-2,-4,-9,-9,-12,3,4,8,7,2,-4,-6,-10,8,8,11,7,5,6,-3,0,9,12,10,12,4,3,6,0,14,20,20,21,10,12,10,7,23,21,23,21,18,10,10,11,-6,-10,-8,-42,-2,-14,-7,-8,-9,-5,-10,0,-2,-6,-6,-5,-8,-12,8,6,9,9,5,0,-3,2,7,20,17,10,8,2,-10,2,0,13,23,18,9,8,-14,-5,5,11,20,16,6,7,-12,-4,3,9,10,11,2,1,-18,-5,0,4,5,1,-8,-2,86,318,327,530,1007,55,-6,-9,0,2,16,36,81,130,4,-4,-5,-19,86,-12,-6,1
+        -23,32,26,-37,28,-23,50,23,-5,5,-2,-46,-36,-11,36,22,-6,3,-5,-13,-18,-13,3,-16,-6,3,5,-4,-7,-8,-7,-19,-4,2,6,2,0,2,4,-10,0,9,7,5,3,9,13,0,-2,5,5,3,3,7,4,-2,-2,0,1,0,-1,1,1,-1,0,0,0,0,0,0,0,0,-41,-15,-26,-28,-16,4,28,-33,-41,-28,-9,-18,1,-15,13,-32,-52,-25,-15,0,3,-8,-17,-62,-37,-11,-11,-7,7,-8,-10,-51,-41,-29,-10,-55,-12,37,-8,-36,-8,-29,-14,-11,-7,-8,-16,-20,0,0,0,0,0,0,0,0,-16,14,-20,-4,6,2,11,-13,-7,-12,19,52,49,36,4,16,3,24,56,49,63,59,53,3,12,9,54,53,70,59,23,7,6,51,41,91,60,67,43,19,-11,20,41,55,55,27,34,-1,-36,-15,19,12,0,29,-2,-10,-61,-8,-11,-10,-3,-23,-5,-27,-3,-1,21,6,3,5,-5,3,-1,34,10,8,13,20,51,8,21,16,14,-4,6,20,7,20,-3,4,-8,11,18,-10,1,-8,-10,-2,-2,6,6,-7,8,1,-10,0,0,-2,5,16,9,22,-25,-3,-16,-8,1,-3,-5,-32,-7,-12,-9,-7,-5,-7,-3,-8,-14,-12,10,14,20,8,-23,0,-38,-13,-13,-4,0,8,-1,-45,-38,-19,-12,-5,1,-2,-3,-16,-31,-17,-19,-10,-7,-5,-2,-14,-21,-12,3,8,-2,5,-2,-1,-4,1,2,8,7,11,8,5,-1,-6,15,19,14,17,7,11,4,8,3,6,7,3,5,3,10,3,16,29,12,-6,-6,-4,-4,5,13,17,23,19,10,8,-14,4,-4,1,1,7,14,5,-10,-13,-13,-14,1,0,14,4,-16,-19,-18,-18,-6,7,2,22,-14,-13,-17,7,15,26,23,55,-8,-34,-12,-3,-5,13,-1,21,-25,-7,-3,0,7,5,-2,4,-38,-35,-20,-11,-27,-10,-42,-71,-29,-6,9,22,23,15,-7,-29,-31,-3,13,23,26,22,7,-16,-33,-8,15,22,25,22,8,-20,-25,4,16,19,15,25,21,-8,-9,13,16,9,13,33,41,4,-14,7,5,3,6,24,23,1,-17,-11,-9,-9,-7,1,0,-9,0,0,0,0,0,0,0,0,24,9,15,7,13,10,-7,-1,16,10,0,5,5,5,-6,1,28,16,1,-4,-4,-4,3,10,43,26,12,-3,-3,4,15,23,77,64,40,16,3,13,39,50,63,54,33,8,8,13,35,40,0,0,0,0,0,0,0,0,-21,-50,-27,-19,-28,-21,-46,-18,-22,-24,-22,-25,-25,-18,-20,-24,-27,-15,-21,2,-2,-18,-25,-28,-23,-10,3,11,4,-1,-6,-20,-21,-7,10,8,10,7,-4,-20,-33,-16,7,7,-7,1,-15,-30,-39,-26,-17,-10,-20,-25,-27,-33,-42,-29,-23,-28,-23,-35,-21,-37,-15,-3,-15,-1,-2,-6,-10,-11,-4,-17,-5,0,3,-3,-12,-10,-6,4,6,15,12,0,-2,-7,-1,4,14,9,-2,10,-5,-5,6,11,7,6,5,2,-1,-1,5,3,5,5,-5,5,2,1,-10,-3,-1,-12,-2,-5,-3,-15,-7,-13,-11,-8,-8,-6,-8,-10,1,5,1,2,-5,-2,3,-25,2,-3,3,3,-4,-7,-6,-5,1,1,-5,-4,-7,-11,-10,-10,7,4,7,3,0,-5,-6,-6,11,7,9,2,2,6,-2,5,10,10,7,8,0,1,6,1,14,20,16,17,6,10,10,8,18,15,16,13,13,10,10,10,0,-6,-8,-24,1,-7,-4,-5,-1,-4,-11,-8,-9,-7,-6,-1,-4,-17,0,-8,0,5,7,7,2,-1,-3,6,1,3,9,11,-4,-1,-12,-3,9,13,12,20,-10,-8,-4,3,15,13,8,18,-4,-4,1,9,11,13,3,9,-17,-4,0,5,8,5,-7,4,99,356,337,541,1032,51,-8,-10,-1,1,17,39,89,141,4,-3,-8,-21,110,-13,-7,1,19,3,11,11,6,15
         };
 
     private Vector<int>[] weightVectors;
 
-    private const int Bias = 2;
+    private const int Bias = 1;
 
     public Evaluation()
     {
@@ -63,7 +63,7 @@ public class Evaluation
 
     private int CalculateResult(Board board)
     {
-        return CalculatePieceSquareTables(board) + CalculateMaterial(board) + CalculatePawnStructure(board) + CalculateKingSafety(board);
+        return CalculatePieceSquareTables(board) + CalculateMaterial(board) + CalculatePawnStructure(board) + CalculateKingSafety(board) + CalculateMobility(board);
     }
 
     public static int GetPieceTypeValue(int piece)
@@ -441,6 +441,88 @@ public class Evaluation
 
         return result;
     }
+    #endregion
+
+
+
+
+    #region Mobility
+
+    //Mobility for 3(*2) piece types in both game phases = 6 features
+    private int CalculateMobility(Board board) //TODO: Account for mobility to squares that are attacked
+    {
+        int result = 0;
+
+        PieceList whiteBishopList = board.GetPieceList(Piece.Bishop, 0);
+        PieceList blackBishopList = board.GetPieceList(Piece.Bishop, 1);
+        PieceList whiteRookList = board.GetPieceList(Piece.Rook, 0);
+        PieceList blackRookList = board.GetPieceList(Piece.Rook, 1);
+        PieceList whiteQueenList = board.GetPieceList(Piece.Queen, 0);
+        PieceList blackQueenList = board.GetPieceList(Piece.Queen, 1);
+
+
+        ulong otherPieces = board.GetPieceList(Piece.Pawn, 0).bitboard | board.GetPieceList(Piece.Knight, 0).bitboard | board.GetPieceList(Piece.Pawn, 1).bitboard | board.GetPieceList(Piece.Knight, 1).bitboard;
+
+        ulong allPiecesNoKings = whiteBishopList.bitboard | blackBishopList.bitboard | whiteRookList.bitboard | blackRookList.bitboard | whiteQueenList.bitboard | blackQueenList.bitboard | otherPieces;
+
+        //We exclude the opponent king bc he can't be on check rays - will be irrelevant when we account for checks in quiescence
+        ulong whiteAllPieces = allPiecesNoKings | (1UL << board.whiteKingSquare);
+        ulong blackAllPieces = allPiecesNoKings | (1UL << board.blackKingSquare);
+
+
+
+        int bishopDifference = 0;
+
+        for (int i = 0; i < whiteBishopList.Count; i++)
+        {
+            bishopDifference += BitBoardHelper.BitCount(MagicData.GetBishopMoveBoard(whiteAllPieces, whiteBishopList[i])) >> 1;
+        }
+
+        for (int i = 0; i < blackBishopList.Count; i++)
+        {
+            bishopDifference -= BitBoardHelper.BitCount(MagicData.GetBishopMoveBoard(blackAllPieces, blackBishopList[i])) >> 1;
+        }
+
+        result += (Weights[790] * bishopDifference * mgWeight) >> 8;
+        result += (Weights[791] * bishopDifference * egWeight) >> 8;
+
+
+
+        int rookDifference = 0;
+
+        for (int i = 0; i < whiteRookList.Count; i++) //TODO: Split into horizontal and vertical mobility
+        {
+            rookDifference += BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(whiteAllPieces, whiteRookList[i])) >> 1;
+        }
+
+        for (int i = 0; i < blackRookList.Count; i++)
+        {
+            rookDifference -= BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(blackAllPieces, blackRookList[i])) >> 1;
+        }
+
+        result += (Weights[792] * rookDifference * mgWeight) >> 8;
+        result += (Weights[793] * rookDifference * egWeight) >> 8;
+
+
+
+        int queenDifference = 0;
+
+        for (int i = 0; i < whiteQueenList.Count; i++)
+        {
+            queenDifference += BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(whiteAllPieces, whiteQueenList[i]) | MagicData.GetBishopMoveBoard(whiteAllPieces, whiteQueenList[i])) >> 1;
+        }
+
+        for (int i = 0; i < blackQueenList.Count; i++)
+        {
+            queenDifference -= BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(blackAllPieces, blackQueenList[i]) | MagicData.GetBishopMoveBoard(blackAllPieces, blackQueenList[i])) >> 1;
+        }
+
+        result += (Weights[792] * queenDifference * mgWeight) >> 8;
+        result += (Weights[793] * queenDifference * egWeight) >> 8;
+
+        return result;
+    }
+
     #endregion
 
     #endregion

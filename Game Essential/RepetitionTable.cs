@@ -41,7 +41,7 @@ public class RepetitionTable
         }
     }
 
-    public bool Contains(ulong hash)
+    public bool Contains(ulong hash) //TODO: Speed this up
     {
         for (int i = currentIndex - 1; i > -1; i--) //We go from top of the stack to the bottom and check if the hash has been seen - imagine it would be slightly more likely the repetition occured in the most recent moves
         {
