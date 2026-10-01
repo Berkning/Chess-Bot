@@ -297,11 +297,18 @@ public static class PrecomputedData
                         passedPawnMasks[squareIndex + 64] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex + 64], BoardHelper.CoordToIndex(1, rankIndex));
                     }
 
-                    kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(0UL, squareIndex + Up);
-                    kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex], squareIndex + UpRight);
 
-                    kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(0UL, squareIndex + Down);
-                    kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex + 64], squareIndex + DownRight);
+                    if (rank < 7)
+                    {
+                        kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(0UL, squareIndex + Up);
+                        kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex], squareIndex + UpRight);
+                    }
+
+                    if (rank > 0)
+                    {
+                        kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(0UL, squareIndex + Down);
+                        kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex + 64], squareIndex + DownRight);
+                    }
                 }
                 else if (file == 7) //On right edge
                 {
@@ -319,11 +326,18 @@ public static class PrecomputedData
                         passedPawnMasks[squareIndex + 64] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex + 64], BoardHelper.CoordToIndex(7, rankIndex));
                     }
 
-                    kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(0UL, squareIndex + Up);
-                    kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex], squareIndex + UpLeft);
 
-                    kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(0UL, squareIndex + Down);
-                    kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex + 64], squareIndex + DownLeft);
+                    if (rank < 7)
+                    {
+                        kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(0UL, squareIndex + Up);
+                        kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex], squareIndex + UpLeft);
+                    }
+
+                    if (rank > 0)
+                    {
+                        kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(0UL, squareIndex + Down);
+                        kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex + 64], squareIndex + DownLeft);
+                    }
                 }
                 else //In middle of board
                 {
@@ -343,13 +357,20 @@ public static class PrecomputedData
                         passedPawnMasks[squareIndex + 64] = BitBoardHelper.AddSquare(passedPawnMasks[squareIndex + 64], BoardHelper.CoordToIndex(file + 1, rankIndex));
                     }
 
-                    kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(0UL, squareIndex + Up);
-                    kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex], squareIndex + UpLeft);
-                    kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex], squareIndex + UpRight);
 
-                    kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(0UL, squareIndex + Down);
-                    kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex + 64], squareIndex + DownLeft);
-                    kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex + 64], squareIndex + DownRight);
+                    if (rank < 7)
+                    {
+                        kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(0UL, squareIndex + Up);
+                        kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex], squareIndex + UpLeft);
+                        kingPawnCoverMasks[squareIndex] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex], squareIndex + UpRight);
+                    }
+
+                    if (rank > 0)
+                    {
+                        kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(0UL, squareIndex + Down);
+                        kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex + 64], squareIndex + DownLeft);
+                        kingPawnCoverMasks[squareIndex + 64] = BitBoardHelper.AddSquare(kingPawnCoverMasks[squareIndex + 64], squareIndex + DownRight);
+                    }
                 }
             }
         }
