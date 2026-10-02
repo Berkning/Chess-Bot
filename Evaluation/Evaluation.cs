@@ -246,15 +246,9 @@ public class Evaluation
         while (whitePawns != 0)
         {
             int pawnSquare = BitBoardHelper.PopFirstBit(ref whitePawns);
-
-            //TODO: Calculate in PrecomputedData
-            ulong isolationMask = 0;
             int file = BoardHelper.IndexToFile(pawnSquare);
 
-            if (file < 7) isolationMask |= PrecomputedData.fileMasks[file + 1];
-            if (file > 0) isolationMask |= PrecomputedData.fileMasks[file - 1];
-
-            if ((whitePawnBoard & isolationMask) == 0) isolatedPawnDifference++;
+            if ((whitePawnBoard & PrecomputedData.isolationFileMasks[file]) == 0) isolatedPawnDifference++;
         }
 
         ulong blackPawns = blackPawnBoard;
@@ -262,15 +256,9 @@ public class Evaluation
         while (blackPawns != 0)
         {
             int pawnSquare = BitBoardHelper.PopFirstBit(ref blackPawns);
-
-            //TODO: Calculate in PrecomputedData
-            ulong isolationMask = 0;
             int file = BoardHelper.IndexToFile(pawnSquare);
 
-            if (file < 7) isolationMask |= PrecomputedData.fileMasks[file + 1];
-            if (file > 0) isolationMask |= PrecomputedData.fileMasks[file - 1];
-
-            if ((blackPawnBoard & isolationMask) == 0) isolatedPawnDifference--;
+            if ((blackPawnBoard & PrecomputedData.isolationFileMasks[file]) == 0) isolatedPawnDifference--;
         }
 
         result += Weights[775] * isolatedPawnDifference;
@@ -302,13 +290,9 @@ public class Evaluation
                 int rank = BoardHelper.IndexToRank(pawnSquare);
                 result += Weights[776 - 1 + rank];
 
-                ulong isolationMask = 0;
                 int file = BoardHelper.IndexToFile(pawnSquare);
 
-                if (file < 7) isolationMask |= PrecomputedData.fileMasks[file + 1];
-                if (file > 0) isolationMask |= PrecomputedData.fileMasks[file - 1];
-
-                if ((whitePawnBoard & isolationMask) != 0) connectedPassedPawnDifference++;
+                if ((whitePawnBoard & PrecomputedData.isolationFileMasks[file]) != 0) connectedPassedPawnDifference++;
             }
         }
 
@@ -330,13 +314,9 @@ public class Evaluation
                 int rank = 7 - BoardHelper.IndexToRank(pawnSquare);
                 result -= Weights[776 - 1 + rank];
 
-                ulong isolationMask = 0;
                 int file = BoardHelper.IndexToFile(pawnSquare);
 
-                if (file < 7) isolationMask |= PrecomputedData.fileMasks[file + 1];
-                if (file > 0) isolationMask |= PrecomputedData.fileMasks[file - 1];
-
-                if ((blackPawnBoard & isolationMask) != 0) connectedPassedPawnDifference--;
+                if ((blackPawnBoard & PrecomputedData.isolationFileMasks[file]) != 0) connectedPassedPawnDifference--;
             }
         }
 
@@ -348,8 +328,8 @@ public class Evaluation
 
     #region King Safety
     //TODO: Add way more features
-    //1 missing pawns on top of king difference = 1 feature
-    private int CalculateKingSafety(Board board) //TODO: Extend pawn cover to include extra row above king so pawns are allowed to push - maybe add as new feature bc it's prob still bad if all pawns push but idk
+    //1 missing pawns on top of king difference + 1 hole in kings pawnshield difference + 1 complete open file above king difference + 4 pawn storm rank differences above king = 7 feature
+    private int CalculateKingSafety(Board board)
     {
         int result = 0;
 
@@ -379,52 +359,80 @@ public class Evaluation
 
 
 
-        //TODO: Obv optimize everything below this comment with precomputed bitboards instead of all these ugly if's -------------------------------------------------------------------------
 
         int missingPawnShieldDifference = 0;
-
-        if (whiteKingFile > 0 && !(BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.UpLeft) || BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.UpLeft + PrecomputedData.Up))) missingPawnShieldDifference++;
-
-        if (whiteKingFile < 7 && !(BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.UpRight) || BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.UpRight + PrecomputedData.Up))) missingPawnShieldDifference++;
-
-        if (!(BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.Up) || BitBoardHelper.ContainsSquare(whitePawns, board.whiteKingSquare + PrecomputedData.Up + PrecomputedData.Up))) missingPawnShieldDifference++;
-
-
-        if (blackKingFile > 0 && !(BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.DownLeft) || BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.DownLeft + PrecomputedData.Down))) missingPawnShieldDifference--;
-
-        if (blackKingFile < 7 && !(BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.DownRight) || BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.DownRight + PrecomputedData.Down))) missingPawnShieldDifference--;
-
-        if (!(BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.Down) || BitBoardHelper.ContainsSquare(blackPawns, board.blackKingSquare + PrecomputedData.Down + PrecomputedData.Down))) missingPawnShieldDifference--;
-
-        result += (Weights[784] * missingPawnShieldDifference * mgWeight) >> 8;
-
-
-
-
-
         int openFileAboveKingDifference = 0;
 
-        if (whiteKingFile > 0 && ((PrecomputedData.fileMasks[whiteKingFile - 1] & whitePawns) == 0)) openFileAboveKingDifference++;
+        ulong whitePawnShield = PrecomputedData.kingPawnDoubleCoverMasks[board.whiteKingSquare] & whitePawns;
+        ulong blackPawnShield = PrecomputedData.kingPawnDoubleCoverMasks[board.blackKingSquare + 64] & blackPawns;
 
-        if (whiteKingFile < 7 && ((PrecomputedData.fileMasks[whiteKingFile + 1] & whitePawns) == 0)) openFileAboveKingDifference++;
+        if (whiteKingFile == 0)
+        {
+            if ((PrecomputedData.fileMasks[whiteKingFile] & whitePawnShield) == 0) missingPawnShieldDifference++;
+            if ((PrecomputedData.fileMasks[whiteKingFile + 1] & whitePawnShield) == 0) missingPawnShieldDifference++;
 
-        if ((PrecomputedData.fileMasks[whiteKingFile] & whitePawns) == 0) openFileAboveKingDifference++;
+            if ((PrecomputedData.fileMasks[whiteKingFile + 1] & whitePawns) == 0) openFileAboveKingDifference++;
+            if ((PrecomputedData.fileMasks[whiteKingFile] & whitePawns) == 0) openFileAboveKingDifference++;
+        }
+        else if (whiteKingFile == 7)
+        {
+            if ((PrecomputedData.fileMasks[whiteKingFile] & whitePawnShield) == 0) missingPawnShieldDifference++;
+            if ((PrecomputedData.fileMasks[whiteKingFile - 1] & whitePawnShield) == 0) missingPawnShieldDifference++;
+
+            if ((PrecomputedData.fileMasks[whiteKingFile - 1] & whitePawns) == 0) openFileAboveKingDifference++;
+            if ((PrecomputedData.fileMasks[whiteKingFile] & whitePawns) == 0) openFileAboveKingDifference++;
+        }
+        else
+        {
+            if ((PrecomputedData.fileMasks[whiteKingFile] & whitePawnShield) == 0) missingPawnShieldDifference++;
+            if ((PrecomputedData.fileMasks[whiteKingFile + 1] & whitePawnShield) == 0) missingPawnShieldDifference++;
+            if ((PrecomputedData.fileMasks[whiteKingFile - 1] & whitePawnShield) == 0) missingPawnShieldDifference++;
+
+            if ((PrecomputedData.fileMasks[whiteKingFile - 1] & whitePawns) == 0) openFileAboveKingDifference++;
+            if ((PrecomputedData.fileMasks[whiteKingFile + 1] & whitePawns) == 0) openFileAboveKingDifference++;
+            if ((PrecomputedData.fileMasks[whiteKingFile] & whitePawns) == 0) openFileAboveKingDifference++;
+        }
 
 
-        if (blackKingFile > 0 && ((PrecomputedData.fileMasks[blackKingFile - 1] & blackPawns) == 0)) openFileAboveKingDifference--;
 
-        if (blackKingFile < 7 && ((PrecomputedData.fileMasks[blackKingFile + 1] & blackPawns) == 0)) openFileAboveKingDifference--;
+        if (blackKingFile == 0)
+        {
+            if ((PrecomputedData.fileMasks[blackKingFile] & blackPawnShield) == 0) missingPawnShieldDifference--;
+            if ((PrecomputedData.fileMasks[blackKingFile + 1] & blackPawnShield) == 0) missingPawnShieldDifference--;
 
-        if ((PrecomputedData.fileMasks[blackKingFile] & blackPawns) == 0) openFileAboveKingDifference--;
+            if ((PrecomputedData.fileMasks[blackKingFile + 1] & blackPawns) == 0) openFileAboveKingDifference--;
+            if ((PrecomputedData.fileMasks[blackKingFile] & blackPawns) == 0) openFileAboveKingDifference--;
+        }
+        else if (blackKingFile == 7)
+        {
+            if ((PrecomputedData.fileMasks[blackKingFile] & blackPawnShield) == 0) missingPawnShieldDifference--;
+            if ((PrecomputedData.fileMasks[blackKingFile - 1] & blackPawnShield) == 0) missingPawnShieldDifference--;
+
+            if ((PrecomputedData.fileMasks[blackKingFile - 1] & blackPawns) == 0) openFileAboveKingDifference--;
+            if ((PrecomputedData.fileMasks[blackKingFile] & blackPawns) == 0) openFileAboveKingDifference--;
+        }
+        else
+        {
+            if ((PrecomputedData.fileMasks[blackKingFile] & blackPawnShield) == 0) missingPawnShieldDifference--;
+            if ((PrecomputedData.fileMasks[blackKingFile + 1] & blackPawnShield) == 0) missingPawnShieldDifference--;
+            if ((PrecomputedData.fileMasks[blackKingFile - 1] & blackPawnShield) == 0) missingPawnShieldDifference--;
+
+            if ((PrecomputedData.fileMasks[blackKingFile - 1] & blackPawns) == 0) openFileAboveKingDifference--;
+            if ((PrecomputedData.fileMasks[blackKingFile + 1] & blackPawns) == 0) openFileAboveKingDifference--;
+            if ((PrecomputedData.fileMasks[blackKingFile] & blackPawns) == 0) openFileAboveKingDifference--;
+        }
+
+        result += (Weights[784] * missingPawnShieldDifference * mgWeight) >> 8;
 
         result += (Weights[785] * openFileAboveKingDifference * mgWeight) >> 8;
 
 
 
 
-
         for (int i = 0; i < 4; i++)
         {
+            //int pawnStormRankDifference = BitBoardHelper.BitCount(PrecomputedData.kingPawnCoverMasks[board.whiteKingSquare + PrecomputedData.Up * i] & blackPawns) - BitBoardHelper.BitCount(PrecomputedData.kingPawnCoverMasks[board.blackKingSquare + 64 + PrecomputedData.Down * i] & whitePawns);
+
             int pawnStormRankDifference = 0;
 
             if (whiteKingFile > 0 && BitBoardHelper.ContainsSquare(blackPawns, board.whiteKingSquare + PrecomputedData.UpLeft + PrecomputedData.Up * i)) pawnStormRankDifference++;
@@ -434,7 +442,6 @@ public class Evaluation
             if (blackKingFile > 0 && BitBoardHelper.ContainsSquare(whitePawns, board.blackKingSquare + PrecomputedData.DownLeft + PrecomputedData.Down * i)) pawnStormRankDifference--;
             if (blackKingFile < 7 && BitBoardHelper.ContainsSquare(whitePawns, board.blackKingSquare + PrecomputedData.DownRight + PrecomputedData.Down * i)) pawnStormRankDifference--;
             if (BitBoardHelper.ContainsSquare(whitePawns, board.blackKingSquare + PrecomputedData.Down + PrecomputedData.Down * i)) pawnStormRankDifference--;
-
 
             result += (Weights[786 + i] * pawnStormRankDifference * mgWeight) >> 8;
         }
