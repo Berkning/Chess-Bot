@@ -15,12 +15,21 @@ public static class OpeningBookCreator
     public const int MaxDepth = 3; //The maximum depth for the book to go from the opening position
     public const int MaxCandidates = 3; //The maximum amount of candidates to assume the opponent might play in a given position. If this is 5, for example, we assume the opponent will play one of the top 5 moves in the position, and nothing else
 
+    //Essentially behaves like LMR reduction rate
+    public const int AlternativeCandidateReductionRate = 1; //The amount we reduce our search depth for "alternative" candidate moves. Multiplied by the sorted index, so candidate #1 is searched to full depth, #2 is searched to full depth - ReductionRate, #3 is searched to full depth - ReductionRate*2 and so on
+
+    private static int totalRejects;
+    private static int totalAccepted;
+
     public static void CreateBook()
     {
         board = new Board();
         search = new Search(board, callback, 0, null);
         moveGenerator = new MoveGenerator(board);
         search.searchDepth = int.MaxValue;
+
+        totalAccepted = 0;
+        totalRejects = 0;
 
         FenUtility.LoadPositionFromFen(board, FenUtility.StartPosFen);
 
@@ -45,7 +54,7 @@ public static class OpeningBookCreator
         {
             board.MakeMove(candidateMoves[i].move, true);
 
-            SearchCandidatesRecursive(depth - 1);
+            SearchCandidatesRecursive(depth - 1 - i * AlternativeCandidateReductionRate);
 
             board.UnMakeMove(candidateMoves[i].move, true);
         }
