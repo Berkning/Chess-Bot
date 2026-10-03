@@ -20,6 +20,7 @@ public static class OpeningBookCreator
 
     private static int totalRejects;
     private static int totalAccepted;
+    private static int totalEntries;
 
     public static void CreateBook()
     {
@@ -30,6 +31,7 @@ public static class OpeningBookCreator
 
         totalAccepted = 0;
         totalRejects = 0;
+        totalEntries = 0;
 
         FenUtility.LoadPositionFromFen(board, FenUtility.StartPosFen);
 
@@ -39,6 +41,8 @@ public static class OpeningBookCreator
         stopwatch.Stop();
 
         Console.WriteLine("Done in " + stopwatch.ElapsedMilliseconds + "ms");
+        Console.WriteLine("Accepted Candidates: " + totalAccepted + " Rejects: " + totalRejects);
+        Console.WriteLine("Book now consists of " + totalEntries + " entries");
     }
 
     private static void SearchCandidatesRecursive(int depth)
@@ -79,11 +83,12 @@ public static class OpeningBookCreator
 
             if (eval > MaxEvalDrop)
             {
-                Console.WriteLine(BoardHelper.GetMoveNameUCI(moves[i]) + " Accepted as candidate");
+                //Console.WriteLine(BoardHelper.GetMoveNameUCI(moves[i]) + " Accepted as candidate");
+                totalAccepted++;
 
                 candidates.Add(new CandidateMove(moves[i], eval));
             }
-            else Console.WriteLine(BoardHelper.GetMoveNameUCI(moves[i]) + " rejected");
+            else totalRejects++;
 
 
             board.UnMakeMove(moves[i], true);
@@ -101,6 +106,7 @@ public static class OpeningBookCreator
         Move bestMove = search.StartInternalSearch(BookEntrySearchTime).bestMove;
 
         Console.WriteLine("Best move is: " + BoardHelper.GetMoveNameUCI(bestMove));
+        totalEntries++;
     }
 
 
