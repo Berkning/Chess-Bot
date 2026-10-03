@@ -122,6 +122,13 @@ public static class FenUtility
 
         if (epString == "-") return;
 
+        int index = BoardHelper.IndexFromString(epString) + (board.colorToMove == Piece.White ? PrecomputedData.Down : PrecomputedData.Up);
+
+        int enemyPawn = board.colorToMove == Piece.White ? Piece.White | Piece.Pawn : Piece.Black | Piece.Pawn;
+
+        if (board.Squares[index + PrecomputedData.Right] != enemyPawn && board.Squares[index + PrecomputedData.Left] != enemyPawn) return; //If EP capture isn't possible, don't add it to the gamestate (to align with polyglot zobrist format)
+
+
         int file = BoardHelper.FileFromString(epString) + 1;
 
         board.currentGameState |= (uint)(file << 5);
@@ -212,7 +219,7 @@ public static class FenUtility
 
         // En-passant
         fen += ' ';
-        int epFile = (int)(board.currentGameState & Board.epFileMask)>>5;
+        int epFile = (int)(board.currentGameState & Board.epFileMask) >> 5;
         if (epFile == 0)
         {
             fen += '-';

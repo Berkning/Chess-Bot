@@ -197,9 +197,15 @@ public class Board //TODOnt prob: Try maybe changing to struct?
 
         if (move.flag == Move.Flag.PawnTwoForward)
         {
-            int file = BoardHelper.IndexToFile(move.targetSquare) + 1;
-            currentGameState |= (ushort)(file << 5);
-            currentZobrist ^= Zobrist.epArray[file - 1]; //Add new ep file to zobrist
+            int enemyPawn = Piece.OppositeColor(Squares[move.startSquare]) | Piece.Pawn;
+
+            //Don't update zobrist with the new ep square if an ep capture isn't actually possible (to align with polyglot format)
+            if (Squares[move.targetSquare + PrecomputedData.Right] == enemyPawn || Squares[move.targetSquare + PrecomputedData.Left] == enemyPawn)
+            {
+                int file = BoardHelper.IndexToFile(move.targetSquare) + 1;
+                currentGameState |= (ushort)(file << 5);
+                currentZobrist ^= Zobrist.epArray[file - 1]; //Add new ep file to zobrist
+            }
         }
         else if (move.flag == Move.Flag.Castling)
         {
@@ -520,6 +526,7 @@ public class Piece
     public const int Rook = 5; //0b101
     public const int Queen = 6; //0b110
 
+    //No reason for this not to just be one bit
     public const int White = 8;
     public const int Black = 16;
 
