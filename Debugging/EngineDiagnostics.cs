@@ -119,32 +119,33 @@ public static class EngineDiagnostics
     {
         bool passed = true;
 
-        foreach (DiagnosticPosition position in positions)
+        for (int i = 0; i < positions.Length; i++)
         {
-            FenUtility.LoadPositionFromFen(board, position.fen);
+            FenUtility.LoadPositionFromFen(board, positions[i].fen);
             ulong ourZobrist = Zobrist.Hash(board);
 
-            if (ourZobrist != position.zobrist)
+            if (ourZobrist != positions[i].zobrist)
             {
                 passed = false;
 
-                Console.WriteLine("Zobrist did not match in position: " + position.fen);
-                Console.WriteLine("Expected: " + position.zobrist + " Got: " + ourZobrist);
+                Console.WriteLine("Position " + (i + 1) + "/" + positions.Length + " Failed ❌");
+                Console.WriteLine("Zobrist did not match in position: " + positions[i].fen);
+                Console.WriteLine("Expected: " + positions[i].zobrist.ToString("x") + " Got: " + ourZobrist.ToString("x"));
                 Console.WriteLine("Attempting to find issue...");
 
-                ulong originalZobristRandom = position.zobrist ^ ourZobrist;
+                ulong originalZobristRandom = positions[i].zobrist ^ ourZobrist;
 
                 //Find the specific number that changed the zobrist
                 if (originalZobristRandom == Zobrist.sideToMove) Console.WriteLine("SideToMove Zobrist wasn't applied correctly");
 
-                for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
                 {
-                    if (originalZobristRandom == Zobrist.epArray[i]) Console.WriteLine("EP Zobrist at index " + i + " wasn't applied correctly");
+                    if (originalZobristRandom == Zobrist.epArray[j]) Console.WriteLine("EP Zobrist at index " + j + " wasn't applied correctly");
                 }
 
-                for (int i = 0; i < 16; i++)
+                for (int j = 0; j < 16; j++)
                 {
-                    if (originalZobristRandom == Zobrist.castlingArray[i]) Console.WriteLine("Castle Zobrist at index " + i + " wasn't applied correctly");
+                    if (originalZobristRandom == Zobrist.castlingArray[j]) Console.WriteLine("Castle Zobrist at index " + j + " wasn't applied correctly");
                 }
 
                 for (int p = 0; p < 6; p++)
@@ -157,6 +158,10 @@ public static class EngineDiagnostics
                         }
                     }
                 }
+            }
+            else
+            {
+                Console.WriteLine("Position " + (i + 1) + "/" + positions.Length + " Zobrist: " + ourZobrist.ToString("x") + " ✅");
             }
         }
 
@@ -405,7 +410,7 @@ public static class EngineDiagnostics
             if (zobrist != board.currentZobrist)
             {
                 Console.WriteLine("Zobrist Corrupted");
-                Console.WriteLine("Before: " + zobrist + " After: " + board.currentZobrist);
+                Console.WriteLine("Before: " + zobrist.ToString("x") + " After: " + board.currentZobrist.ToString("x"));
                 ulong originalZobristRandom = zobrist ^ board.currentZobrist;
 
                 //Find the specific number that changed the zobrist
@@ -439,7 +444,7 @@ public static class EngineDiagnostics
             else if (zobrist != Zobrist.Hash(board))
             {
                 Console.WriteLine("Zobrist not updated correctly");
-                Console.WriteLine("Zobrist should be: " + Zobrist.Hash(board) + " but board holds: " + zobrist);
+                Console.WriteLine("Zobrist should be: " + Zobrist.Hash(board).ToString("x") + " but board holds: " + zobrist.ToString("x"));
 
                 ulong originalZobristRandom = zobrist ^ Zobrist.Hash(board);
 
