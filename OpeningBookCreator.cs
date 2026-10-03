@@ -1,5 +1,7 @@
 
 
+using System.Diagnostics;
+
 public static class OpeningBookCreator
 {
     private static Action<Move, int> callback = (result, id) => { };
@@ -9,9 +11,9 @@ public static class OpeningBookCreator
 
     public const int MaxEvalDrop = -50; //If a move causes the eval to drop to, or below, this value, we will not add the resulting position to the book
     public const int BookEntrySearchTime = 10000; //The amount of time to spend searching to figure out the best move in a given position, before adding the result to the book
-    public const int ResponseCandidateSearchTime = 50; //The amount of time to spend searching to figure out whether a move is good enough, that we should account for the possibility of our opponent playing it, as in add the resulting position (with best move) to the book
-    public const int MaxDepth = 2; //The maximum depth for the book to go from the opening position
-    public const int MaxCandidates = 6; //The maximum amount of candidates to assume the opponent might play in a given position. If this is 5, for example, we assume the opponent will play one of the top 5 moves in the position, and nothing else
+    public const int ResponseCandidateSearchTime = 100; //The amount of time to spend searching to figure out whether a move is good enough, that we should account for the possibility of our opponent playing it, as in add the resulting position (with best move) to the book
+    public const int MaxDepth = 3; //The maximum depth for the book to go from the opening position
+    public const int MaxCandidates = 3; //The maximum amount of candidates to assume the opponent might play in a given position. If this is 5, for example, we assume the opponent will play one of the top 5 moves in the position, and nothing else
 
     public static void CreateBook()
     {
@@ -22,10 +24,12 @@ public static class OpeningBookCreator
 
         FenUtility.LoadPositionFromFen(board, FenUtility.StartPosFen);
 
-
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Restart();
         SearchCandidatesRecursive(MaxDepth);
+        stopwatch.Stop();
 
-        Console.WriteLine("Done");
+        Console.WriteLine("Done in " + stopwatch.ElapsedMilliseconds + "ms");
     }
 
     private static void SearchCandidatesRecursive(int depth)
