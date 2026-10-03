@@ -136,6 +136,53 @@ public class Search
         callback.Invoke(bestMove, threadID);
     }
 
+    public (Move bestMove, int eval) StartInternalSearch(int time)
+    {
+        bestMove = Move.nullMove;
+        bestEval = NegativeInfinity;
+        repetitionTable.Copy(board.repetitionTable);
+
+        nodeCount = -1; //Dont want to include start node
+
+        clock.Reset();
+
+        moveOrdering.DecayHistory();
+
+        searchTime = time;
+        clock.Start();
+
+
+        int prevResult = NegativeInfinity;
+
+
+        int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
+
+        if (resultFromLastSearch != TranspositionTable.LookupFailed)
+        {
+            prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
+        }
+
+        for (uint depth = 1; depth <= searchDepth; depth++)
+        {
+            if (engine != null)
+            {
+                engine.StartHelperThreads((int)depth);
+                prevResult = AspirationSearch(depth, prevResult);
+                engine.StopHelperThreads();
+            }
+            else prevResult = AspirationSearch(depth, prevResult);
+
+            if (clock.ElapsedMilliseconds >= searchTime)
+            {
+                break;
+            }
+        }
+
+        clock.Stop();
+
+        return (bestMove, bestEval);
+    }
+
 
 
 

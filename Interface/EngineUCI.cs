@@ -183,6 +183,13 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                     Console.WriteLine("info string Set numThreads to " + count);
                 }
                 break;
+            case "createBook":
+                if (args.Length < 2) Console.WriteLine("blah blah");
+                else
+                {
+                    OpeningBookCreator.CreateBook();
+                }
+                break;
             case "book":
                 if (args.Length == 1) Console.WriteLine(OpeningBook.bookPath);
                 else
