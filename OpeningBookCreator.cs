@@ -1,5 +1,6 @@
 
 
+using System.Buffers.Binary;
 using System.Diagnostics;
 
 public static class OpeningBookCreator
@@ -10,17 +11,20 @@ public static class OpeningBookCreator
     private static Board board;
 
     public const int MaxEvalDrop = -50; //If a move causes the eval to drop to, or below, this value, we will not add the resulting position to the book
-    public const int BookEntrySearchTime = 3500; //The amount of time to spend searching to figure out the best move in a given position, before adding the result to the book
+    public const int BookEntrySearchTime = 10; //The amount of time to spend searching to figure out the best move in a given position, before adding the result to the book
     public const int ResponseCandidateSearchTime = 50; //The amount of time to spend searching to figure out whether a move is good enough, that we should account for the possibility of our opponent playing it, as in add the resulting position (with best move) to the book
     //public const int MaxDepth = 1; //The maximum depth for the book to go from the opening position
-    public const int MaxCandidates = 3; //The maximum amount of candidates to assume the opponent might play in a given position. If this is 5, for example, we assume the opponent will play one of the top 5 moves in the position, and nothing else
+    public const int MaxCandidates = 5; //The maximum amount of candidates to assume the opponent might play in a given position. If this is 5, for example, we assume the opponent will play one of the top 5 moves in the position, and nothing else
 
     //Essentially behaves like LMR reduction rate
-    public const int AlternativeCandidateReductionRate = 2; //The amount we reduce our search depth for "alternative" candidate moves. Multiplied by the sorted index, so candidate #1 is searched to full depth, #2 is searched to full depth - ReductionRate, #3 is searched to full depth - ReductionRate*2 and so on
+    public const int AlternativeCandidateReductionRate = 1; //The amount we reduce our search depth for "alternative" candidate moves. Multiplied by the sorted index, so candidate #1 is searched to full depth, #2 is searched to full depth - ReductionRate, #3 is searched to full depth - ReductionRate*2 and so on
 
     private static int totalRejects;
     private static int totalAccepted;
     private static int totalEntries;
+
+    public static List<PolyglotEntry> entries = new List<PolyglotEntry>();
+
 
     public static void CreateBook(int maxDepth)
     {
@@ -43,6 +47,41 @@ public static class OpeningBookCreator
         Console.WriteLine("Done in " + stopwatch.ElapsedMilliseconds + "ms");
         Console.WriteLine("Accepted Candidates: " + totalAccepted + " Rejects: " + totalRejects);
         Console.WriteLine("Book now consists of " + totalEntries + " entries");
+
+        WriteBook("CUSTOMBOOK.bin");
+    }
+
+
+    public static void WriteBook(string filePath)
+    {
+        // Sort entries by key (lowest first).
+        entries.Sort((a, b) => a.key.CompareTo(b.key));
+
+        using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+
+        Span<byte> buffer = stackalloc byte[16];
+
+        foreach (PolyglotEntry entry in entries)
+        {
+            // Key: 8 bytes
+            BinaryPrimitives.WriteUInt64BigEndian(
+                buffer.Slice(0, 8), entry.key);
+
+            // Move: 2 bytes
+            BinaryPrimitives.WriteUInt16BigEndian(
+                buffer.Slice(8, 2), entry.move);
+
+            // Weight: 2 bytes
+            BinaryPrimitives.WriteUInt16BigEndian(
+                buffer.Slice(10, 2), entry.weight);
+
+            // Learn: 4 bytes
+            BinaryPrimitives.WriteUInt32BigEndian(
+                buffer.Slice(12, 4), entry.learn);
+
+            // Write the complete 16-byte entry.
+            stream.Write(buffer);
+        }
     }
 
     private static void SearchCandidatesRecursive(int depth)
@@ -58,7 +97,13 @@ public static class OpeningBookCreator
         {
             board.MakeMove(candidateMoves[i].move, true);
 
-            SearchCandidatesRecursive(depth - 1 - i * AlternativeCandidateReductionRate);
+            int reduction = 0;
+            if (i >= 2)
+            {
+                reduction = (i - 1) * AlternativeCandidateReductionRate;
+            }
+
+            SearchCandidatesRecursive(depth - 1 - reduction);
 
             board.UnMakeMove(candidateMoves[i].move, true);
         }
@@ -107,6 +152,7 @@ public static class OpeningBookCreator
 
         Console.WriteLine("Best move is: " + BoardHelper.GetMoveNameUCI(bestMove));
         totalEntries++;
+        entries.Add(new PolyglotEntry(board.currentZobrist, OpeningBook.TranslateMoveToPolyglot(bestMove), ushort.MaxValue, 0));
     }
 
 
@@ -146,6 +192,22 @@ public static class OpeningBookCreator
         {
             move = _move;
             eval = _eval;
+        }
+    }
+
+    public struct PolyglotEntry
+    {
+        public ulong key;
+        public ushort move;
+        public ushort weight;
+        public uint learn;
+
+        public PolyglotEntry(ulong key, ushort move, ushort weight, uint learn)
+        {
+            this.key = key;
+            this.move = move;
+            this.weight = weight;
+            this.learn = learn;
         }
     }
 }
