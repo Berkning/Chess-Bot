@@ -296,7 +296,7 @@ public static class Zobrist
 
         //Add ep file to key
         int epFile = (int)((board.currentGameState & Board.epFileMask) >> 5) - 1;
-        if (epFile != -1) key ^= epArray[epFile]; //Should be conditional on whether an enemy pawn is able to capture the ep pawn
+        if (epFile != -1) key ^= epArray[epFile];
 
         //Add colorToMove to key
         key ^= sideToMove * (ulong)board.opponentColorBit;
