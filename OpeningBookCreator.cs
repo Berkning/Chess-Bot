@@ -10,7 +10,7 @@ public static class OpeningBookCreator
     public const int MaxEvalDrop = -60; //If a move causes the eval to drop to, or below, this value, we will not add the resulting position to the book
     public const int BookEntrySearchTime = 10000; //The amount of time to spend searching to figure out the best move in a given position, before adding the result to the book
     public const int ResponseCandidateSearchTime = 1000; //The amount of time to spend searching to figure out whether a move is good enough, that we should account for the possibility of our opponent playing it, as in add the resulting position (with best move) to the book
-    public const int MaxDepth = 6; //The maximum depth for the book to go from the opening position
+    public const int MaxDepth = 1; //The maximum depth for the book to go from the opening position
 
     public static void CreateBook()
     {
@@ -23,15 +23,15 @@ public static class OpeningBookCreator
 
         AddBestMoveToBook();
 
-        GetCandidateMoves();
+        GetCandidateMoves(MaxDepth);
     }
 
-    private static List<CandidateMove> GetCandidateMoves()
+    private static void GetCandidateMoves(int depth)
     {
+        if (depth <= 0) return;
+
         Span<Move> moves = stackalloc Move[256];
         int moveCount = moveGenerator.GenerateMoves(ref moves);
-
-        List<CandidateMove> candidates = new List<CandidateMove>();
 
 
         for (int i = 0; i < moveCount; i++)
@@ -43,18 +43,19 @@ public static class OpeningBookCreator
             if (eval > MaxEvalDrop)
             {
                 Console.WriteLine(BoardHelper.GetMoveNameUCI(moves[i]) + " Accepted as candidate");
-                candidates.Add(new CandidateMove(moves[i], eval));
+
+                AddBestMoveToBook();
+
+                GetCandidateMoves(depth - 1);
             }
             else Console.WriteLine(BoardHelper.GetMoveNameUCI(moves[i]) + " rejected");
 
 
             board.UnMakeMove(moves[i], true);
         }
-
-        SortCandidates(candidates);
-
-        return candidates;
     }
+
+
 
     private static void AddBestMoveToBook()
     {
