@@ -89,6 +89,8 @@ public static class OpeningBook
             if (Math.Abs(fromRank - toRank) == 2) return new Move(startSquare, targetSquare, Move.Flag.PawnTwoForward); //If pawn two forward
 
             if (fromFile - toFile != 0 && Piece.IsNone(Engine.mainBoard.Squares[targetSquare])) return new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture); //If we moved diagonally, and the target square is empty - must be en passant
+
+            return new Move(startSquare, targetSquare);
         }
 
         switch (promotionPiece)
@@ -106,6 +108,49 @@ public static class OpeningBook
         Console.WriteLine("Error translating polyglot move - assumed was promotion but wasn't -> " + move);
 
         return Move.nullMove;
+    }
+
+    public static ushort TranslateMoveToPolyglot(Move move)
+    {
+        ushort targetSquare = (ushort)move.targetSquare;
+
+        if (move.flag == Move.Flag.Castling)
+        {
+            switch (targetSquare)
+            {
+                case BoardHelper.g1:
+                    //White Shortcastle
+                    targetSquare = BoardHelper.h1;
+                    break;
+                case BoardHelper.g8:
+                    //Black Shortcastle
+                    targetSquare = BoardHelper.h8;
+                    break;
+                case BoardHelper.c1:
+                    //White Longcastle
+                    targetSquare = BoardHelper.a1;
+                    break;
+                case BoardHelper.c8:
+                    //Black Longcastle
+                    targetSquare = BoardHelper.a8;
+                    break;
+            }
+        }
+
+
+        ushort toFile = (ushort)BoardHelper.IndexToFile(targetSquare);
+        ushort toRank = (ushort)BoardHelper.IndexToRank(targetSquare);
+        ushort fromFile = (ushort)BoardHelper.IndexToFile(move.startSquare);
+        ushort fromRank = (ushort)BoardHelper.IndexToRank(move.startSquare);
+
+        ushort promotionPiece = 0;
+
+        if (move.flag == Move.Flag.PromoteToKnight) promotionPiece = 1;
+        else if (move.flag == Move.Flag.PromoteToBishop) promotionPiece = 2;
+        else if (move.flag == Move.Flag.PromoteToRook) promotionPiece = 3;
+        else if (move.flag == Move.Flag.PromoteToQueen) promotionPiece = 4;
+
+        return (ushort)(toFile | (toRank << 3) | (fromFile << 6) | (fromRank << 9) | (promotionPiece << 12));
     }
 
 
