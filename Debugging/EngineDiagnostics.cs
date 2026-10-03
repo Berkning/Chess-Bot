@@ -360,6 +360,41 @@ public static class EngineDiagnostics
 
                 success = false;
             }
+            else if (zobrist != Zobrist.Hash(board))
+            {
+                Console.WriteLine("Zobrist not updated correctly");
+                Console.WriteLine("Zobrist should be: " + Zobrist.Hash(board) + " but board holds: " + zobrist);
+
+                ulong originalZobristRandom = zobrist ^ Zobrist.Hash(board);
+
+                //Find the specific number that changed the zobrist
+                if (originalZobristRandom == Zobrist.sideToMove) Console.WriteLine("SideToMove Zobrist wasn't applied correctly");
+
+                for (int i = 0; i < 8; i++)
+                {
+                    if (originalZobristRandom == Zobrist.epArray[i]) Console.WriteLine("EP Zobrist at index " + i + " wasn't applied correctly");
+                }
+
+                for (int i = 0; i < 16; i++)
+                {
+                    if (originalZobristRandom == Zobrist.castlingArray[i]) Console.WriteLine("Castle Zobrist at index " + i + " wasn't applied correctly");
+                }
+
+                for (int p = 0; p < 6; p++)
+                {
+                    for (int c = 0; c < 2; c++)
+                    {
+                        for (int sq = 0; sq < 64; sq++)
+                        {
+                            if (originalZobristRandom == Zobrist.piecesArray[p, c, sq]) Console.WriteLine("Piece Zobrist at piece " + p + " with color " + c + " on square " + sq + " wasn't applied correctly");
+                        }
+                    }
+                }
+
+
+
+                success = false;
+            }
 
             if (gameState != board.currentGameState)
             {
