@@ -187,7 +187,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 if (args.Length < 2) Console.WriteLine("blah blah");
                 else
                 {
-                    OpeningBookCreator.CreateBook();
+                    OpeningBookCreator.CreateBook(int.Parse(args[1]));
                 }
                 break;
             case "book":

@@ -10,19 +10,19 @@ public static class OpeningBookCreator
     private static Board board;
 
     public const int MaxEvalDrop = -50; //If a move causes the eval to drop to, or below, this value, we will not add the resulting position to the book
-    public const int BookEntrySearchTime = 10000; //The amount of time to spend searching to figure out the best move in a given position, before adding the result to the book
-    public const int ResponseCandidateSearchTime = 100; //The amount of time to spend searching to figure out whether a move is good enough, that we should account for the possibility of our opponent playing it, as in add the resulting position (with best move) to the book
-    public const int MaxDepth = 3; //The maximum depth for the book to go from the opening position
+    public const int BookEntrySearchTime = 3500; //The amount of time to spend searching to figure out the best move in a given position, before adding the result to the book
+    public const int ResponseCandidateSearchTime = 50; //The amount of time to spend searching to figure out whether a move is good enough, that we should account for the possibility of our opponent playing it, as in add the resulting position (with best move) to the book
+    //public const int MaxDepth = 1; //The maximum depth for the book to go from the opening position
     public const int MaxCandidates = 3; //The maximum amount of candidates to assume the opponent might play in a given position. If this is 5, for example, we assume the opponent will play one of the top 5 moves in the position, and nothing else
 
     //Essentially behaves like LMR reduction rate
-    public const int AlternativeCandidateReductionRate = 1; //The amount we reduce our search depth for "alternative" candidate moves. Multiplied by the sorted index, so candidate #1 is searched to full depth, #2 is searched to full depth - ReductionRate, #3 is searched to full depth - ReductionRate*2 and so on
+    public const int AlternativeCandidateReductionRate = 2; //The amount we reduce our search depth for "alternative" candidate moves. Multiplied by the sorted index, so candidate #1 is searched to full depth, #2 is searched to full depth - ReductionRate, #3 is searched to full depth - ReductionRate*2 and so on
 
     private static int totalRejects;
     private static int totalAccepted;
     private static int totalEntries;
 
-    public static void CreateBook()
+    public static void CreateBook(int maxDepth)
     {
         board = new Board();
         search = new Search(board, callback, 0, null);
@@ -37,7 +37,7 @@ public static class OpeningBookCreator
 
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Restart();
-        SearchCandidatesRecursive(MaxDepth);
+        SearchCandidatesRecursive(maxDepth);
         stopwatch.Stop();
 
         Console.WriteLine("Done in " + stopwatch.ElapsedMilliseconds + "ms");
