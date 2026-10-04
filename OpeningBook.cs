@@ -10,7 +10,7 @@ public static class OpeningBook
     private static bool isInitialized = false;
 
 
-    public static Move GetMove(ulong zobrist) //TODO: http://hgm.nubati.net/book_format.html  "The entries are ordered according to key. Lowest key first. " - Could speed up search an insane amount - doesn't seem to be the case with current book
+    public static Move GetMove(Board board) //TODO: http://hgm.nubati.net/book_format.html  "The entries are ordered according to key. Lowest key first. " - Could speed up search an insane amount - doesn't seem to be the case with current book
     {
         int startIndex = random.Next() % bookEntries.Length; //Random starting index to search from
         int direction = random.Next() % 2 == 1 ? -1 : 1; //Randomly picks whether to search up or down from starting index, based on whether the random number turns out even or odd
@@ -25,7 +25,7 @@ public static class OpeningBook
 
             for (int i = startIndex; i >= 0 && i < bookEntries.Length; i += direction)
             {
-                if (bookEntries[i].key == zobrist)
+                if (bookEntries[i].key == board.currentZobrist)
                 {
                     if (bookEntries[i].move == 0)
                     {
@@ -34,7 +34,7 @@ public static class OpeningBook
                     }
 
                     Console.WriteLine("info string Found book move after checking " + checkedEntryCount + " entries");
-                    return TranslatePolyglotMove(bookEntries[i].move);
+                    return TranslatePolyglotMove(board, bookEntries[i].move);
                 }
 
                 checkedEntryCount++;
@@ -47,7 +47,7 @@ public static class OpeningBook
         return Move.nullMove;
     }
 
-    private static Move TranslatePolyglotMove(ushort move)
+    public static Move TranslatePolyglotMove(Board board, ushort move)
     {
         int toFile = move & 0b111;
         int toRank = (move & 0b111000) >> 3;
@@ -58,7 +58,7 @@ public static class OpeningBook
         int startSquare = BoardHelper.CoordToIndex(fromFile, fromRank);
         int targetSquare = BoardHelper.CoordToIndex(toFile, toRank);
 
-        int movedPiece = Engine.mainBoard.Squares[startSquare];
+        int movedPiece = board.Squares[startSquare];
 
         if (Piece.Type(movedPiece) != Piece.Pawn)
         {
@@ -88,7 +88,7 @@ public static class OpeningBook
         {
             if (Math.Abs(fromRank - toRank) == 2) return new Move(startSquare, targetSquare, Move.Flag.PawnTwoForward); //If pawn two forward
 
-            if (fromFile - toFile != 0 && Piece.IsNone(Engine.mainBoard.Squares[targetSquare])) return new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture); //If we moved diagonally, and the target square is empty - must be en passant
+            if (fromFile - toFile != 0 && Piece.IsNone(board.Squares[targetSquare])) return new Move(startSquare, targetSquare, Move.Flag.EnPassantCapture); //If we moved diagonally, and the target square is empty - must be en passant
 
             return new Move(startSquare, targetSquare);
         }

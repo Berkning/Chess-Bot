@@ -65,40 +65,47 @@ public static class EngineDiagnostics
         if (n == 0 || n == 1)
         {
             Console.WriteLine("");
-            Console.WriteLine("\x1b[1m#3 Verifying Zobrist Hashing...\x1b[0m");
+            Console.WriteLine("\x1b[1m#1 Verifying Zobrist Hashing...\x1b[0m");
             VerifyZobristHashing();
         }
-
 
         if (n == 0 || n == 2)
         {
             Console.WriteLine("");
-            Console.WriteLine("\x1b[1m#1 Verifying Make/UnMake Move...\x1b[0m");
-            VerifyMakeUnmake();
+            Console.WriteLine("\x1b[1m#2 Verifying Polyglot Move Translation...\x1b[0m");
+            VerifyPolyglotMoveTranslation();
         }
 
 
         if (n == 0 || n == 3)
         {
             Console.WriteLine("");
-            Console.WriteLine("\x1b[1m#2 Verifying Search...\x1b[0m");
-            VerifySearch();
+            Console.WriteLine("\x1b[1m#3 Verifying Make/UnMake Move...\x1b[0m");
+            VerifyMakeUnmake();
         }
 
 
         if (n == 0 || n == 4)
         {
             Console.WriteLine("");
-            Console.WriteLine("\x1b[1m#3 Verifying NullMove Make/UnMake...\x1b[0m");
-            VerifyNullMove();
+            Console.WriteLine("\x1b[1m#4 Verifying Search...\x1b[0m");
+            VerifySearch();
         }
 
 
         if (n == 0 || n == 5)
         {
+            Console.WriteLine("");
+            Console.WriteLine("\x1b[1m#5 Verifying NullMove Make/UnMake...\x1b[0m");
+            VerifyNullMove();
+        }
+
+
+        if (n == 0 || n == 6)
+        {
             //Always keep this last bc user can just run perft separately
             Console.WriteLine("");
-            Console.WriteLine("\x1b[1m#4 Verifying MoveGen...\x1b[0m");
+            Console.WriteLine("\x1b[1m#6 Verifying MoveGen...\x1b[0m");
             VerifyMoveGeneration();
         }
     }
@@ -113,9 +120,47 @@ public static class EngineDiagnostics
     }
 
 
+
+    #region Polyglot Move Translation
+
+    private static void VerifyPolyglotMoveTranslation()
+    {
+        bool passed = true;
+
+        for (int i = 0; i < positions.Length; i++)
+        {
+            FenUtility.LoadPositionFromFen(board, positions[i].fen);
+
+            Span<Move> moves = stackalloc Move[256];
+
+            int moveCount = moveGenerator.GenerateMoves(ref moves, false);
+
+            for (int j = 0; j < int.Min(moveCount, MovesPerPosition); j++)
+            {
+                ushort polyglot = OpeningBook.TranslateMoveToPolyglot(moves[j]);
+                Move retranslation = OpeningBook.TranslatePolyglotMove(board, polyglot);
+
+                if (moves[j].data != retranslation.data)
+                {
+                    Console.WriteLine("Polyglot translation incorrect. Move: " + moves[j].data + "(" + BoardHelper.GetMoveNameUCI(moves[j]) + ")" + "Gave: " + polyglot + " Retranslation was: " + retranslation.data + "(" + BoardHelper.GetMoveNameUCI(retranslation) + ")");
+                    passed = false;
+                }
+            }
+        }
+
+        Console.ForegroundColor = passed ? ConsoleColor.Green : ConsoleColor.Red;
+        Console.WriteLine(passed ? "Polyglot Translation \x1b[1mPassed ✅\x1b[0m" : "Polyglot Translation \x1b[1mFailed ❌\x1b[0m");
+        Console.ResetColor();
+    }
+
+
+    #endregion
+
+
+
     #region Zobrist Hashing
 
-    public static void VerifyZobristHashing()
+    private static void VerifyZobristHashing()
     {
         bool passed = true;
 

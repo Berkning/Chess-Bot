@@ -92,7 +92,7 @@ public class Engine
         //TODOne: Adjust TT on first book move
         if (!outOfBook) //If we aren't yet out of book, check if the position is present in our opening book. If not, mark us as out of book
         {
-            Move bookMove = OpeningBook.GetMove(mainBoard.currentZobrist);
+            Move bookMove = OpeningBook.GetMove(mainBoard);
 
             if (bookMove.data == 0)
             {
