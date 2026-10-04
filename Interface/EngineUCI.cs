@@ -26,6 +26,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 Console.WriteLine("option name Hash type spin default 16 min 1 max 1024");
                 Console.WriteLine("option name Threads type spin default 1 min 1 max 256");
                 Console.WriteLine("option name Ponder type check default false");
+                Console.WriteLine("option name OwnBook type check default true");
 #if TUNABLE
                 Tuning.LogAllConstants();
 #endif
@@ -96,6 +97,11 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
 #else
                         Console.WriteLine("No such option as " + args[2]);
 #endif
+                        break;
+                    case "OwnBook":
+                        bool useBook = bool.Parse(args[4]);
+                        OpeningBook.useOwnBook = useBook;
+                        Console.WriteLine("info string Set OwnBook to " + useBook);
                         break;
                 }
                 break;
@@ -190,7 +196,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                     OpeningBookCreator.CreateBook(int.Parse(args[1]));
                 }
                 break;
-            case "book":
+            /*case "book":
                 if (args.Length == 1) Console.WriteLine(OpeningBook.bookPath);
                 else
                 {
@@ -201,7 +207,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
 
                     Console.WriteLine("Set book path to " + OpeningBook.bookPath);
                 }
-                break;
+                break;*/
             case "d":
                 ulong bitBoard = 0UL;
 

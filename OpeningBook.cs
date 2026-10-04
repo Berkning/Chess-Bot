@@ -1,17 +1,20 @@
-
+using System.Reflection;
 
 public static class OpeningBook
 {
-    public static string bookPath = @"/home/berkning/Documents/OpeningBook.bin";
+    //public static string bookPath = "LichessBot.Resources.InternalBook.bin";
 
     private static Entry[] bookEntries;
     private static Random random = new Random();
 
     private static bool isInitialized = false;
+    public static bool useOwnBook = true;
 
 
     public static Move GetMove(Board board) //TODO: http://hgm.nubati.net/book_format.html  "The entries are ordered according to key. Lowest key first. " - Could speed up search an insane amount - doesn't seem to be the case with current book
     {
+        if (!useOwnBook) return Move.nullMove;
+
         int startIndex = random.Next() % bookEntries.Length; //Random starting index to search from
         int direction = random.Next() % 2 == 1 ? -1 : 1; //Randomly picks whether to search up or down from starting index, based on whether the random number turns out even or odd
 
@@ -158,7 +161,22 @@ public static class OpeningBook
     {
         if (isInitialized) return;
 
-        byte[] book = File.ReadAllBytes(bookPath);
+        Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LichessBot.Resources.InternalBook.bin");
+
+        if (stream == null)
+        {
+            Console.WriteLine("Unable to get stream for internal book");
+            return;
+        }
+
+        byte[] book;//File.ReadAllBytes(bookPath);
+
+        using (stream)
+        using (MemoryStream memoryStream = new MemoryStream())
+        {
+            stream.CopyTo(memoryStream);
+            book = memoryStream.ToArray();
+        }
 
         if (book.Length % 16 != 0) Console.WriteLine("Opening book size is irregular");
 
