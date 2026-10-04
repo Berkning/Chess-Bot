@@ -8,4 +8,8 @@
     <BaseOutputPath></BaseOutputPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\InternalBook.bin" />
+  </ItemGroup>
+
 </Project>

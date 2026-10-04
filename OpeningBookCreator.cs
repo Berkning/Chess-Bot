@@ -3,7 +3,7 @@
 using System.Buffers.Binary;
 using System.Diagnostics;
 
-public static class OpeningBookCreator
+public static class OpeningBookCreator //TODO: add dry run //TODO: pass parameters through uci instead of having them hardcoded
 {
     private static Action<Move, int> callback = (result, id) => { };
     private static Search search;
