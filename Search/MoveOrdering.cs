@@ -142,12 +142,17 @@ public class MoveOrdering
             }
             else
             {
+                //TODO: Account for the move being a capture? Mb this is done already with recapture guess? Doesn't account for it being an equal trade tho?
+
                 // Penalize moving piece to a square attacked by opponent pawn
                 if (BitBoardHelper.ContainsSquare(moveGenerator.oponnentPawnAttackMap, moves[i].targetSquare))
                 {
                     moveScore += TunableConstants.AttackedByPawnBias;
                 }
-                //else if (movedPieceType == Piece.Rook) moveScore -= (int)(100f * Evaluation.earlygameMultiplier); //Penalize moving rook in early game
+                else if (BitBoardHelper.ContainsSquare(moveGenerator.opponentKnightAttackMap, moves[i].targetSquare))
+                {
+                    if (movedPieceValue >= TunableConstants.AttackedByKnightMinPieceValue) moveScore += TunableConstants.AttackedByKnightBias;
+                }
             }
 
             moveScores[i] = moveScore;
