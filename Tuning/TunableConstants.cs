@@ -15,8 +15,8 @@ public static class TunableConstants
     public static TunableConstant equalCaptureBias =  Tuning.AddConstant(new TunableConstant("EqualCaptureBias", Category.MoveOrdering, 9250, 0, 10000));
     public static TunableConstant badCaptureBias =  Tuning.AddConstant(new TunableConstant("BadCaptureBias", Category.MoveOrdering, 1805, 0, 10000));
     public static TunableConstant attackedByPawnBias =  Tuning.AddConstant(new TunableConstant("AttackedByPawnBias", Category.MoveOrdering, -704, -2500, 500));
-    public static TunableConstant attackedByKnightBias =  Tuning.AddConstant(new TunableConstant("AttackedByKnightBias", Category.MoveOrdering, -200, -2500, 500));
-    public static TunableConstant attackedByKnightMinPieceValue =  Tuning.AddConstant(new TunableConstant("AttackedByKnightMinPieceValue", Category.MoveOrdering, 80, 0, 1200));
+    public static TunableConstant attackedByKnightBias =  Tuning.AddConstant(new TunableConstant("AttackedByKnightBias", Category.MoveOrdering, 0, -1000, 50));
+    public static TunableConstant attackedByKnightMinPieceValue =  Tuning.AddConstant(new TunableConstant("AttackedByKnightMinPieceValue", Category.MoveOrdering, 300, 0, 1200));
     public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 2, 0, 15));
     public static TunableConstant maxHistory =  Tuning.AddConstant(new TunableConstant("MaxHistory", Category.MoveOrdering, 1024, 1, 4096));
     public static TunableConstant historyDecay =  Tuning.AddConstant(new TunableConstant("HistoryDecay", Category.MoveOrdering, 8000, 0, 10000));
@@ -43,8 +43,8 @@ public static class TunableConstants
     public const int EqualCaptureBias = 9250;
     public const int BadCaptureBias = 1805;
     public const int AttackedByPawnBias = -704;
-    public const int AttackedByKnightBias = -200;
-    public const int AttackedByKnightMinPieceValue = 80;
+    public const int AttackedByKnightBias = 0;
+    public const int AttackedByKnightMinPieceValue = 300;
     public const int CaptureValueDeltaMultiplier = 2;
     public const int MaxHistory = 1024;
     public const int HistoryDecay = 8000;
