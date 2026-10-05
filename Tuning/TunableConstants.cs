@@ -35,7 +35,7 @@ public static class TunableConstants
     public static int MaxHistory {get {return maxHistory.currentValue;}}
     public static int HistoryDecay {get {return historyDecay.currentValue;}}
     public static int PromotionMultiplier {get {return promotionMultiplier.currentValue;}}
-    public static int defendedByPawnBias {get {return defendedByPawnBias.currentValue;}}
+    public static int DefendedByPawnBias {get {return defendedByPawnBias.currentValue;}}
 #else
     public const int PrevBestBias = 15406; //2000000
     public const int KillerBias = 6515; //500000
