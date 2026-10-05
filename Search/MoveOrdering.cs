@@ -77,7 +77,7 @@ public class MoveOrdering
             int capturedPieceType = Piece.Type(board.Squares[moves[i].targetSquare]);
 
             int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
-            int flag = moves[i].flag; //TODO: try having ref to current move even though prob done by compiler anyway
+            int flag = moves[i].flag;
 
             //TODOne: guess if opponent cant recapture //TODOne: penalize rook and queen movements in early game?
 
@@ -88,19 +88,21 @@ public class MoveOrdering
             if (capturedPieceType != Piece.None)
             {
                 //moveScore += 10 * Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
-                int valueDelta = (Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue) * TunableConstants.CaptureValueDeltaMultiplier;
+
+                int valueDelta = Evaluation.GetPieceTypeValue(capturedPieceType) - movedPieceValue;
 
                 bool canRecaptureGuess = BitBoardHelper.ContainsSquare(moveGenerator.opponentAttackMap, moves[i].targetSquare);
                 if (canRecaptureGuess)
                 {
-                    moveScore += valueDelta >= 0 ? TunableConstants.GoodCaptureBias : TunableConstants.BadCaptureBias;
+                    if (valueDelta == 0) moveScore += TunableConstants.EqualCaptureBias;
+                    else moveScore += valueDelta > 0 ? TunableConstants.GoodCaptureBias : TunableConstants.BadCaptureBias;
                 }
                 else
                 {
-                    moveScore += TunableConstants.GoodCaptureBias + valueDelta;
+                    moveScore += TunableConstants.GoodCaptureBias + valueDelta * TunableConstants.CaptureValueDeltaMultiplier;
                 }
             }
-            else if (moves[i].flag != Move.Flag.EnPassantCapture) //If not a capture
+            else if (flag != Move.Flag.EnPassantCapture) //If not a capture
             {
                 // if (BitBoardHelper.ContainsSquare(MoveGenerator.opponentKingAttackMap, moves[i].targetSquare))
                 // {
@@ -116,42 +118,47 @@ public class MoveOrdering
                 //{
                 //if (BitBoardHelper.ContainsSquare(MoveGenerator.opponentKnightAttackMap, moves[i].targetSquare)) moveScore -= 150; //TODO: Tweak value and test //Cant do with bishops and rooks bc their attack boards are combined with each other - and the queen
                 //}
-
-                //if (movedPieceType == Piece.Rook) moveScore -= (int)(100f * Evaluation.earlygameMultiplier); //TODO: experiment with moving this into different if statements - also try with else if
             }
 
             if (movedPieceType == Piece.Pawn)
             {
-
                 if (flag == Move.Flag.PromoteToQueen) //TODO: Maybe account for king attack squares here
                 {
-                    moveScore += Evaluation.GetPieceTypeValue(Piece.Queen);
+                    moveScore += Evaluation.GetPieceTypeValue(Piece.Queen) * TunableConstants.PromotionMultiplier;
                 }
                 else if (flag == Move.Flag.PromoteToKnight)
                 {
-                    moveScore += Evaluation.GetPieceTypeValue(Piece.Knight);
+                    moveScore += Evaluation.GetPieceTypeValue(Piece.Knight) * TunableConstants.PromotionMultiplier;
                 }
                 else if (flag == Move.Flag.PromoteToRook)
                 {
-                    moveScore += Evaluation.GetPieceTypeValue(Piece.Rook);
+                    moveScore += Evaluation.GetPieceTypeValue(Piece.Rook) * TunableConstants.PromotionMultiplier;
                 }
                 else if (flag == Move.Flag.PromoteToBishop)
                 {
-                    moveScore += Evaluation.GetPieceTypeValue(Piece.Bishop);
+                    moveScore += Evaluation.GetPieceTypeValue(Piece.Bishop) * TunableConstants.PromotionMultiplier;
                 }
             }
             else
             {
-                //TODO: Account for the move being a capture? Mb this is done already with recapture guess? Doesn't account for it being an equal trade tho?
+                //TODOnt: This is accounted for already (as far as i can tell) - Account for the move being a capture? Mb this is done already with recapture guess? Doesn't account for it being an equal trade tho?
 
-                // Penalize moving piece to a square attacked by opponent pawn
+                // Penalize moving piece to a square attacked by enemy pawn
                 if (BitBoardHelper.ContainsSquare(moveGenerator.oponnentPawnAttackMap, moves[i].targetSquare))
                 {
                     moveScore += TunableConstants.AttackedByPawnBias;
                 }
-                else if (BitBoardHelper.ContainsSquare(moveGenerator.opponentKnightAttackMap, moves[i].targetSquare))
+                else if (BitBoardHelper.ContainsSquare(moveGenerator.opponentKnightAttackMap, moves[i].targetSquare))// Penalize moving piece to a square attacked by enemy knight
                 {
                     if (movedPieceValue >= TunableConstants.AttackedByKnightMinPieceValue) moveScore += TunableConstants.AttackedByKnightBias;
+                }
+
+                //TODO: Defense bonuses - if we move a piece to a square where it is protected by one of our pawns that probably deserves a bonus. Could do the same for knights and maybe king as well (although this might turn out to be a penalty instead, but still prob good heuristic)
+
+                //Give bonus for moving a piece to a square, where it is defended by a friendly pawn
+                if ((PrecomputedData.pawnAttackBitboards[moves[i].targetSquare + board.opponentColorBit * 64] & board.GetPieceList(Piece.Pawn, board.friendlyColorBit).bitboard) != 0) //TODO: try applying a bonus like this when moving pawns as well
+                {
+                    moveScore += TunableConstants.DefendedByPawnBias;
                 }
             }
 
@@ -173,7 +180,7 @@ public class MoveOrdering
 
         while (moveScores[j] < score)
         {
-            //Swap Scores
+            //Swap ScoresTunableConstants.CaptureValueDeltaMultiplier
             moveScores[i] = moveScores[j];
             moveScores[j] = score;
             //Swap Moves
