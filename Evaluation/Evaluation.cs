@@ -58,7 +58,7 @@ public class Evaluation
 
         int perspective = board.colorToMove == Piece.White ? 1 : -1;
 
-        return result * perspective;
+        return result * perspective + TunableConstants.TempoBonus;
     }
 
     private int CalculateResult(Board board)

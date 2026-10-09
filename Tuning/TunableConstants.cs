@@ -96,9 +96,10 @@ public static class TunableConstants
     //Evaluation -------------------------------------------------
 
 #if TUNABLE
-    //TODO:
+    public static TunableConstant tempoBonus = Tuning.AddConstant(new TunableConstant("TempoBonus", Category.Evaluation, 0, -30, 30));
+    public static int TempoBonus {get {return tempoBonus.currentValue;}}
 #else
-
+    public const int TempoBonus = 0;
 #endif
 
     //------------------------------------------------------------
