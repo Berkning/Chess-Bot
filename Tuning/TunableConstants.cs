@@ -9,7 +9,6 @@ public static class TunableConstants
     //Move Ordering ----------------------------------------------
 
 #if TUNABLE
-    public static TunableConstant prevBestBias = Tuning.AddConstant(new TunableConstant("PrevBestBias", Category.MoveOrdering, 14487, 0, 20000));
     public static TunableConstant killerBias =  Tuning.AddConstant(new TunableConstant("KillerBias", Category.MoveOrdering, 5302, 0, 10000));
     public static TunableConstant goodCaptureBias =  Tuning.AddConstant(new TunableConstant("GoodCaptureBias", Category.MoveOrdering, 9900, 0, 15000)); //Increased max from 10k bc tuner maxed it out pretty quickly
     public static TunableConstant equalCaptureBias =  Tuning.AddConstant(new TunableConstant("EqualCaptureBias", Category.MoveOrdering, 7842, 0, 10000));
@@ -23,8 +22,7 @@ public static class TunableConstants
     public static TunableConstant promotionMultiplier =  Tuning.AddConstant(new TunableConstant("PromotionMultiplier", Category.MoveOrdering, 1, 0, 25));
     public static TunableConstant defendedByPawnBias =  Tuning.AddConstant(new TunableConstant("DefendedByPawnBias", Category.MoveOrdering, 58, 0, 1000));
 
-    public static int PrevBestBias {get {return prevBestBias.currentValue;}} //TODO: Make all these tunable constants (or at the very least the multipliers) floats, bc tuner really seems to want some extra resolution
-    public static int KillerBias {get {return killerBias.currentValue;}}
+    public static int KillerBias {get {return killerBias.currentValue;}} //TODO: Make all these tunable constants (or at the very least the multipliers) floats, bc tuner really seems to want some extra resolution
     public static int GoodCaptureBias {get {return goodCaptureBias.currentValue;}}
     public static int EqualCaptureBias {get {return equalCaptureBias.currentValue;}}
     public static int BadCaptureBias {get {return badCaptureBias.currentValue;}}
@@ -37,7 +35,6 @@ public static class TunableConstants
     public static int PromotionMultiplier {get {return promotionMultiplier.currentValue;}}
     public static int DefendedByPawnBias {get {return defendedByPawnBias.currentValue;}}
 #else
-    public const int PrevBestBias = 14487; //2000000
     public const int KillerBias = 5302; //500000
     public const int GoodCaptureBias = 9900;
     public const int EqualCaptureBias = 7842;
@@ -112,7 +109,7 @@ public static class TunableConstants
 #if TUNABLE
     public static void Initialize()
     {
-        prevBestBias.currentValue = prevBestBias.currentValue + 0; //Lowkey janky but otherwise variables aren't initialized and thereby not added to the constant-list
+        killerBias.currentValue = killerBias.currentValue + 0; //Lowkey janky but otherwise variables aren't initialized and thereby not added to the constant-list
     }
 
     public class TunableConstant

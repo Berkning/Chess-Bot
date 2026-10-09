@@ -316,7 +316,7 @@ public class Search
         }
 
 
-        Span<Move> moves = stackalloc Move[256];
+        Span<Move> moves = stackalloc Move[256]; //TODO: Try just allocating 218, technically no need for the extra 38 at all except maybe fits nicer into memory
 
         int moveCount = moveGenerator.GenerateMoves(ref moves);
 
@@ -326,8 +326,17 @@ public class Search
 
         if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
 
-        /*if (test)*/
-        moveOrdering.OrderMoves(ref moves, moveCount, hashMove, plyFromRoot); //TODOnt: Try this after the mate check - somehow basically makes zero to worse difference
+
+        bool isMoveListFullySorted = false;
+        //If a hash-move is either not found, or just illegal in the current position, we sort our moves normally.
+        //Otherwise we just move the hash-move to the "front" of the movelist so our search will look at it first,
+        //and hopefully not need to look at any other moves, thereby avoiding having to sort all of them.
+        if (hashMove.IsNullMove() || !moveOrdering.OrderHashMove(ref moves, hashMove))
+        {
+            moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot);
+            isMoveListFullySorted = true;
+        }
+
 
         //TODO: Could prob optimize to avoid this if statement
         //TODO: try this -> if (plyFromRoot == 0 && threadID % 2 == 1) moves.Reverse();//moveOrdering.ThreadRootShuffle(ref moves, moveCount, threadShuffle);
@@ -370,14 +379,12 @@ public class Search
 
         for (int i = 0; i < moveCount; i++)
         {
-            //Move move = moves[i];
-
-            board.MakeMove(moves[i], true); //TODOne: test having ref to move instead of accesing array - prob already done by compiler though
+            board.MakeMove(moves[i], true);
 
             uint extensions = 0;
             if (numExtensions < MaxExtensions)
             {
-                if (moveGenerator.inCheck && depth < 2) extensions = 1;//TODOnt?: Implement when we can easily calculate (with magics) if the move were about to make puts opponent in check.
+                if (moveGenerator.inCheck && depth < 2) extensions = 1;
 
                 //TODO: try combining these - as in increment extensions, allowing them to stack (i imagine this will just be slightly worse bc rare but idk)
 
@@ -408,7 +415,7 @@ public class Search
                 if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
             }
 
-            //Move was good opponent will avoid this position
+            //Move was too good opponent will avoid this position
             if (evaluation >= beta)
             {
                 transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, beta, TranspositionTable.LowerBound, moves[i]);
@@ -442,6 +449,15 @@ public class Search
                     bestMove = bestMoveInPosition;
                     bestEval = evaluation;
                 }
+            }
+
+
+            //If we had a hash-move in this position, looked at it in this iteration of the search,
+            //and found out we still need to look at other moves in the movelist, we have to sort those now before next iteration
+            if (!isMoveListFullySorted)
+            {
+                moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot, true);
+                isMoveListFullySorted = true;
             }
         }
 
@@ -480,7 +496,7 @@ public class Search
         int moveCount = moveGenerator.GenerateMoves(ref moves, true);
 
         //FIXME: this should absolutely not pass -1 as the ply, as this is not checked by the moveordering. This is only saved by the fact that killer moves don't apply to captures, but if we ever search check-evasion or other non-capture moves, this will throw. Just pass a value greater than MaxKillerPlys (which will be globally accessible when made tunable anyway)
-        moveOrdering.OrderMoves(ref moves, moveCount, bestMove, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
+        moveOrdering.OrderMoves(ref moves, moveCount, -1); //TODO: Could prob optimize moveordering here to not worry about things that only apply to quiet moves
 
         for (int i = 0; i < moveCount; i++)
         {

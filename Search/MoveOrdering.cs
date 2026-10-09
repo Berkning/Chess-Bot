@@ -2,7 +2,7 @@ using System;
 
 public class MoveOrdering
 {
-    private int[] moveScores = new int[218]; //TODOcant: Change to span? Should be way faster in sort especially i think
+    private int[] moveScores = new int[218];
 
     //const int jitterBias = -100000;
     const int kingAttackBias = -250;
@@ -12,7 +12,7 @@ public class MoveOrdering
     public /*static*/ KillerMove[] killerMoves = new KillerMove[MaxKillerPlys]; //TODO: test making atomic
 
     //Indexed by [sideToMove][from][to] //TODO: Try with [piece][to] - would make array a LOT smaller and maybe not have that much of a negative impact either
-
+    //TODO: Could also just store ushort/short instead of int. Every entry just holds a value from 0->TunableConstants.MaxHistory, so 2 bytes are more than enough - also halves array size in memory
     public int[][][] history;
 
     public void UpdateHistory(int bonus, int colorBit, int from, int to)
@@ -28,7 +28,7 @@ public class MoveOrdering
     }
 
     //TODO: reset on new game
-    public void DecayHistory()
+    public void DecayHistory() //TODO: Don't call this before search, wait till after it has returned - this could also be the cause of our time-losses in extreme STC
     {
         for (int i = 0; i < 64; i++)
         {
@@ -64,13 +64,30 @@ public class MoveOrdering
         }
     }
 
+    //Returns false if hash move wasn't part of the current legal move set, otherwise true
+    public bool OrderHashMove(ref Span<Move> moves, Move hashMove) //TODO: Do this Lazy-MoveOrdering type thing for movegen as well - always start by just generating the hash move - would also mean we dont have to do this inefficient loop to find it in the movelist
+    {
+        for (int i = 0; i < moves.Length; i++)
+        {
+            if (moves[i].data == hashMove.data)
+            {
+                moves[i] = moves[0];
+                moves[0] = hashMove;
+                return true;
+            }
+        }
 
-    //TODOne: try penalizing moving very valuable pieces into less valuable enemy attack range - penalize rook in bishop attack range
-    public void OrderMoves(ref Span<Move> moves, int moveCount, Move prevBestMove, int ply) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
+        return false;
+    }
+
+
+    //skipFirstMove will be passed as true here, if OrderHashMove was already called on the movelist we are operating on,
+    //meaning the move at index 0, will be the hash-move, which has already been looked at by the search, so we don't have to worry about it.
+    public void OrderMoves(ref Span<Move> moves, int moveCount, int ply, bool skipFirstMove = false) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
     {
         int jitterIndex = moveCount != 0 ? threadID % moveCount : 0;
 
-        for (int i = 0; i < moveCount; i++) //TODOne: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
+        for (int i = skipFirstMove ? 1 : 0; i < moveCount; i++) //TODOne: Pretty sure we could just sort the moves in this loop by scoring the current move, and then checking if the previous move had a lower score, in which case we swap and check if the previous move after that also had a lower score and so on - should be faster?
         {
             int moveScore = 0;
             int movedPieceType = Piece.Type(board.Squares[moves[i].startSquare]);
@@ -78,10 +95,6 @@ public class MoveOrdering
 
             int movedPieceValue = Evaluation.GetPieceTypeValue(movedPieceType);
             int flag = moves[i].flag;
-
-            //TODOne: guess if opponent cant recapture //TODOne: penalize rook and queen movements in early game?
-
-            if (moves[i].data == prevBestMove.data) moveScore += TunableConstants.PrevBestBias; //TODO: Could optimize checking through all moves to find this one prob
 
             //if (i == jitterIndex) moveScore += jitterBias;
 
@@ -104,11 +117,6 @@ public class MoveOrdering
             }
             else if (flag != Move.Flag.EnPassantCapture) //If not a capture
             {
-                // if (BitBoardHelper.ContainsSquare(MoveGenerator.opponentKingAttackMap, moves[i].targetSquare))
-                // {
-                //     moveScore += kingAttackBias;
-                // }
-
                 if (ply < MaxKillerPlys && killerMoves[ply].Contains(moves[i])) moveScore += TunableConstants.KillerBias;
                 else moveScore += history[board.friendlyColorBit][moves[i].startSquare][moves[i].targetSquare];
 
@@ -164,16 +172,18 @@ public class MoveOrdering
 
             moveScores[i] = moveScore;
 
-            SwapSortMove(ref moves, i, moveScore);
+            SwapSortMove(ref moves, i, moveScore, skipFirstMove);
         }
 
         //SortMoves(ref moves, moveCount);
     }
 
     //TODO: Agressive inlining
-    private void SwapSortMove(ref Span<Move> moves, int i, int score) //TODO: Try other sorting algo
+    private void SwapSortMove(ref Span<Move> moves, int i, int score, bool skipFirstMove) //TODO: Try other sorting algo
     {
-        if (i == 0) return;
+        int cap = skipFirstMove ? 1 : 0;
+
+        if (i == cap) return;
 
         int j = i - 1;
         Move move = moves[i];
@@ -189,7 +199,7 @@ public class MoveOrdering
 
 
             i--;
-            if (i == 0) return;
+            if (i == cap) return;
 
             j--;
         }
