@@ -18,7 +18,8 @@ public class Search
     //private static int quiescenseCount = 0;
     //private static int ttHits = 0;
 
-    //private Move[][] principledVariation = new Move[100];
+    private Move[,] pvTable = new Move[MaxDepth, MaxDepth];
+    private int[] pvLastIndex = new int[MaxDepth];
 
     private Move bestMove;
     private int bestEval;
@@ -276,6 +277,8 @@ public class Search
     {
         nodeCount++;
 
+        pvLastIndex[plyFromRoot] = plyFromRoot; //PV at this ply is empty by default
+
         if ((nodeCount & CancelDelay) == 0) //TODO: test with removing this
         {
             if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
@@ -448,9 +451,22 @@ public class Search
                 bestMoveInPosition = moves[i];
                 transpositionBound = TranspositionTable.Exact;
 
-                //if (evaluation > 1000) Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: suspicious eval={evaluation}, plyFromRoot={plyFromRoot}");
 
-                if (plyFromRoot == 0) //TODO: PV
+                //PV collection
+                pvTable[plyFromRoot, plyFromRoot] = moves[i];
+
+                //Copy child PV into ours
+                for (int nextPly = plyFromRoot + 1; nextPly < pvLastIndex[plyFromRoot + 1]; nextPly++)
+                {
+                    pvTable[plyFromRoot, nextPly] = pvTable[plyFromRoot + 1, nextPly];
+                }
+
+                //The last index of our own PV is now the last index of the child PV we just copied
+                pvLastIndex[plyFromRoot] = pvLastIndex[plyFromRoot + 1];
+
+
+
+                if (plyFromRoot == 0)
                 {
                     bestMove = bestMoveInPosition;
                     bestEval = evaluation;
@@ -538,7 +554,6 @@ public class Search
 
     #region Helpers
 
-    public static bool logFullPV = false;
 
     private void LogSearchInfo(uint depth, int nodeCount, bool isPartial, int id)
     {
@@ -549,14 +564,21 @@ public class Search
             return;
         }
 
-        string pv = logFullPV ? GetPVFromTranspositionTable() : GetBasicPVString();
+        string pv = GetPVString();
 
         Console.WriteLine("info depth " + depth + " score " + GetScoreLogString(bestEval) + " pv" + pv + " nodes " + nodeCount + " nps " + Math.Round(nodeCount / clock.Elapsed.TotalSeconds) + (isPartial ? " string partial" : "") + " id " + id);
     }
 
-    private string GetBasicPVString()
+    private string GetPVString()
     {
-        return ' ' + BoardHelper.GetMoveNameUCI(bestMove);
+        string pv = "";
+
+        for (int i = 0; i < pvLastIndex[0]; i++)
+        {
+            pv += " " + BoardHelper.GetMoveNameUCI(pvTable[0, i]);
+        }
+
+        return pv;
     }
 
     private string GetPVFromTranspositionTable()

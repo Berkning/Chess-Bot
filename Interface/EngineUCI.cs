@@ -157,18 +157,6 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                     //Console.WriteLine("Transposition table is " + Search.transpositionTable.GetTest() + "% full");
                 }
                 break;
-            case "pv":
-                if (args.Length == 1)
-                {
-                    Console.WriteLine(Search.logFullPV);
-                    break;
-                }
-
-                bool value = bool.Parse(args[1]);
-                Search.logFullPV = value;
-
-                Console.WriteLine("Logging Full PV " + (value ? "Enabled" : "Disabled"));
-                break;
             case "version":
                 Console.WriteLine("Currently Running Version 1.14.8 FINAL");
                 //Console.WriteLine("Currently Running Version 1.14.7 FINAL");
