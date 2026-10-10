@@ -297,7 +297,7 @@ public static class EngineDiagnostics
     {
         bool passed = true;
 
-        Search search = new Search(board, new Action<Move, int>(SearchReturn), 0, null);
+        Search search = new Search(board, new Action<Move, int>(SearchReturn), 0);
         search.searchTime = 1000;
 
         for (int i = 0; i < positions.Length; i++)

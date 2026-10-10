@@ -32,7 +32,7 @@ public class Engine
         searchThreads = new EngineThread[count];
         availableThreads = count;
 
-        Action<Move, int> callback = OnSearchCompleted;
+        Action<Move, int> callback = OnSearchCompleted; //TODO: No reason to allocate a new action every time we want to pass this as a callback
 
         string fen = FenUtility.GetCurrentFen(mainBoard);
 
@@ -192,6 +192,9 @@ public class Engine
     {
         public int id;
         public Search search;
+        public MoveOrdering moveOrdering;
+        public MoveGenerator moveGenerator;
+        public Evaluation evaluator;
         public Board board;
         private Thread thread;
 
@@ -199,7 +202,10 @@ public class Engine
         {
             id = _id;
             board = new Board();
-            search = new Search(board, callback, id, (id == 0) ? _engine : null);
+            evaluator = new Evaluation();
+            moveGenerator = new MoveGenerator(board);
+            moveOrdering = new MoveOrdering(board, moveGenerator, id);
+            search = new Search(board, moveGenerator, moveOrdering, evaluator, callback, id, (id == 0) ? _engine : null);
         }
 
         public void Start(int depth, int time)

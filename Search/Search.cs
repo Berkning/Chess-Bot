@@ -32,7 +32,7 @@ public class Search
     private MoveGenerator moveGenerator;
     private MoveOrdering moveOrdering;
     private Evaluation evaluator;
-    private Engine engine;
+    private Engine? engine;
     //private int threadShuffle;
     private int threadID;
     private Action<Move, int> callback;
@@ -41,7 +41,20 @@ public class Search
     private Stopwatch clock = new Stopwatch();
 
 
-    public Search(Board _board, Action<Move, int> _callback, int _threadID, Engine _engine)
+    public Search(Board _board, MoveGenerator _moveGenerator, MoveOrdering _moveOrdering, Evaluation _evaluation, Action<Move, int> _callback, int _threadID, Engine _engine)
+    {
+        threadID = _threadID;
+        callback = _callback;
+
+
+        board = _board;
+        moveGenerator = _moveGenerator;
+        moveOrdering = _moveOrdering;
+        evaluator = _evaluation;
+        engine = _engine;
+    }
+
+    public Search(Board _board, Action<Move, int> _callback, int _threadID)
     {
         threadID = _threadID;
         callback = _callback;
@@ -51,7 +64,7 @@ public class Search
         moveGenerator = new MoveGenerator(board);
         moveOrdering = new MoveOrdering(board, moveGenerator, threadID);
         evaluator = new Evaluation();
-        engine = _engine;
+        engine = null;
     }
 
     public int searchDepth = -1;

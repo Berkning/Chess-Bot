@@ -29,7 +29,7 @@ public static class OpeningBookCreator //TODO: add dry run //TODO: pass paramete
     public static void CreateBook(int maxDepth)
     {
         board = new Board();
-        search = new Search(board, callback, 0, null);
+        search = new Search(board, callback, 0);
         moveGenerator = new MoveGenerator(board);
         search.searchDepth = int.MaxValue;
 
