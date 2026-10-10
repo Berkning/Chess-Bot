@@ -8,18 +8,22 @@ public class Search
     private const int ImmediateMateScore = short.MaxValue;
     private const int PositiveInfinity = 9999999;
     private const int NegativeInfinity = -PositiveInfinity;
-
     private const int MaxExtensions = 8; //TODO: Make tunable somehow
-
     private const int MaxDepth = 127;
+    private const int CancelDelay = 1023; //Amount of nodes to check before next check of cancelSearch value - HAS to be mask - like ending in only ones -> 0b0001111111 //TODO: Make tunable somehow
+
 
     public int nodeCount { get; private set; } = 0;
-    private const int CancelDelay = 1023; //Amount of nodes to check before next check of cancelSearch value - HAS to be mask - like ending in only ones -> 0b0001111111 //TODO: Make tunable somehow
     //private static int quiescenseCount = 0;
     //private static int ttHits = 0;
 
     private Move[,] pvTable = new Move[MaxDepth, MaxDepth];
-    private int[] pvLastIndex = new int[MaxDepth];
+    private int[] pvLengths = new int[MaxDepth];
+
+    private Move[] previousPVLine = new Move[MaxDepth];
+    private int previousPVLineLength = 0;
+
+
 
     private Move bestMove;
     private int bestEval;
@@ -67,6 +71,8 @@ public class Search
         engine = null;
     }
 
+
+
     public int searchDepth = -1;
     //Might be necessary to mark as volatile so it's synced when main thread wants to stop this thread
     public int searchTime = -1; //-2 : infinite,  -1 : use time management,  x : use x amount of time
@@ -83,7 +89,7 @@ public class Search
         clock.Reset();
 
 
-        moveOrdering.DecayHistory(); //TODO: maybe do after search when it is our opponents turn
+        moveOrdering.DecayHistory(); //TODO: Move to the PlayMove function in EngineManager
 
 
         if (searchTime == -1)
@@ -125,8 +131,16 @@ public class Search
             prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
         }
 
+        followPV = false;
+
         for (uint depth = 1; depth <= searchDepth; depth++)
         {
+            if (depth > 1)
+            {
+                followPV = true;
+                CopyPreviousPV(); //Make a copy of the PV from the previous search iteration, to follow in this one
+            }
+
             if (engine != null)
             {
                 engine.StartHelperThreads((int)depth);
@@ -201,6 +215,16 @@ public class Search
         clock.Stop();
 
         return (bestMove, bestEval);
+    }
+
+    private void CopyPreviousPV()
+    {
+        previousPVLineLength = pvLengths[0];
+
+        for (int i = 0; i < previousPVLineLength; i++)
+        {
+            previousPVLine[i] = pvTable[0, i];
+        }
     }
 
 
@@ -286,11 +310,14 @@ public class Search
 
     #region Search
 
+    private bool followPV = true;
+
     private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0)//, bool test)
     {
         nodeCount++;
 
-        pvLastIndex[plyFromRoot] = plyFromRoot; //PV at this ply is empty by default
+        pvLengths[plyFromRoot] = plyFromRoot; //PV at this ply is empty by default
+
 
         if ((nodeCount & CancelDelay) == 0) //TODO: test with removing this
         {
@@ -343,10 +370,19 @@ public class Search
         int moveCount = moveGenerator.GenerateMoves(ref moves);
 
 
-        //TODO: Try setting hash move to the global bestmove if plyfromroot == 0
         Move hashMove = Move.nullMove;
 
         if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
+
+        if (followPV)
+        {
+            if (previousPVLineLength > plyFromRoot)
+            {
+                //TODO: we can theoretically assume the PV-move is legal, and just bypass movegen completely until we have searched it - prob not much of a performance gain since very few nodes where we have a PV-move available
+                hashMove = previousPVLine[plyFromRoot]; //TODO: Don't override hash-move completely - we can still use it as the second option in our move ordering if PV move isn't good enough.
+            }
+            else followPV = false;
+        }
 
 
         bool isMoveListFullySorted = false;
@@ -445,6 +481,7 @@ public class Search
                 //TODO: Test without checking for ep for performance bc we already check if this is the case in the moveordering but this will ofc override the space of a valid killer move with an invalid ep move if possible - maybe too rare?
                 if (board.Squares[moves[i].targetSquare] == Piece.None && moves[i].flag != Move.Flag.EnPassantCapture) //If not a capture - only add killer moves that aren't captures, bc these are always ranked highly i guess?
                 {
+                    //TODO: Add some tunable parameters to the history bonus
                     moveOrdering.UpdateHistory((int)(depth * depth), board.friendlyColorBit, moves[i].startSquare, moves[i].targetSquare);
                     //moveOrdering.history[board.friendlyColorBit][moves[i].startSquare][moves[i].targetSquare] += (int)(depth * depth); //TODO: maybe just store depth as int to avoid this?
 
@@ -469,13 +506,13 @@ public class Search
                 pvTable[plyFromRoot, plyFromRoot] = moves[i];
 
                 //Copy child PV into ours
-                for (int nextPly = plyFromRoot + 1; nextPly < pvLastIndex[plyFromRoot + 1]; nextPly++)
+                for (int nextPly = plyFromRoot + 1; nextPly < pvLengths[plyFromRoot + 1]; nextPly++)
                 {
                     pvTable[plyFromRoot, nextPly] = pvTable[plyFromRoot + 1, nextPly];
                 }
 
                 //The last index of our own PV is now the last index of the child PV we just copied
-                pvLastIndex[plyFromRoot] = pvLastIndex[plyFromRoot + 1];
+                pvLengths[plyFromRoot] = pvLengths[plyFromRoot + 1];
 
 
 
@@ -493,6 +530,8 @@ public class Search
             {
                 moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot, true);
                 isMoveListFullySorted = true;
+
+                followPV = false; //If we were following the PV until this point, we will now be deviating from that path, since we are looking at alternative moves
             }
         }
 
@@ -586,7 +625,7 @@ public class Search
     {
         string pv = "";
 
-        for (int i = 0; i < pvLastIndex[0]; i++)
+        for (int i = 0; i < pvLengths[0]; i++)
         {
             pv += " " + BoardHelper.GetMoveNameUCI(pvTable[0, i]);
         }

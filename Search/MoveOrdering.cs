@@ -27,6 +27,8 @@ public class MoveOrdering
         //if (history[colorBit][from][to] > HistoryUpperBound) history[colorBit][from][to] = HistoryUpperBound;
     }
 
+
+
     //TODO: reset on new game
     public void DecayHistory() //TODO: Don't call this before search, wait till after it has returned - this could also be the cause of our time-losses in extreme STC
     {
