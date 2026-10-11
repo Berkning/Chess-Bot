@@ -131,6 +131,7 @@ public class Search
             prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
         }
 
+
         followPV = false;
 
         for (uint depth = 1; depth <= searchDepth; depth++)
@@ -312,7 +313,7 @@ public class Search
 
     private bool followPV = true;
 
-    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0)//, bool test)
+    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, bool isPV = true, uint numExtensions = 0)//, bool test)
     {
         nodeCount++;
 
@@ -374,7 +375,7 @@ public class Search
 
         if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
 
-        if (followPV)
+        if (isPV && followPV)
         {
             if (previousPVLineLength > plyFromRoot)
             {
@@ -415,7 +416,7 @@ public class Search
             {
                 board.MakeNullMove();
                 uint nullReduction = 3;
-                int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
+                int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), false, numExtensions);
                 board.UnMakeNullMove();
 
                 if ((nodeCount & CancelDelay) == 0)
@@ -456,13 +457,13 @@ public class Search
             //Late Move Reduction
             if (i > 4 && extensions == 0 && depth > 3)  //Assuming move ordering isn't completely wrong
             {
-                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions);
+                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, false, numExtensions);
 
                 //If evals better than anything else so far we'll search to full depth
                 searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()); //TODOnt?: Move cancel check to separate if before this
             }
 
-            if (searchFullDepth) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);
+            if (searchFullDepth) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, isPV, numExtensions + extensions);
 
 
             board.UnMakeMove(moves[i], true);
@@ -531,7 +532,7 @@ public class Search
                 moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot, true);
                 isMoveListFullySorted = true;
 
-                followPV = false; //If we were following the PV until this point, we will now be deviating from that path, since we are looking at alternative moves
+                if (isPV) followPV = false; //If we were following the PV until this point, we will now be deviating from that path, since we are looking at alternative moves
             }
         }
 
