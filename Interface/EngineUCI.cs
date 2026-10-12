@@ -360,7 +360,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
     {
         if (args.Length == 1)
         {
-            engine.InitializeSearch(99, -2);
+            engine.InitializeSearch(int.MaxValue, -2);
             return;
         }
 

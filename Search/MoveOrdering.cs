@@ -83,6 +83,54 @@ public class MoveOrdering
     }
 
 
+    //Returns the number of moves that were successfully sorted. 2 if both hashmove and pvMove are present in the current move set
+    public int OrderHashMove(ref Span<Move> moves, Move pvMove, Move hashMove) //TODO: Do this Lazy-MoveOrdering type thing for movegen as well - always start by just generating the hash move - would also mean we dont have to do this inefficient loop to find it in the movelist
+    {
+        //pvMove and hashMove should not be identical here
+        if (pvMove.data == hashMove.data)
+        {
+            Console.WriteLine("bestmove PV and Hash Were identical");
+            return 0;
+        }
+
+        int hashIndex = -1;
+        int pvIndex = -1;
+
+        for (int i = 0; i < moves.Length; i++)
+        {
+            if (moves[i].data == hashMove.data)
+            {
+                hashIndex = i;
+            }
+            else if (moves[i].data == pvMove.data)
+            {
+                pvIndex = i;
+            }
+        }
+
+        if (pvIndex == -1)
+        {
+            Console.WriteLine("bestmove PV was illegal in double ordering");
+            if (hashIndex == -1) return 0;
+
+            moves[hashIndex] = moves[0];
+            moves[0] = hashMove;
+            return 1;
+        }
+        else
+        {
+            moves[pvIndex] = moves[0];
+            moves[0] = pvMove;
+
+            if (hashIndex == -1) return 1;
+
+            moves[hashIndex] = moves[1];
+            moves[1] = hashMove;
+            return 2;
+        }
+    }
+
+
     //skipFirstMove will be passed as true here, if OrderHashMove was already called on the movelist we are operating on,
     //meaning the move at index 0, will be the hash-move, which has already been looked at by the search, so we don't have to worry about it.
     public void OrderMoves(ref Span<Move> moves, int moveCount, int ply, bool skipFirstMove = false) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search

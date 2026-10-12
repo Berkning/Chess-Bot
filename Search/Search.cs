@@ -375,25 +375,41 @@ public class Search
 
         if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
 
+        int sortedMoveCount = 0;
+
         if (isPV && followPV)
         {
             if (previousPVLineLength > plyFromRoot)
             {
+                Move pvMove = previousPVLine[plyFromRoot];
+
+                if (hashMove.data == pvMove.data) Console.WriteLine("Pv and hash were identical");
+
                 //TODO: we can theoretically assume the PV-move is legal, and just bypass movegen completely until we have searched it - prob not much of a performance gain since very few nodes where we have a PV-move available
-                hashMove = previousPVLine[plyFromRoot]; //TODO: Don't override hash-move completely - we can still use it as the second option in our move ordering if PV move isn't good enough.
+                if (hashMove.IsNullMove() || hashMove.data == pvMove.data)
+                {
+                    if (!moveOrdering.OrderHashMove(ref moves, pvMove)) Console.WriteLine("bestmove PV Was Illegal: " + BoardHelper.GetMoveNameUCI(previousPVLine[plyFromRoot]));
+                    sortedMoveCount = 1;
+                }
+                else
+                {
+                    sortedMoveCount = moveOrdering.OrderHashMove(ref moves, pvMove, hashMove);
+                }
             }
             else followPV = false;
         }
 
-
-        bool isMoveListFullySorted = false;
-        //If a hash-move is either not found, or just illegal in the current position, we sort our moves normally.
-        //Otherwise we just move the hash-move to the "front" of the movelist so our search will look at it first,
-        //and hopefully not need to look at any other moves, thereby avoiding having to sort all of them.
-        if (hashMove.IsNullMove() || !moveOrdering.OrderHashMove(ref moves, hashMove))
+        if (sortedMoveCount == 0)
         {
-            moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot);
-            isMoveListFullySorted = true;
+            //If a hash-move is either not found, or just illegal in the current position, we sort our moves normally.
+            //Otherwise we just move the hash-move to the "front" of the movelist so our search will look at it first,
+            //and hopefully not need to look at any other moves, thereby avoiding having to sort all of them.
+            if (hashMove.IsNullMove() || !moveOrdering.OrderHashMove(ref moves, hashMove))
+            {
+                moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot);
+                sortedMoveCount = moveCount;
+            }
+            else sortedMoveCount = 1;
         }
 
 
