@@ -83,14 +83,14 @@ public class MoveOrdering
     }
 
 
-    //Returns the number of moves that were successfully sorted. 2 if both hashmove and pvMove are present in the current move set
+    //Returns the number of moves - 1 that were successfully sorted. 2 if both hashmove and pvMove are present in the current move set
     public int OrderHashMove(ref Span<Move> moves, Move pvMove, Move hashMove) //TODO: Do this Lazy-MoveOrdering type thing for movegen as well - always start by just generating the hash move - would also mean we dont have to do this inefficient loop to find it in the movelist
     {
         //pvMove and hashMove should not be identical here
         if (pvMove.data == hashMove.data)
         {
             Console.WriteLine("bestmove PV and Hash Were identical");
-            return 0;
+            return -1;
         }
 
         int hashIndex = -1;
@@ -111,22 +111,22 @@ public class MoveOrdering
         if (pvIndex == -1)
         {
             Console.WriteLine("bestmove PV was illegal in double ordering");
-            if (hashIndex == -1) return 0;
+            if (hashIndex == -1) return -1;
 
             moves[hashIndex] = moves[0];
             moves[0] = hashMove;
-            return 1;
+            return 0;
         }
         else
         {
             moves[pvIndex] = moves[0];
             moves[0] = pvMove;
 
-            if (hashIndex == -1) return 1;
+            if (hashIndex == -1) return 0;
 
             moves[hashIndex] = moves[1];
             moves[1] = hashMove;
-            return 2;
+            return 1;
         }
     }
 

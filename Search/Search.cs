@@ -375,7 +375,7 @@ public class Search
 
         if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
 
-        int sortedMoveCount = 0;
+        int lastSortedMoveIndex = -1;
 
         if (isPV && followPV)
         {
@@ -383,23 +383,21 @@ public class Search
             {
                 Move pvMove = previousPVLine[plyFromRoot];
 
-                if (hashMove.data == pvMove.data) Console.WriteLine("Pv and hash were identical");
-
                 //TODO: we can theoretically assume the PV-move is legal, and just bypass movegen completely until we have searched it - prob not much of a performance gain since very few nodes where we have a PV-move available
                 if (hashMove.IsNullMove() || hashMove.data == pvMove.data)
                 {
-                    if (!moveOrdering.OrderHashMove(ref moves, pvMove)) Console.WriteLine("bestmove PV Was Illegal: " + BoardHelper.GetMoveNameUCI(previousPVLine[plyFromRoot]));
-                    sortedMoveCount = 1;
+                    if (moveOrdering.OrderHashMove(ref moves, pvMove)) lastSortedMoveIndex = 0;
+                    else Console.WriteLine("bestmove PV Was Illegal: " + BoardHelper.GetMoveNameUCI(previousPVLine[plyFromRoot]));
                 }
                 else
                 {
-                    sortedMoveCount = moveOrdering.OrderHashMove(ref moves, pvMove, hashMove);
+                    lastSortedMoveIndex = moveOrdering.OrderHashMove(ref moves, pvMove, hashMove);
                 }
             }
             else followPV = false;
         }
 
-        if (sortedMoveCount == 0)
+        if (lastSortedMoveIndex == -1)
         {
             //If a hash-move is either not found, or just illegal in the current position, we sort our moves normally.
             //Otherwise we just move the hash-move to the "front" of the movelist so our search will look at it first,
@@ -407,9 +405,9 @@ public class Search
             if (hashMove.IsNullMove() || !moveOrdering.OrderHashMove(ref moves, hashMove))
             {
                 moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot);
-                sortedMoveCount = moveCount;
+                lastSortedMoveIndex = moveCount;
             }
-            else sortedMoveCount = 1;
+            else lastSortedMoveIndex = 0;
         }
 
 
@@ -543,13 +541,13 @@ public class Search
 
             //If we had a hash-move in this position, looked at it in this iteration of the search,
             //and found out we still need to look at other moves in the movelist, we have to sort those now before next iteration
-            if (!isMoveListFullySorted)
+            if (i == lastSortedMoveIndex)
             {
                 moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot, true);
-                isMoveListFullySorted = true;
 
-                if (isPV) followPV = false; //If we were following the PV until this point, we will now be deviating from that path, since we are looking at alternative moves
             }
+
+            if (isPV) followPV = false; //If we were following the PV until this point, we will now be deviating from that path, since we are looking at alternative moves
         }
 
         if (plyFromRoot > 0) repetitionTable.PopNoRtn();
