@@ -89,7 +89,7 @@ public class MoveOrdering
         //pvMove and hashMove should not be identical here
         if (pvMove.data == hashMove.data)
         {
-            Console.WriteLine("bestmove PV and Hash Were identical");
+            Console.WriteLine("bestmove PVandHashWereidentical");
             return -1;
         }
 
@@ -110,7 +110,7 @@ public class MoveOrdering
 
         if (pvIndex == -1)
         {
-            Console.WriteLine("bestmove PV was illegal in double ordering");
+            Console.WriteLine("bestmove PVillegalindoubleordering");
             if (hashIndex == -1) return -1;
 
             moves[hashIndex] = moves[0];

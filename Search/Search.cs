@@ -387,7 +387,7 @@ public class Search
                 if (hashMove.IsNullMove() || hashMove.data == pvMove.data)
                 {
                     if (moveOrdering.OrderHashMove(ref moves, pvMove)) lastSortedMoveIndex = 0;
-                    else Console.WriteLine("bestmove PV Was Illegal: " + BoardHelper.GetMoveNameUCI(previousPVLine[plyFromRoot]));
+                    else Console.WriteLine("bestmove PVWasIllegal: " + BoardHelper.GetMoveNameUCI(previousPVLine[plyFromRoot]));
                 }
                 else
                 {
