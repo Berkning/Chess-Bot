@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 
 public class Evaluation
 {
@@ -15,6 +16,10 @@ public class Evaluation
 
     private const int Bias = 1;
 
+    private readonly Vector128<int> bishopMobilityWeights;
+    private readonly Vector128<int> rookMobilityWeights;
+    private readonly Vector128<int> queenMobilityWeights;
+
     public Evaluation()
     {
         weightVectors = new Vector<int>[(int)Math.Ceiling(Weights.Length / ((float)Vector<int>.Count))];
@@ -25,6 +30,10 @@ public class Evaluation
         {
             weightVectors[i] = new Vector<int>(Weights, i * Vector<int>.Count);
         }
+
+        bishopMobilityWeights = Vector128.Create(Weights[790], Weights[791], 0, 0);
+        rookMobilityWeights = Vector128.Create(Weights[792], Weights[793], 0, 0);
+        queenMobilityWeights = Vector128.Create(Weights[794], Weights[795], 0, 0);
 
         /*if (weightVectors.Length != FullVectorCount) //If all vectors cant be fully filled, we fill the last one partially
         {
@@ -73,7 +82,8 @@ public class Evaluation
         CalculateMaterial(board);
         CalculatePawnStructure(board);
         CalculateKingSafety(board);
-        CalculateMobility(board);
+        if (Vector128.IsHardwareAccelerated) CalculateMobilitySIMD(board);
+        else CalculateMobilityScalar(board);
 
         return ApplyPhase(board);
     }
@@ -423,7 +433,7 @@ public class Evaluation
     #region Mobility
 
     //Mobility for 3(*2) piece types in both game phases = 6 features
-    private void CalculateMobility(Board board) //TODO: Account for mobility to squares that are attacked
+    private void CalculateMobilityScalar(Board board) //TODO: Account for mobility to squares that are attacked
     {
         PieceList whiteBishopList = board.GetPieceList(Piece.Bishop, 0);
         PieceList blackBishopList = board.GetPieceList(Piece.Bishop, 1);
@@ -497,6 +507,82 @@ public class Evaluation
 
         rawMGEval += Weights[794] * queenDifference;
         rawEGEval += Weights[795] * queenDifference;
+    }
+
+    private void CalculateMobilitySIMD(Board board) //TODO: Account for mobility to squares that are attacked
+    {
+        PieceList whiteBishopList = board.GetPieceList(Piece.Bishop, 0);
+        PieceList blackBishopList = board.GetPieceList(Piece.Bishop, 1);
+        PieceList whiteRookList = board.GetPieceList(Piece.Rook, 0);
+        PieceList blackRookList = board.GetPieceList(Piece.Rook, 1);
+        PieceList whiteQueenList = board.GetPieceList(Piece.Queen, 0);
+        PieceList blackQueenList = board.GetPieceList(Piece.Queen, 1);
+
+
+        ulong otherPieces = board.GetPieceList(Piece.Pawn, 0).bitboard | board.GetPieceList(Piece.Knight, 0).bitboard | board.GetPieceList(Piece.Pawn, 1).bitboard | board.GetPieceList(Piece.Knight, 1).bitboard;
+
+        ulong allPiecesNoKings = whiteBishopList.bitboard | blackBishopList.bitboard | whiteRookList.bitboard | blackRookList.bitboard | whiteQueenList.bitboard | blackQueenList.bitboard | otherPieces;
+
+        //We exclude the opponent king bc he can't be on check rays - will be irrelevant when we account for checks in quiescence
+        ulong whiteAllPieces = allPiecesNoKings | (1UL << board.whiteKingSquare);
+        ulong blackAllPieces = allPiecesNoKings | (1UL << board.blackKingSquare);
+
+
+
+        int bishopDifference = 0;
+
+        for (int i = 0; i < whiteBishopList.Count; i++)
+        {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
+            bishopDifference += BitBoardHelper.BitCount(MagicData.GetBishopMoveBoard(whiteAllPieces, whiteBishopList[i])) >> 1;
+        }
+
+        for (int i = 0; i < blackBishopList.Count; i++)
+        {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
+            bishopDifference -= BitBoardHelper.BitCount(MagicData.GetBishopMoveBoard(blackAllPieces, blackBishopList[i])) >> 1;
+        }
+
+        Vector128<int> results = bishopMobilityWeights * bishopDifference;
+
+
+
+        int rookDifference = 0;
+
+        for (int i = 0; i < whiteRookList.Count; i++) //TODO: Split into horizontal and vertical mobility
+        {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
+            rookDifference += BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(whiteAllPieces, whiteRookList[i])) >> 1;
+        }
+
+        for (int i = 0; i < blackRookList.Count; i++)
+        {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
+            rookDifference -= BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(blackAllPieces, blackRookList[i])) >> 1;
+        }
+
+        results += rookMobilityWeights * rookDifference;
+
+
+
+        int queenDifference = 0;
+
+        for (int i = 0; i < whiteQueenList.Count; i++)
+        {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
+            queenDifference += BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(whiteAllPieces, whiteQueenList[i]) | MagicData.GetBishopMoveBoard(whiteAllPieces, whiteQueenList[i])) >> 1;
+        }
+
+        for (int i = 0; i < blackQueenList.Count; i++)
+        {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
+            queenDifference -= BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(blackAllPieces, blackQueenList[i]) | MagicData.GetBishopMoveBoard(blackAllPieces, blackQueenList[i])) >> 1;
+        }
+
+        results += queenMobilityWeights * queenDifference;
+
+        rawMGEval += results[0];
+        rawEGEval += results[1];
     }
 
     #endregion
