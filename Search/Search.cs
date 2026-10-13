@@ -205,6 +205,7 @@ public class Search
 
         if (prevResult == NegativeInfinity) //If no previous result, we search with a full window
         {
+            //TODO: Maybe try just centering the search around 0 - Would be a MUCH faster search, but we would ofc prob have to re-search a few times - maybe makes up for it tho?
             alpha = NegativeInfinity;
             beta = PositiveInfinity;
         }
