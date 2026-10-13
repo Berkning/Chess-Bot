@@ -423,10 +423,8 @@ public class Evaluation
     #region Mobility
 
     //Mobility for 3(*2) piece types in both game phases = 6 features
-    private int CalculateMobility(Board board) //TODO: Account for mobility to squares that are attacked
+    private void CalculateMobility(Board board) //TODO: Account for mobility to squares that are attacked
     {
-        int result = 0;
-
         PieceList whiteBishopList = board.GetPieceList(Piece.Bishop, 0);
         PieceList blackBishopList = board.GetPieceList(Piece.Bishop, 1);
         PieceList whiteRookList = board.GetPieceList(Piece.Rook, 0);
@@ -449,11 +447,13 @@ public class Evaluation
 
         for (int i = 0; i < whiteBishopList.Count; i++)
         {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
             bishopDifference += BitBoardHelper.BitCount(MagicData.GetBishopMoveBoard(whiteAllPieces, whiteBishopList[i])) >> 1;
         }
 
         for (int i = 0; i < blackBishopList.Count; i++)
         {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
             bishopDifference -= BitBoardHelper.BitCount(MagicData.GetBishopMoveBoard(blackAllPieces, blackBishopList[i])) >> 1;
         }
 
@@ -466,11 +466,13 @@ public class Evaluation
 
         for (int i = 0; i < whiteRookList.Count; i++) //TODO: Split into horizontal and vertical mobility
         {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
             rookDifference += BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(whiteAllPieces, whiteRookList[i])) >> 1;
         }
 
         for (int i = 0; i < blackRookList.Count; i++)
         {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
             rookDifference -= BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(blackAllPieces, blackRookList[i])) >> 1;
         }
 
@@ -483,18 +485,18 @@ public class Evaluation
 
         for (int i = 0; i < whiteQueenList.Count; i++)
         {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
             queenDifference += BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(whiteAllPieces, whiteQueenList[i]) | MagicData.GetBishopMoveBoard(whiteAllPieces, whiteQueenList[i])) >> 1;
         }
 
         for (int i = 0; i < blackQueenList.Count; i++)
         {
+            //TODO: Should really divide by 2 (>> 1) after multiplying by the weight, as this would give more granularity/resolution
             queenDifference -= BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(blackAllPieces, blackQueenList[i]) | MagicData.GetBishopMoveBoard(blackAllPieces, blackQueenList[i])) >> 1;
         }
 
         rawMGEval += Weights[794] * queenDifference;
         rawEGEval += Weights[795] * queenDifference;
-
-        return result;
     }
 
     #endregion
