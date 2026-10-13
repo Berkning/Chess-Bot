@@ -49,10 +49,16 @@ public class Evaluation
 
 
 
+    private int rawMGEval = 0;
+    private int rawEGEval = 0;
+    private int rawTotalEval = 0;
+
 
     public int Evaluate(Board board)
     {
-        CalculatePhase(board);
+        rawMGEval = 0;
+        rawEGEval = 0;
+        rawTotalEval = 0;
 
         int result = CalculateResult(board) + Bias;
 
@@ -63,7 +69,13 @@ public class Evaluation
 
     private int CalculateResult(Board board)
     {
-        return CalculatePieceSquareTables(board) + CalculateMaterial(board) + CalculatePawnStructure(board) + CalculateKingSafety(board) + CalculateMobility(board);
+        CalculatePieceSquareTables(board);
+        CalculateMaterial(board);
+        CalculatePawnStructure(board);
+        CalculateKingSafety(board);
+        CalculateMobility(board);
+
+        return ApplyPhase(board);
     }
 
     public static int GetPieceTypeValue(int piece)
@@ -81,32 +93,20 @@ public class Evaluation
     private const int QueenPhase = 4;
 
     private const int MaxPhase = KnightPhase * 4 + BishopPhase * 4 + RookPhase * 4 + QueenPhase * 2;
-    private int phase; //Phase is between 0 (MG) and 256 (EG)
-    private int mgWeight;
-    private int egWeight;
 
-    private void CalculatePhase(Board board)
+    private int ApplyPhase(Board board)
     {
-        phase = MaxPhase;
+        int phase = (GetRawPhase(board) * 256 + (MaxPhase / 2)) / MaxPhase; //Phase is between 0 (MG) and 256 (EG)
 
-        phase -= board.GetPieceList(Piece.Knight, 0).Count * KnightPhase;
-        phase -= board.GetPieceList(Piece.Knight, 1).Count * KnightPhase;
-        phase -= board.GetPieceList(Piece.Bishop, 0).Count * BishopPhase;
-        phase -= board.GetPieceList(Piece.Bishop, 1).Count * BishopPhase;
-        phase -= board.GetPieceList(Piece.Rook, 0).Count * RookPhase;
-        phase -= board.GetPieceList(Piece.Rook, 1).Count * RookPhase;
-        phase -= board.GetPieceList(Piece.Queen, 0).Count * QueenPhase;
-        phase -= board.GetPieceList(Piece.Queen, 1).Count * QueenPhase;
+        int mgWeight = 256 - phase;
+        int egWeight = phase;
 
-        phase = (phase * 256 + (MaxPhase / 2)) / MaxPhase;
-
-        mgWeight = 256 - phase;
-        egWeight = phase;
+        return ((rawMGEval * mgWeight + rawEGEval * egWeight) >> 8) + rawTotalEval;
     }
 
     public int GetRawPhase(Board board) //0 -> MaxPhase
     {
-        phase = MaxPhase;
+        int phase = MaxPhase;
 
         phase -= board.GetPieceList(Piece.Knight, 0).Count * KnightPhase;
         phase -= board.GetPieceList(Piece.Knight, 1).Count * KnightPhase;
@@ -127,99 +127,80 @@ public class Evaluation
 
     #region PSQT
     //6 pieces * 64 squares * 2 game stages = 768 features
-    private int CalculatePieceSquareTables(Board board)
+    private void CalculatePieceSquareTables(Board board)
     {
-        int result = 0;
-
         //TODO: find more efficient way to do this?
 
         //TODO: Use the allPieceList array instead of calling GetPiecelist
 
-        result += (Weights[board.whiteKingSquare] * mgWeight) >> 8;
-        result += (Weights[board.whiteKingSquare + 384] * egWeight) >> 8;
+        rawMGEval += Weights[board.whiteKingSquare];
+        rawEGEval += Weights[board.whiteKingSquare + 384];
 
-        result += SetPSQTFeaturesWhite(board.GetPieceList(Piece.Pawn, 0), 64 * 1);
-        result += SetPSQTFeaturesWhite(board.GetPieceList(Piece.Knight, 0), 64 * 2);
-        result += SetPSQTFeaturesWhite(board.GetPieceList(Piece.Bishop, 0), 64 * 3);
-        result += SetPSQTFeaturesWhite(board.GetPieceList(Piece.Rook, 0), 64 * 4);
-        result += SetPSQTFeaturesWhite(board.GetPieceList(Piece.Queen, 0), 64 * 5);
+        SetPSQTFeaturesWhite(board.GetPieceList(Piece.Pawn, 0), 64 * 1);
+        SetPSQTFeaturesWhite(board.GetPieceList(Piece.Knight, 0), 64 * 2);
+        SetPSQTFeaturesWhite(board.GetPieceList(Piece.Bishop, 0), 64 * 3);
+        SetPSQTFeaturesWhite(board.GetPieceList(Piece.Rook, 0), 64 * 4);
+        SetPSQTFeaturesWhite(board.GetPieceList(Piece.Queen, 0), 64 * 5);
 
         int blackKingFlipped = BoardHelper.FlipIndex(board.blackKingSquare);
 
-        result -= (Weights[blackKingFlipped] * mgWeight) >> 8;
-        result -= (Weights[blackKingFlipped + 384] * egWeight) >> 8;
+        rawMGEval -= Weights[blackKingFlipped];
+        rawEGEval -= Weights[blackKingFlipped + 384];
 
-        result += SetPSQTFeaturesBlack(board.GetPieceList(Piece.Pawn, 1), 64 * 1);
-        result += SetPSQTFeaturesBlack(board.GetPieceList(Piece.Knight, 1), 64 * 2);
-        result += SetPSQTFeaturesBlack(board.GetPieceList(Piece.Bishop, 1), 64 * 3);
-        result += SetPSQTFeaturesBlack(board.GetPieceList(Piece.Rook, 1), 64 * 4);
-        result += SetPSQTFeaturesBlack(board.GetPieceList(Piece.Queen, 1), 64 * 5);
-
-
-        return result;
+        SetPSQTFeaturesBlack(board.GetPieceList(Piece.Pawn, 1), 64 * 1);
+        SetPSQTFeaturesBlack(board.GetPieceList(Piece.Knight, 1), 64 * 2);
+        SetPSQTFeaturesBlack(board.GetPieceList(Piece.Bishop, 1), 64 * 3);
+        SetPSQTFeaturesBlack(board.GetPieceList(Piece.Rook, 1), 64 * 4);
+        SetPSQTFeaturesBlack(board.GetPieceList(Piece.Queen, 1), 64 * 5);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int SetPSQTFeaturesWhite(PieceList list, int PSQTOffset)
+    private void SetPSQTFeaturesWhite(PieceList list, int PSQTOffset)
     {
-        int result = 0;
-
         for (int i = 0; i < list.Count; i++)
         {
-            result += (Weights[list[i] + PSQTOffset] * mgWeight) >> 8; //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
-            result += (Weights[list[i] + PSQTOffset + 384] * egWeight) >> 8; //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame 
+            rawMGEval += Weights[list[i] + PSQTOffset]; //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
+            rawEGEval += Weights[list[i] + PSQTOffset + 384]; //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame 
         }
-
-        return result;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int SetPSQTFeaturesBlack(PieceList list, int PSQTOffset)
+    private void SetPSQTFeaturesBlack(PieceList list, int PSQTOffset)
     {
-        int result = 0;
-
         for (int i = 0; i < list.Count; i++)
         {
             //TODO: Rename "flipindex" to "mirrorindex"
             int mirroredSquare = BoardHelper.FlipIndex(list[i]);
 
-            result -= (Weights[mirroredSquare + PSQTOffset] * mgWeight) >> 8; //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
-            result -= (Weights[mirroredSquare + PSQTOffset + 384] * egWeight) >> 8; //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame
+            rawMGEval -= Weights[mirroredSquare + PSQTOffset]; //Activate middlegame PSQT at this square with intensity equal to how "much" we are in the middlegame
+            rawEGEval -= Weights[mirroredSquare + PSQTOffset + 384]; //Activate endgame PSQT at this square with intensity equal to how "much" we are in the endgame
         }
-
-        return result;
     }
     #endregion
 
 
     #region Material
     //5 material differences + 1 bishop pair difference = 6 features
-    private int CalculateMaterial(Board board)
+    private void CalculateMaterial(Board board)
     {
-        int result = 0;
-
         //TODO: Use the allPieceList array instead of calling GetPiecelist
-        result += Weights[768] * (board.GetPieceList(Piece.Pawn, 0).Count - board.GetPieceList(Piece.Pawn, 1).Count);
-        result += Weights[769] * (board.GetPieceList(Piece.Knight, 0).Count - board.GetPieceList(Piece.Knight, 1).Count);
-        result += Weights[770] * (board.GetPieceList(Piece.Bishop, 0).Count - board.GetPieceList(Piece.Bishop, 1).Count);
-        result += Weights[771] * (board.GetPieceList(Piece.Rook, 0).Count - board.GetPieceList(Piece.Rook, 1).Count);
-        result += Weights[772] * (board.GetPieceList(Piece.Queen, 0).Count - board.GetPieceList(Piece.Queen, 1).Count);
+        rawTotalEval += Weights[768] * (board.GetPieceList(Piece.Pawn, 0).Count - board.GetPieceList(Piece.Pawn, 1).Count);
+        rawTotalEval += Weights[769] * (board.GetPieceList(Piece.Knight, 0).Count - board.GetPieceList(Piece.Knight, 1).Count);
+        rawTotalEval += Weights[770] * (board.GetPieceList(Piece.Bishop, 0).Count - board.GetPieceList(Piece.Bishop, 1).Count);
+        rawTotalEval += Weights[771] * (board.GetPieceList(Piece.Rook, 0).Count - board.GetPieceList(Piece.Rook, 1).Count);
+        rawTotalEval += Weights[772] * (board.GetPieceList(Piece.Queen, 0).Count - board.GetPieceList(Piece.Queen, 1).Count);
 
         int whiteBishopPair = board.GetPieceList(Piece.Bishop, 0).Count > 1 ? 1 : 0; //TODO: Obv don't call this again
         int blackBishopPair = board.GetPieceList(Piece.Bishop, 1).Count > 1 ? 1 : 0; //TODO: Obv don't call this again
 
-        result += Weights[773] * (whiteBishopPair - blackBishopPair);
-
-        return result;
+        rawTotalEval += Weights[773] * (whiteBishopPair - blackBishopPair);
     }
     #endregion
 
     #region Pawn Structure
     //1 doubled pawn difference + 1 isolated pawn difference + (0) backward pawn difference + 6 passed pawn buckets + 1 connected passed pawn difference = 9 features
-    private int CalculatePawnStructure(Board board)
+    private void CalculatePawnStructure(Board board)
     {
-        int result = 0;
-
         ulong whitePawnBoard = board.GetPieceList(Piece.Pawn, 0).bitboard;
         ulong blackPawnBoard = board.GetPieceList(Piece.Pawn, 1).bitboard;
 
@@ -234,7 +215,7 @@ public class Evaluation
             doubledPawnDifference -= Math.Max(0, BitBoardHelper.BitCount(blackPawnBoard & fileMask) - 1);
         }
 
-        result += Weights[774] * doubledPawnDifference;
+        rawTotalEval += Weights[774] * doubledPawnDifference;
         //Console.WriteLine("doubledPawnDifference: " + doubledPawnDifference);
 
 
@@ -261,7 +242,7 @@ public class Evaluation
             if ((blackPawnBoard & PrecomputedData.isolationFileMasks[file]) == 0) isolatedPawnDifference--;
         }
 
-        result += Weights[775] * isolatedPawnDifference;
+        rawTotalEval += Weights[775] * isolatedPawnDifference;
         //Console.WriteLine("isolatedPawnDifference: " + isolatedPawnDifference);
 
 
@@ -288,7 +269,7 @@ public class Evaluation
                 //Console.WriteLine("white has passed pawn");
 
                 int rank = BoardHelper.IndexToRank(pawnSquare);
-                result += Weights[776 - 1 + rank];
+                rawTotalEval += Weights[776 - 1 + rank];
 
                 int file = BoardHelper.IndexToFile(pawnSquare);
 
@@ -312,7 +293,7 @@ public class Evaluation
                 //Console.WriteLine("Black has passed pawn");
 
                 int rank = 7 - BoardHelper.IndexToRank(pawnSquare);
-                result -= Weights[776 - 1 + rank];
+                rawTotalEval -= Weights[776 - 1 + rank];
 
                 int file = BoardHelper.IndexToFile(pawnSquare);
 
@@ -320,20 +301,16 @@ public class Evaluation
             }
         }
 
-        result += Weights[782] * connectedPassedPawnDifference;
-        //Console.WriteLine("connectedPassedPawnDifference: " + connectedPassedPawnDifference);
-        return result;
+        rawTotalEval += Weights[782] * connectedPassedPawnDifference;
     }
     #endregion
 
     #region King Safety
     //TODO: Add way more features
     //1 missing pawns on top of king difference + 1 hole in kings pawnshield difference + 1 complete open file above king difference + 4 pawn storm rank differences above king = 7 feature
-    private int CalculateKingSafety(Board board)
+    private void CalculateKingSafety(Board board)
     {
         //TODO: Skip all of this if mgWeight == 0
-
-        int result = 0;
 
         ulong whitePawns = board.GetPieceList(Piece.Pawn, 0).bitboard;
         ulong blackPawns = board.GetPieceList(Piece.Pawn, 1).bitboard;
@@ -357,7 +334,7 @@ public class Evaluation
 
         missingPawnDefenseDifference -= BitBoardHelper.BitCount(blackCoverHoles);
 
-        result += (Weights[783] * missingPawnDefenseDifference * mgWeight) >> 8;
+        rawMGEval += Weights[783] * missingPawnDefenseDifference;
 
 
 
@@ -424,9 +401,9 @@ public class Evaluation
             if ((PrecomputedData.fileMasks[blackKingFile] & blackPawns) == 0) openFileAboveKingDifference--;
         }
 
-        result += (Weights[784] * missingPawnShieldDifference * mgWeight) >> 8;
+        rawMGEval += Weights[784] * missingPawnShieldDifference;
 
-        result += (Weights[785] * openFileAboveKingDifference * mgWeight) >> 8;
+        rawMGEval += Weights[785] * openFileAboveKingDifference;
 
 
 
@@ -435,10 +412,8 @@ public class Evaluation
         {
             int pawnStormRankDifference = BitBoardHelper.BitCount(PrecomputedData.kingPawnCoverMasks[board.whiteKingSquare + PrecomputedData.Up * i] & blackPawns) - BitBoardHelper.BitCount(PrecomputedData.kingPawnCoverMasks[board.blackKingSquare + 64 + PrecomputedData.Down * i] & whitePawns);
 
-            result += (Weights[786 + i] * pawnStormRankDifference * mgWeight) >> 8;
+            rawMGEval += Weights[786 + i] * pawnStormRankDifference;
         }
-
-        return result;
     }
     #endregion
 
@@ -482,8 +457,8 @@ public class Evaluation
             bishopDifference -= BitBoardHelper.BitCount(MagicData.GetBishopMoveBoard(blackAllPieces, blackBishopList[i])) >> 1;
         }
 
-        result += (Weights[790] * bishopDifference * mgWeight) >> 8;
-        result += (Weights[791] * bishopDifference * egWeight) >> 8;
+        rawMGEval += Weights[790] * bishopDifference;
+        rawEGEval += Weights[791] * bishopDifference;
 
 
 
@@ -499,8 +474,8 @@ public class Evaluation
             rookDifference -= BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(blackAllPieces, blackRookList[i])) >> 1;
         }
 
-        result += (Weights[792] * rookDifference * mgWeight) >> 8;
-        result += (Weights[793] * rookDifference * egWeight) >> 8;
+        rawMGEval += Weights[792] * rookDifference;
+        rawEGEval += Weights[793] * rookDifference;
 
 
 
@@ -516,8 +491,8 @@ public class Evaluation
             queenDifference -= BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(blackAllPieces, blackQueenList[i]) | MagicData.GetBishopMoveBoard(blackAllPieces, blackQueenList[i])) >> 1;
         }
 
-        result += (Weights[794] * queenDifference * mgWeight) >> 8;
-        result += (Weights[795] * queenDifference * egWeight) >> 8;
+        rawMGEval += Weights[794] * queenDifference;
+        rawEGEval += Weights[795] * queenDifference;
 
         return result;
     }
