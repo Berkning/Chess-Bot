@@ -146,7 +146,8 @@ public class TranspositionTable
 
         if (Math.Abs(eval) > short.MaxValue)
         {
-            Console.WriteLine("bestmoveEval" + eval + "isoutsideofshortbounds");
+            Console.WriteLine("Eval" + eval + "isoutsideofshortbounds");
+            //FIXME: Should clamp eval to fit within short - should prob also track down the problem
         }
 
         table[Index(zobrist)] = new Transposition(zobrist, CorrectMateScoreForStorage(eval, numPlySearched), (byte)depth, (byte)evalType, move);
