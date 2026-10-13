@@ -516,8 +516,8 @@ public class Evaluation
             queenDifference -= BitBoardHelper.BitCount(MagicData.GetRookMoveBoard(blackAllPieces, blackQueenList[i]) | MagicData.GetBishopMoveBoard(blackAllPieces, blackQueenList[i])) >> 1;
         }
 
-        result += (Weights[792] * queenDifference * mgWeight) >> 8;
-        result += (Weights[793] * queenDifference * egWeight) >> 8;
+        result += (Weights[794] * queenDifference * mgWeight) >> 8;
+        result += (Weights[795] * queenDifference * egWeight) >> 8;
 
         return result;
     }
