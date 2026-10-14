@@ -386,8 +386,9 @@ public class Search
                 //TODO: we can theoretically assume the PV-move is legal, and just bypass movegen completely until we have searched it - prob not much of a performance gain since very few nodes where we have a PV-move available
                 if (hashMove.IsNullMove() || hashMove.data == pvMove.data)
                 {
+                    //FIXME: PV is for some reason illegal every once in a while
                     if (moveOrdering.OrderHashMove(ref moves, pvMove)) lastSortedMoveIndex = 0;
-                    else Console.WriteLine("bestmove PVWasIllegal: " + BoardHelper.GetMoveNameUCI(previousPVLine[plyFromRoot]));
+                    //else Console.WriteLine("bestmove PVWasIllegal: " + BoardHelper.GetMoveNameUCI(previousPVLine[plyFromRoot]));
                 }
                 else
                 {
@@ -397,6 +398,7 @@ public class Search
             else followPV = false;
         }
 
+        //If we didn't have a PV move to use in ordering
         if (lastSortedMoveIndex == -1)
         {
             //If a hash-move is either not found, or just illegal in the current position, we sort our moves normally.

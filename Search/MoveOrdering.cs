@@ -87,11 +87,11 @@ public class MoveOrdering
     public int OrderHashMove(ref Span<Move> moves, Move pvMove, Move hashMove) //TODO: Do this Lazy-MoveOrdering type thing for movegen as well - always start by just generating the hash move - would also mean we dont have to do this inefficient loop to find it in the movelist
     {
         //pvMove and hashMove should not be identical here
-        if (pvMove.data == hashMove.data)
+        /*if (pvMove.data == hashMove.data)
         {
             Console.WriteLine("bestmove PVandHashWereidentical");
             return -1;
-        }
+        }*/
 
         int hashIndex = -1;
         int pvIndex = -1;
@@ -110,7 +110,7 @@ public class MoveOrdering
 
         if (pvIndex == -1)
         {
-            Console.WriteLine("bestmove PVillegalindoubleordering");
+            //Console.WriteLine("bestmove PVillegalindoubleordering");
             if (hashIndex == -1) return -1;
 
             moves[hashIndex] = moves[0];
