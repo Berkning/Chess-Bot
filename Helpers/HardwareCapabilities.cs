@@ -24,7 +24,52 @@ public static class HardwareCapabilities
     public static void Initialize()
     {
         //MobilityBenchmark();
+        //MaterialBenchmark();
     }
+
+    private static void MaterialBenchmark()
+    {
+        Console.WriteLine("Running Material Benchmark...");
+        Console.WriteLine(Vector256.IsHardwareAccelerated);
+
+        //Warmup
+        for (int i = 0; i < 4; i++)
+        {
+            RunMaterialSIMD(4, 5, 1, 1, 2, 6, 3, 2, 4, 5);
+            RunMaterialScalar(4, 5, 1, 1, 2, 6, 3, 2, 4, 5);
+        }
+
+
+        Stopwatch simdStopWatch = new Stopwatch();
+        Stopwatch scalarStopWatch = new Stopwatch();
+
+        for (int r = 0; r < MaxRounds; r++)
+        {
+            if (r % 2 == 0)
+            {
+                scalarStopWatch.Start();
+                for (int i = 0; i < RandomBoardCount; i++)
+                {
+                    RunMaterialScalar(2, 1, 2, 2, 2, 1, 2, 2, 1, 1);
+                    RunMaterialScalar(7, 8, 1, 2, 2, 0, 2, 0, 1, 1);
+                }
+                scalarStopWatch.Stop();
+            }
+            else
+            {
+                simdStopWatch.Start();
+                for (int i = 0; i < RandomBoardCount; i++)
+                {
+                    RunMaterialSIMD(2, 1, 2, 2, 2, 1, 2, 2, 1, 1);
+                    RunMaterialSIMD(7, 8, 1, 2, 2, 0, 2, 0, 1, 1);
+                }
+                simdStopWatch.Stop();
+            }
+        }
+
+        Console.WriteLine("SIMD took: " + simdStopWatch.ElapsedMilliseconds + "ms - Scalar took: " + scalarStopWatch.ElapsedMilliseconds + "ms");
+    }
+
 
     private static void MobilityBenchmark()
     {
@@ -87,6 +132,33 @@ public static class HardwareCapabilities
         };
     private static int rawMGEval;
     private static int rawEGEval;
+    private static int rawTotalEval;
+    private static Vector256<int> materialWeights = Vector256.Create(Weights[768], Weights[769], Weights[770], Weights[771], Weights[772], Weights[773], 0, 0);
+
+    private static void RunMaterialScalar(int wPC, int bPC, int wKC, int bKC, int wBC, int bBC, int wRC, int bRC, int wQC, int bQC)
+    {
+        rawTotalEval += Weights[768] * (wPC - bPC);
+        rawTotalEval += Weights[769] * (wKC - bKC);
+        rawTotalEval += Weights[770] * (wBC - bBC);
+        rawTotalEval += Weights[771] * (wRC - bRC);
+        rawTotalEval += Weights[772] * (wQC - bQC);
+
+        int whiteBishopPair = wBC - bBC > 1 ? 1 : 0;
+        int blackBishopPair = bBC > 1 ? 1 : 0;
+
+        rawTotalEval += Weights[773] * (whiteBishopPair - blackBishopPair);
+    }
+
+    private static void RunMaterialSIMD(int wPC, int bPC, int wKC, int bKC, int wBC, int bBC, int wRC, int bRC, int wQC, int bQC)
+    {
+        int whiteBishopPair = wBC - bBC > 1 ? 1 : 0;
+        int blackBishopPair = bBC > 1 ? 1 : 0;
+
+        Vector256<int> result = Vector256.Create(wPC, wKC, wBC, wRC, wQC, whiteBishopPair, 0, 0) - Vector256.Create(bPC, bKC, bBC, bRC, bQC, blackBishopPair, 0, 0);
+        result *= materialWeights;
+
+        rawTotalEval += result[0] + result[1] + result[2] + result[3] + result[4] + result[5];
+    }
 
     private static void RunMobilitySIMD(ulong whiteAllPieces, ulong blackAllPieces, int[] whiteBishopList, int[] blackBishopList, int[] whiteRookList, int[] blackRookList, int[] whiteQueenList, int[] blackQueenList) //TODO: Account for mobility to squares that are attacked
     {
