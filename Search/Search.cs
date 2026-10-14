@@ -358,7 +358,7 @@ public class Search
         }
 
         //Razoring
-        if (depth == 1) //TODO: && !isPV
+        if (depth == 1) //TODO: && !isPV //TODO: Should be limited to positions in which alpha < big number, bc otherwise we risk being blind to potential mates (according to the CPW)
         {
             int staticEval = evaluator.Evaluate(board); //TODO: Can use TT eval, even when depth failed
 
