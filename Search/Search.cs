@@ -357,6 +357,18 @@ public class Search
             return 0; //Stalemate
         }
 
+        //Razoring
+        if (depth == 1) //TODO: && !isPV
+        {
+            int staticEval = evaluator.Evaluate(board); //TODO: Can use TT eval, even when depth failed
+
+            if (staticEval + TunableConstants.RazoringParameter <= alpha)
+            {
+                int score = SearchAllCaptures(alpha, alpha + 1);
+                if (score <= alpha) return score;
+            }
+        }
+
         //Null-Move pruning
         if (depth > 3 && !moveGenerator.inCheck)
         {
@@ -440,7 +452,7 @@ public class Search
                 }
 
                 if (plyFromRoot > 0) repetitionTable.PopNoRtn();
-                return beta;
+                return beta; //TODO: Fail-soft
             }
 
             if (evaluation > alpha)
@@ -472,7 +484,7 @@ public class Search
 
         transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);
 
-        return alpha;
+        return alpha; //TODO: Fail-soft
     }
 
 
