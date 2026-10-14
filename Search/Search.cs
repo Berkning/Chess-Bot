@@ -11,12 +11,15 @@ public class Search
 
     private const int MaxExtensions = 8; //TODO: Make tunable somehow
 
+    private const int MaxDepth = 127;
+
     public int nodeCount { get; private set; } = 0;
     private const int CancelDelay = 1023; //Amount of nodes to check before next check of cancelSearch value - HAS to be mask - like ending in only ones -> 0b0001111111 //TODO: Make tunable somehow
     //private static int quiescenseCount = 0;
     //private static int ttHits = 0;
 
-    //private static Move[] principledVariation = new Move[100]; //TODOne: Could just convert to array indexed by depth to store PV
+    //private Move[][] principledVariation = new Move[100];
+
     private Move bestMove;
     private int bestEval;
 
@@ -93,6 +96,9 @@ public class Search
             searchTime = int.MaxValue;
             clock.Start();
         }
+
+
+        searchDepth = int.Min(searchDepth, MaxDepth); //Clamp searchDepth to never be above MaxDepth
 
 
         int prevResult = NegativeInfinity;

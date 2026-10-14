@@ -386,7 +386,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 engine.InitializeSearch(int.MaxValue, -2);
                 return;
             case "movetime":
-                engine.InitializeSearch(99, int.Parse(args[2]));
+                engine.InitializeSearch(int.MaxValue, int.Parse(args[2]));
                 return;
             case "wtime":
                 int white = int.Parse(args[2]);
