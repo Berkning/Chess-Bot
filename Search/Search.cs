@@ -57,9 +57,6 @@ public class Search
     //Might be necessary to mark as volatile so it's synced when main thread wants to stop this thread
     public int searchTime = -1; //-2 : infinite,  -1 : use time management,  x : use x amount of time
 
-    public int x;
-    public int y;
-
 
     public void StartSearch()
     {
@@ -138,8 +135,6 @@ public class Search
             }
             else LogSearchInfo(depth, nodeCount, false, threadID); //TODO: check if matescore and then exit if were low on time
         }
-
-        Console.WriteLine(x + " " + y);
 
 
         clock.Stop();
@@ -372,12 +367,7 @@ public class Search
             {
                 staticEval = transpositionTable.LookupEvaluation(board.currentZobrist, 0, plyFromRoot, alpha, PositiveInfinity);
 
-                if (!transpositionTable.IsSuccessfulLookup(staticEval))
-                {
-                    y++;
-                    staticEval = evaluator.Evaluate(board);
-                }
-                else x++;
+                if (!transpositionTable.IsSuccessfulLookup(staticEval)) staticEval = evaluator.Evaluate(board);
             }
             else staticEval = evaluator.Evaluate(board);
 
