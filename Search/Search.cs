@@ -417,7 +417,7 @@ public class Search
             bool searchFullDepth = true;
 
             //Late Move Reduction
-            if (i > 4 && extensions == 0 && depth > 3)  //Assuming move ordering isn't completely wrong
+            if (i > 2 && extensions == 0 && depth > 2)  //Assuming move ordering isn't completely wrong
             {
                 evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions);
 
