@@ -57,6 +57,9 @@ public class Search
     //Might be necessary to mark as volatile so it's synced when main thread wants to stop this thread
     public int searchTime = -1; //-2 : infinite,  -1 : use time management,  x : use x amount of time
 
+    public int x;
+    public int y;
+
 
     public void StartSearch()
     {
@@ -136,6 +139,8 @@ public class Search
             else LogSearchInfo(depth, nodeCount, false, threadID); //TODO: check if matescore and then exit if were low on time
         }
 
+        Console.WriteLine(x + " " + y);
+
 
         clock.Stop();
 
@@ -212,6 +217,7 @@ public class Search
         if (prevResult == NegativeInfinity) //If no previous result, we search with a full window
         {
             //TODO: Maybe try just centering the search around 0 - Would be a MUCH faster search, but we would ofc prob have to re-search a few times - maybe makes up for it tho?
+            //TODO: Actually, try centering around static eval of the position, as that would probably be a better heuristic
             alpha = NegativeInfinity;
             beta = PositiveInfinity;
         }
@@ -360,9 +366,21 @@ public class Search
         //Razoring
         if (depth <= 3) //TODO: && !isPV //TODO: Should be limited to positions in which alpha < big number, bc otherwise we risk being blind to potential mates (according to the CPW)
         {
-            //Tried getting this from TT, but apparently is succesful so incredibly rarely,
-            //that i refuse to believe it wouldn't just be counterproductive
-            int staticEval = evaluator.Evaluate(board);
+            int staticEval;
+
+            if (depth > 1 && tableEval == TranspositionTable.DepthFailed) //TODO: Try adding && depth > 1, bc incredibly rare to actually get a lookup from depth == 1, bc we usually haven't searched it yet ofc
+            {
+                staticEval = transpositionTable.LookupEvaluation(board.currentZobrist, 0, plyFromRoot, alpha, PositiveInfinity);
+
+                if (!transpositionTable.IsSuccessfulLookup(staticEval))
+                {
+                    y++;
+                    staticEval = evaluator.Evaluate(board);
+                }
+                else x++;
+            }
+            else staticEval = evaluator.Evaluate(board);
+
 
             if (staticEval + TunableConstants.RazoringParameter * depth <= alpha)
             {
