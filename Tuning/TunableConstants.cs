@@ -57,15 +57,16 @@ public static class TunableConstants
 
 #if TUNABLE
 
-    public static TunableConstant aspInstabilityMargin = Tuning.AddConstant(new TunableConstant("AspInstabilityMargin", Category.Search, 25, -100, 150)); //TODO: Check once if tuning wants this to go negative, otherwise remove and just go like 0-100
-    public static TunableConstant aspWindowIncrement0 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement0", Category.Search, 25, 0, 150));
-    public static TunableConstant aspWindowIncrement1 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement1", Category.Search, 50, 0, 300));
-    public static TunableConstant aspWindowIncrement2 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement2", Category.Search, 100, 0, 650));
-    public static TunableConstant aspWindowIncrement3 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement3", Category.Search, 200, 0, 1100));
-    public static TunableConstant aspWindowIncrement4 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement4", Category.Search, 400, 0, 1600));
-    public static TunableConstant aspWindowIncrement5 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement5", Category.Search, 800, 0, 3000));
-    public static TunableConstant aspWindowIncrement6 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement6", Category.Search, 1600, 0, 9000));
-    public static TunableConstant razoringParameter = Tuning.AddConstant(new TunableConstant("RazoringParameter", Category.Search, 300, 0, 1000));
+    public static TunableConstant aspInstabilityMargin = Tuning.AddConstant(new TunableConstant("AspInstabilityMargin", Category.Search, 25, 0, 50)); //TODO: Check once if tuning wants this to go negative, otherwise remove and just go like 0-100
+    public static TunableConstant aspWindowIncrement0 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement0", Category.Search, 25, 0, 50));
+    public static TunableConstant aspWindowIncrement1 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement1", Category.Search, 50, 0, 100));
+    public static TunableConstant aspWindowIncrement2 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement2", Category.Search, 100, 0, 200));
+    public static TunableConstant aspWindowIncrement3 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement3", Category.Search, 200, 0, 325));
+    public static TunableConstant aspWindowIncrement4 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement4", Category.Search, 400, 0, 600));
+    public static TunableConstant aspWindowIncrement5 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement5", Category.Search, 800, 0, 1000));
+    public static TunableConstant aspWindowIncrement6 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement6", Category.Search, 1600, 0, 2000));
+    public static TunableConstant razoringMargin = Tuning.AddConstant(new TunableConstant("RazoringMargin", Category.Search, 300, 0, 1000));
+    public static TunableConstant razoringTTMargin = Tuning.AddConstant(new TunableConstant("RazoringTTMargin", Category.Search, 40, 0, 300));
 
     public static int AspInstabilityMargin {get {return aspInstabilityMargin.currentValue;}}
     public static int AspWindowIncrement0 {get {return aspWindowIncrement0.currentValue;}}
@@ -75,7 +76,8 @@ public static class TunableConstants
     public static int AspWindowIncrement4 {get {return aspWindowIncrement4.currentValue;}}
     public static int AspWindowIncrement5 {get {return aspWindowIncrement5.currentValue;}}
     public static int AspWindowIncrement6 {get {return aspWindowIncrement6.currentValue;}}
-    public static int RazoringParameter {get {return razoringParameter.currentValue;}}
+    public static int RazoringMargin {get {return razoringMargin.currentValue;}}
+    public static int RazoringTTMargin {get {return razoringTTMargin.currentValue;}}
 
 #else
     public const int AspInstabilityMargin = 25;
@@ -86,7 +88,8 @@ public static class TunableConstants
     public const int AspWindowIncrement4 = 400;
     public const int AspWindowIncrement5 = 800;
     public const int AspWindowIncrement6 = 1600;
-    public const int RazoringParameter = 300;
+    public const int RazoringMargin = 300;
+    public const int RazoringTTMargin = 40;
 #endif
 
     //------------------------------------------------------------

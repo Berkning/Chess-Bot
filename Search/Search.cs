@@ -362,17 +362,21 @@ public class Search
         if (depth <= 3) //TODO: && !isPV //TODO: Should be limited to positions in which alpha < big number, bc otherwise we risk being blind to potential mates (according to the CPW)
         {
             int staticEval;
+            int ttDepth = 0;
 
             if (depth > 1 && tableEval == TranspositionTable.DepthFailed) //TODO: Try adding && depth > 1, bc incredibly rare to actually get a lookup from depth == 1, bc we usually haven't searched it yet ofc
             {
                 staticEval = transpositionTable.LookupEvaluation(board.currentZobrist, 0, plyFromRoot, alpha, PositiveInfinity);
 
                 if (!transpositionTable.IsSuccessfulLookup(staticEval)) staticEval = evaluator.Evaluate(board);
+                else ttDepth = transpositionTable.GetStoredDepth(board.currentZobrist); //If we are able to use the eval from a TT entry, instead of just the static eval, we store the depth to which the TTentry was searched
             }
             else staticEval = evaluator.Evaluate(board);
 
 
-            if (staticEval + TunableConstants.RazoringParameter * depth <= alpha)
+            int margin = int.Max(0, TunableConstants.RazoringMargin - ttDepth * TunableConstants.RazoringTTMargin) * (int)depth;
+
+            if (staticEval + margin <= alpha)
             {
                 int score = SearchAllCaptures(alpha, alpha + 1);
                 if (score <= alpha) return score;

@@ -87,6 +87,11 @@ public class TranspositionTable
         return table[Index(zobrist)].move; //TODOnt anymore: Could just return whole entry to avoid having to lock twice waiting for both eval and move if eval is good
     }
 
+    public int GetStoredDepth(ulong zobrist) //TODO: Prob just return full Transposition struct in LookupEvaluation, and then extract move, depth and so on from that
+    {
+        return table[Index(zobrist)].depth;
+    }
+
     public int LookupEvaluation(ulong zobrist, uint depth, int plyFromRoot, int alpha, int beta)
     {
         ulong index = Index(zobrist);
