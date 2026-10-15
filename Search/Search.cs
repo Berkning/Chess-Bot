@@ -358,11 +358,13 @@ public class Search
         }
 
         //Razoring
-        if (depth == 1) //TODO: && !isPV //TODO: Should be limited to positions in which alpha < big number, bc otherwise we risk being blind to potential mates (according to the CPW)
+        if (depth <= 3) //TODO: && !isPV //TODO: Should be limited to positions in which alpha < big number, bc otherwise we risk being blind to potential mates (according to the CPW)
         {
-            int staticEval = evaluator.Evaluate(board); //TODO: Can use TT eval, even when depth failed
+            //Tried getting this from TT, but apparently is succesful so incredibly rarely,
+            //that i refuse to believe it wouldn't just be counterproductive
+            int staticEval = evaluator.Evaluate(board);
 
-            if (staticEval + TunableConstants.RazoringParameter <= alpha)
+            if (staticEval + TunableConstants.RazoringParameter * depth <= alpha)
             {
                 int score = SearchAllCaptures(alpha, alpha + 1);
                 if (score <= alpha) return score;

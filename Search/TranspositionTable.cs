@@ -102,18 +102,18 @@ public class TranspositionTable
             {
                 int correctedScore = CorrectRetrievedMateScore(transposition.eval, plyFromRoot);
                 // We have stored the exact evaluation for this position, so return it
-                if (transposition.nodeType == Exact) //TODO: test with caching nodetype maybe?
+                if (transposition.nodeType == Exact)
                 {
                     return correctedScore;
                 }
                 // We have stored the upper bound of the eval for this position. If it's less than alpha then we don't need to
                 // search the moves in this position as they won't interest us; otherwise we will have to search to find the exact value
-                if (transposition.nodeType == UpperBound && correctedScore <= alpha)//TODO: test with caching nodetype maybe?
+                if (transposition.nodeType == UpperBound && correctedScore <= alpha)
                 {
                     return correctedScore;
                 }
                 // We have stored the lower bound of the eval for this position. Only return if it causes a beta cut-off.
-                if (transposition.nodeType == LowerBound && correctedScore >= beta)//TODO: test with caching nodetype maybe?
+                if (transposition.nodeType == LowerBound && correctedScore >= beta)
                 {
                     return correctedScore;
                 }
