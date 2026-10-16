@@ -419,7 +419,11 @@ public class Search
             //Late Move Reduction
             if (i > 2 && extensions == 0 && depth > 2)  //Assuming move ordering isn't completely wrong
             {
-                evaluation = -AlphaBeta(depth - 2, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions);
+                uint reduction = 1;
+
+                if (i > 5) reduction++;
+
+                evaluation = -AlphaBeta(depth - 1 - reduction, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions);
 
                 //If evals better than anything else so far we'll search to full depth
                 searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()); //TODOnt?: Move cancel check to separate if before this
