@@ -519,6 +519,11 @@ public class Search
         {
             return beta;
         }
+
+        //Very general Delta-Pruning that prunes all moves, but with a bigger safety margin ofc.
+        //TODO: Do Delta-Pruning in the move-loop as well for each capture
+        if (eval + Evaluation.GetPieceTypeValue(Piece.Queen) + TunableConstants.DeltaPruningMargin < alpha) return alpha;
+
         if (eval > alpha)
         {
             alpha = eval;
