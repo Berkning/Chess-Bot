@@ -323,6 +323,18 @@ public class Search
         }
 
 
+        int staticEval = evaluator.Evaluate(board); //TODO: Try getting from TT if DepthFailed - could also be used to reduce margins bc we have a more reliable evaluation
+
+        //Reverse Futility Pruning
+        if (staticEval >= beta + TunableConstants.RFPMargin * depth) //TODO: Try not doing RFP if position is in check
+        {
+            return staticEval; //Fail soft
+        }
+
+
+
+
+
         Span<Move> moves = stackalloc Move[256]; //TODO: Try just allocating 218, technically no need for the extra 38 at all except maybe fits nicer into memory
 
         int moveCount = moveGenerator.GenerateMoves(ref moves);
@@ -360,11 +372,7 @@ public class Search
         //Razoring
         if (depth <= 3) //TODO: && !isPV //TODO: Should be limited to positions in which alpha < big number, bc otherwise we risk being blind to potential mates (according to the CPW)
         {
-            //Tried getting this from TT, but apparently is succesful so incredibly rarely,
-            //that i refuse to believe it wouldn't just be counterproductive
-            int staticEval = evaluator.Evaluate(board);
-
-            if (staticEval + TunableConstants.RazoringParameter * depth <= alpha)
+            if (staticEval + TunableConstants.RazoringMargin * depth <= alpha)
             {
                 int score = SearchAllCaptures(alpha, alpha + 1);
                 if (score <= alpha) return score;
