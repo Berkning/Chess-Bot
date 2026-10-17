@@ -273,7 +273,7 @@ public class Search
 
     #region Search
 
-    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0)//, bool test)
+    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, bool isPV = true, uint numExtensions = 0)//, bool test)
     {
         nodeCount++;
 
@@ -386,7 +386,7 @@ public class Search
             {
                 board.MakeNullMove();
                 uint nullReduction = 3;
-                int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), numExtensions);
+                int nullEval = -AlphaBeta(depth - nullReduction, plyFromRoot + 1, -beta, -(beta - 1), false, numExtensions);
                 board.UnMakeNullMove();
 
                 if ((nodeCount & CancelDelay) == 0)
@@ -431,13 +431,30 @@ public class Search
 
                 if (i > 5) reduction++;
 
-                evaluation = -AlphaBeta(depth - 1 - reduction, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions);
+                evaluation = -AlphaBeta(depth - 1 - reduction, plyFromRoot + 1, -alpha - 1, -alpha, false, numExtensions);
 
                 //If evals better than anything else so far we'll search to full depth
                 searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()); //TODOnt?: Move cancel check to separate if before this
             }
 
-            if (searchFullDepth) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);
+            if (searchFullDepth)
+            {
+                if (i == 0) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, isPV, numExtensions + extensions);
+                else
+                {
+                    evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -alpha - 1, -alpha, false, numExtensions);
+
+                    if ((nodeCount & CancelDelay) == 0)
+                    {
+                        if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
+                    }
+
+                    if (evaluation > alpha && evaluation < beta && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()))
+                    {
+                        evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, isPV, numExtensions + extensions);
+                    }
+                }
+            }
 
 
             board.UnMakeMove(moves[i], true);
