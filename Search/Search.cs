@@ -444,9 +444,9 @@ public class Search
                 {
                     evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -alpha - 1, -alpha, false, numExtensions);
 
-                    if (evaluation > alpha && evaluation < beta && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()))
+                    if (evaluation > alpha && isPV && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()))
                     {
-                        evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, isPV, numExtensions + extensions);
+                        evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, true, numExtensions + extensions);
                     }
                 }
             }
