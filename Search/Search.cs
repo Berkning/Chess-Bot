@@ -444,11 +444,6 @@ public class Search
                 {
                     evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -alpha - 1, -alpha, false, numExtensions);
 
-                    if ((nodeCount & CancelDelay) == 0)
-                    {
-                        if (clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()) return 0;
-                    }
-
                     if (evaluation > alpha && evaluation < beta && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()))
                     {
                         evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, isPV, numExtensions + extensions);
