@@ -423,6 +423,7 @@ public class Search
 
             int evaluation = NegativeInfinity;
             bool searchFullDepth = true;
+            bool lmrFailed = false;
 
             //Late Move Reduction
             if (i > 2 && extensions == 0 && depth > 2)  //Assuming move ordering isn't completely wrong
@@ -435,11 +436,13 @@ public class Search
 
                 //If evals better than anything else so far we'll search to full depth
                 searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()); //TODOnt?: Move cancel check to separate if before this
+                if (searchFullDepth) lmrFailed = true;
             }
 
             if (searchFullDepth)
             {
-                if (i == 0) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, isPV, numExtensions + extensions);
+                //If LMR search failed we assume a normal search would also exceed alpha - not necessarily true, just seems to save redundant re-searches, making the engine stronger
+                if (i == 0 || lmrFailed) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, isPV, numExtensions + extensions);
                 else
                 {
                     evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -alpha - 1, -alpha, false, numExtensions);
