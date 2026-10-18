@@ -328,7 +328,7 @@ public class Search
         //Reverse Futility Pruning
         if (staticEval >= beta + TunableConstants.RFPMargin * depth) //TODO: Try not doing RFP if position is in check
         {
-            return staticEval; //Fail soft
+            return (staticEval + beta) / 2;
         }
 
 
