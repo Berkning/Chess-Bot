@@ -65,8 +65,8 @@ public static class TunableConstants
     public static TunableConstant aspWindowIncrement4 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement4", Category.Search, 400, 0, 1600));
     public static TunableConstant aspWindowIncrement5 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement5", Category.Search, 800, 0, 3000));
     public static TunableConstant aspWindowIncrement6 = Tuning.AddConstant(new TunableConstant("AspWindowIncrement6", Category.Search, 1600, 0, 9000));
-    public static TunableConstant razoringMargin = Tuning.AddConstant(new TunableConstant("RazoringMargin", Category.Search, 300, 0, 1000));
-    public static TunableConstant rfpMargin = Tuning.AddConstant(new TunableConstant("RFPMargin", Category.Search, 150, 0, 400));
+    public static TunableConstant razoringMargin = Tuning.AddConstant(new TunableConstant("RazoringMargin", Category.Search, 217, 75, 350));
+    public static TunableConstant rfpMargin = Tuning.AddConstant(new TunableConstant("RFPMargin", Category.Search, 124, 50, 200));
 
     public static int AspInstabilityMargin {get {return aspInstabilityMargin.currentValue;}}
     public static int AspWindowIncrement0 {get {return aspWindowIncrement0.currentValue;}}
@@ -88,8 +88,8 @@ public static class TunableConstants
     public const int AspWindowIncrement4 = 400;
     public const int AspWindowIncrement5 = 800;
     public const int AspWindowIncrement6 = 1600;
-    public const int RazoringMargin = 300;
-    public const int RFPMargin = 150;
+    public const int RazoringMargin = 217;
+    public const int RFPMargin = 124;
 #endif
 
     //------------------------------------------------------------
