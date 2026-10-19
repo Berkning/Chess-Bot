@@ -498,7 +498,7 @@ public class Search
 
         transpositionTable.StoreEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, transpositionBound, bestMoveInPosition);
 
-        return alpha; //TODO: Fail-soft
+        return alpha;
     }
 
 

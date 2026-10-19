@@ -95,7 +95,7 @@ public class TranspositionTable
         //TODO: Test maybe with waiting a tiny bit here if key and data is corrupted instead of just failing the probe?
 
         //if ((transposition.key ^ (uint)transposition.data) == (uint)zobrist) //TODO: guarantee atomic for SMP
-        if (transposition.key == zobrist >> 48)
+        if (transposition.key == zobrist)
         {
             // Only use stored evaluation if it has been searched to at least the same depth as would be searched now
             if (transposition.depth >= depth)
@@ -181,30 +181,28 @@ public class TranspositionTable
     public struct Transposition
     {
         public readonly ulong data;
+        public readonly ulong key;
 
-        private const ulong keyMask = 0b0000000000000000000000000000000000000000000000001111111111111111;
-        private const ulong evalMask = 0b0000000000000000000000000000000011111111111111110000000000000000;
-        private const ulong depthMask = 0b0000000000000000000000000011111100000000000000000000000000000000;
-        private const ulong nodeTypeMask = 0b0000000000000000000000001100000000000000000000000000000000000000;
-        private const ulong moveMask = 0b0000000011111111111111110000000000000000000000000000000000000000;
+        private const ulong EvalMask = 0b0000000000000000000000000000000000000000000000001111111111111111;
+        //TODO: make depth hold up to Search.MaxDepth - 127 => 7 bits instead of 6
+        private const ulong DepthMask = 0b0000000000000000000000000000000000000000001111110000000000000000;
+        private const ulong NodeTypeMask = 0b0000000000000000000000000000000000000000110000000000000000000000;
+        private const ulong MoveMask = 0b0000000000000000000000001111111111111111000000000000000000000000;
 
-        public ulong key { get { return data & keyMask; } }
-        public short eval { get { return (short)((data & evalMask) >> 16); } }
-        public byte depth { get { return (byte)((data & depthMask) >> 32); } }
-        public ulong nodeType { get { return (data & nodeTypeMask) >> 38; } }
-        public Move move { get { return new Move((ushort)((data & moveMask) >> 40)); } } //TODOnt: Try without move entirely - not necessary unless at root - just maintain PV instead - necessary for move ordering
+        //TODO: Add static eval to entry
+        private const ulong StaticEvalMask = 0b0000000011111111111111110000000000000000000000000000000000000000;
 
-        public Transposition(ulong zobrist, short eval, byte depth, byte nodeType, Move move) //TODO: make all ulong here in params?
+        public short eval { get { return (short)(data & EvalMask); } }
+        public byte depth { get { return (byte)((data & DepthMask) >> 16); } }
+        public ulong nodeType { get { return (data & NodeTypeMask) >> 22; } }
+        public Move move { get { return new Move((ushort)((data & MoveMask) >> 24)); } }
+
+        //TODO: Make multi-threading safe again - xor data with key and stuff
+        public Transposition(ulong zobrist, short eval, byte depth, byte nodeType, Move move)
         {
-            //TODO: test if depth is bigger than 6 bits - prob no need to check if depth is above 63 as we would prob be winning anyway
-            //TODO: Maybe try testing if eval is larger than 16 bits as this would provide very wrong answers if ever the case
+            data = (((ulong)eval) & EvalMask) | ((((ulong)depth) << 16) & DepthMask) | ((((ulong)nodeType) << 22) & NodeTypeMask) | ((((ulong)move.data) << 24) & MoveMask);
 
-            ulong key = zobrist >> 48; //Bc we are using PO2 TT we already now that fx the first 26 bits match for a 64mb table so we use the last 16 bits as the key since the last bits are the ones that will actually differ if the position is different
-
-            data = key | ((((ulong)eval) << 16) & evalMask) | ((((ulong)depth) << 32) & depthMask) | ((((ulong)nodeType) << 38) & nodeTypeMask) | ((((ulong)move.data) << 40) & moveMask);
-
-
-            //data = (uint)eval | (((ulong)move.data) << 32) | (((ulong)depth) << 48) | (((ulong)nodeType) << 56);
+            key = zobrist;
 
             //key = zobrist ^ data;
         }

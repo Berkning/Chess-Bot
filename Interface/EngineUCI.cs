@@ -266,6 +266,18 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                     Console.WriteLine("Queen: " + Evaluation.GetPieceTypeValue(Piece.Queen));
 
                     Console.WriteLine("Vector Length: " + Vector<int>.Count);
+
+
+
+                    short eval = (short)v;
+
+                    Console.WriteLine("");
+                    Console.WriteLine("");
+                    Console.WriteLine("");
+                    Console.WriteLine("Eval Before: " + eval);
+                    ulong converted = ((ulong)eval) & 0b0000000000000000000000000000000000000000000000001111111111111111;
+                    Console.WriteLine("Converted eval: " + converted);
+                    Console.WriteLine("Converted back: " + (short)converted);
                 }
                 break;
             case "gc":
