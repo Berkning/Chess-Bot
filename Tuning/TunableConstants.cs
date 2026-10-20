@@ -21,6 +21,7 @@ public static class TunableConstants
     public static TunableConstant historyDecay =  Tuning.AddConstant(new TunableConstant("HistoryDecay", Category.MoveOrdering, 4982, 0, 10000));
     public static TunableConstant promotionMultiplier =  Tuning.AddConstant(new TunableConstant("PromotionMultiplier", Category.MoveOrdering, 1f, -1f, 5f, true));
     public static TunableConstant defendedByPawnBias =  Tuning.AddConstant(new TunableConstant("DefendedByPawnBias", Category.MoveOrdering, 58, 0, 1000));
+    public static TunableConstant historyBonusMultiplier =  Tuning.AddConstant(new TunableConstant("HistoryBonusMultiplier", Category.MoveOrdering, 1f, 0f, 10f, true));
 
     public static int KillerBias {get {return (int)killerBias.currentValue;}}
     public static int GoodCaptureBias {get {return (int)goodCaptureBias.currentValue;}}
@@ -34,6 +35,7 @@ public static class TunableConstants
     public static int HistoryDecay {get {return (int)historyDecay.currentValue;}}
     public static float PromotionMultiplier {get {return promotionMultiplier.currentValue;}}
     public static int DefendedByPawnBias {get {return (int)defendedByPawnBias.currentValue;}}
+    public static float HistoryBonusMultiplier {get {return historyBonusMultiplier.currentValue;}}
 #else
     public const int KillerBias = 5302; //500000
     public const int GoodCaptureBias = 9900;
@@ -42,11 +44,12 @@ public static class TunableConstants
     public const int AttackedByPawnBias = -579;
     public const int AttackedByKnightBias = -110;
     public const int AttackedByKnightMinPieceValue = 463;
-    public const float CaptureValueDeltaMultiplier = 2;
+    public const float CaptureValueDeltaMultiplier = 2f;
     public const int MaxHistory = 844;
     public const int HistoryDecay = 4982;
-    public const float PromotionMultiplier = 1; //TODO: Try setting to 0 (just remove code using it completely), tuner seemed to be really considering that option
+    public const float PromotionMultiplier = 1f; //TODO: Try setting to 0 (just remove code using it completely), tuner seemed to be really considering that option
     public const int DefendedByPawnBias = 58;
+    public const float HistoryBonusMultiplier = 1f;
 #endif
 
     //------------------------------------------------------------
