@@ -16,24 +16,24 @@ public static class TunableConstants
     public static TunableConstant attackedByPawnBias =  Tuning.AddConstant(new TunableConstant("AttackedByPawnBias", Category.MoveOrdering, -579, -2500, 0));
     public static TunableConstant attackedByKnightBias =  Tuning.AddConstant(new TunableConstant("AttackedByKnightBias", Category.MoveOrdering, -110, -1000, 0));
     public static TunableConstant attackedByKnightMinPieceValue =  Tuning.AddConstant(new TunableConstant("AttackedByKnightMinPieceValue", Category.MoveOrdering, 463, 0, 1500));
-    public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 2, 0, 15)); //TODO: Tuner seemed to have maube wanted this to be somewhere closer to 3. Should prob just wait for retune with floats
+    public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 2f, -1f, 10f, true));
     public static TunableConstant maxHistory =  Tuning.AddConstant(new TunableConstant("MaxHistory", Category.MoveOrdering, 844, 1, 2048));
     public static TunableConstant historyDecay =  Tuning.AddConstant(new TunableConstant("HistoryDecay", Category.MoveOrdering, 4982, 0, 10000));
-    public static TunableConstant promotionMultiplier =  Tuning.AddConstant(new TunableConstant("PromotionMultiplier", Category.MoveOrdering, 1, 0, 25));
+    public static TunableConstant promotionMultiplier =  Tuning.AddConstant(new TunableConstant("PromotionMultiplier", Category.MoveOrdering, 1f, -1f, 5f, true));
     public static TunableConstant defendedByPawnBias =  Tuning.AddConstant(new TunableConstant("DefendedByPawnBias", Category.MoveOrdering, 58, 0, 1000));
 
-    public static int KillerBias {get {return killerBias.currentValue;}} //TODO: Make all these tunable constants (or at the very least the multipliers) floats, bc tuner really seems to want some extra resolution
-    public static int GoodCaptureBias {get {return goodCaptureBias.currentValue;}}
-    public static int EqualCaptureBias {get {return equalCaptureBias.currentValue;}}
-    public static int BadCaptureBias {get {return badCaptureBias.currentValue;}}
-    public static int AttackedByPawnBias {get {return attackedByPawnBias.currentValue;}}
-    public static int AttackedByKnightBias {get {return attackedByKnightBias.currentValue;}}
-    public static int AttackedByKnightMinPieceValue {get {return attackedByKnightMinPieceValue.currentValue;}}
-    public static int CaptureValueDeltaMultiplier {get {return captureValueDeltaMultiplier.currentValue;}}
-    public static int MaxHistory {get {return maxHistory.currentValue;}}
-    public static int HistoryDecay {get {return historyDecay.currentValue;}}
-    public static int PromotionMultiplier {get {return promotionMultiplier.currentValue;}}
-    public static int DefendedByPawnBias {get {return defendedByPawnBias.currentValue;}}
+    public static int KillerBias {get {return (int)killerBias.currentValue;}}
+    public static int GoodCaptureBias {get {return (int)goodCaptureBias.currentValue;}}
+    public static int EqualCaptureBias {get {return (int)equalCaptureBias.currentValue;}}
+    public static int BadCaptureBias {get {return (int)badCaptureBias.currentValue;}}
+    public static int AttackedByPawnBias {get {return (int)attackedByPawnBias.currentValue;}}
+    public static int AttackedByKnightBias {get {return (int)attackedByKnightBias.currentValue;}}
+    public static int AttackedByKnightMinPieceValue {get {return (int)attackedByKnightMinPieceValue.currentValue;}}
+    public static float CaptureValueDeltaMultiplier {get {return captureValueDeltaMultiplier.currentValue;}}
+    public static int MaxHistory {get {return (int)maxHistory.currentValue;}}
+    public static int HistoryDecay {get {return (int)historyDecay.currentValue;}}
+    public static float PromotionMultiplier {get {return promotionMultiplier.currentValue;}}
+    public static int DefendedByPawnBias {get {return (int)defendedByPawnBias.currentValue;}}
 #else
     public const int KillerBias = 5302; //500000
     public const int GoodCaptureBias = 9900;
@@ -42,10 +42,10 @@ public static class TunableConstants
     public const int AttackedByPawnBias = -579;
     public const int AttackedByKnightBias = -110;
     public const int AttackedByKnightMinPieceValue = 463;
-    public const int CaptureValueDeltaMultiplier = 2;
+    public const float CaptureValueDeltaMultiplier = 2;
     public const int MaxHistory = 844;
     public const int HistoryDecay = 4982;
-    public const int PromotionMultiplier = 1; //TODO: Try setting to 0 (just remove code using it completely), tuner seemed to be really considering that option
+    public const float PromotionMultiplier = 1; //TODO: Try setting to 0 (just remove code using it completely), tuner seemed to be really considering that option
     public const int DefendedByPawnBias = 58;
 #endif
 
@@ -68,16 +68,16 @@ public static class TunableConstants
     public static TunableConstant razoringMargin = Tuning.AddConstant(new TunableConstant("RazoringMargin", Category.Search, 300, 150, 350));
     public static TunableConstant rfpMargin = Tuning.AddConstant(new TunableConstant("RFPMargin", Category.Search, 150, 50, 200));
 
-    public static int AspInstabilityMargin {get {return aspInstabilityMargin.currentValue;}}
-    public static int AspWindowIncrement0 {get {return aspWindowIncrement0.currentValue;}}
-    public static int AspWindowIncrement1 {get {return aspWindowIncrement1.currentValue;}}
-    public static int AspWindowIncrement2 {get {return aspWindowIncrement2.currentValue;}}
-    public static int AspWindowIncrement3 {get {return aspWindowIncrement3.currentValue;}}
-    public static int AspWindowIncrement4 {get {return aspWindowIncrement4.currentValue;}}
-    public static int AspWindowIncrement5 {get {return aspWindowIncrement5.currentValue;}}
-    public static int AspWindowIncrement6 {get {return aspWindowIncrement6.currentValue;}}
-    public static int RazoringMargin {get {return razoringMargin.currentValue;}}
-    public static int RFPMargin {get {return rfpMargin.currentValue;}}
+    public static int AspInstabilityMargin {get {return (int)aspInstabilityMargin.currentValue;}}
+    public static int AspWindowIncrement0 {get {return (int)aspWindowIncrement0.currentValue;}}
+    public static int AspWindowIncrement1 {get {return (int)aspWindowIncrement1.currentValue;}}
+    public static int AspWindowIncrement2 {get {return (int)aspWindowIncrement2.currentValue;}}
+    public static int AspWindowIncrement3 {get {return (int)aspWindowIncrement3.currentValue;}}
+    public static int AspWindowIncrement4 {get {return (int)aspWindowIncrement4.currentValue;}}
+    public static int AspWindowIncrement5 {get {return (int)aspWindowIncrement5.currentValue;}}
+    public static int AspWindowIncrement6 {get {return (int)aspWindowIncrement6.currentValue;}}
+    public static int RazoringMargin {get {return (int)razoringMargin.currentValue;}}
+    public static int RFPMargin {get {return (int)rfpMargin.currentValue;}}
 
 #else
     public const int AspInstabilityMargin = 25;
@@ -122,13 +122,14 @@ public static class TunableConstants
     {
         public string name;
         public Category category;
-        public int currentValue;
-        public int minValue;
-        public int maxValue;
+        public float currentValue;
+        public float minValue;
+        public float maxValue;
         public float cEnd;
         public float rEnd;
+        public bool isFloat;
 
-        public TunableConstant(string _name, Category _category, int _currentValue, int _minValue, int _maxValue, float _cEnd = float.MaxValue, float _rEnd = 0.002f)
+        public TunableConstant(string _name, Category _category, float _currentValue, float _minValue, float _maxValue, bool _isFloat = false, float _cEnd = float.MaxValue, float _rEnd = 0.002f)
         {
             name = _name;
             category = _category;
@@ -143,6 +144,8 @@ public static class TunableConstants
             else cEnd = _cEnd;
 
             rEnd = _rEnd;
+
+            isFloat = _isFloat;
         }
     }
 #endif

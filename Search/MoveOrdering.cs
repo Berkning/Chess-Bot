@@ -112,7 +112,7 @@ public class MoveOrdering
                 }
                 else
                 {
-                    moveScore += TunableConstants.GoodCaptureBias + valueDelta * TunableConstants.CaptureValueDeltaMultiplier;
+                    moveScore += (int)(TunableConstants.GoodCaptureBias + valueDelta * TunableConstants.CaptureValueDeltaMultiplier);
                 }
             }
             else if (flag != Move.Flag.EnPassantCapture) //If not a capture
@@ -132,19 +132,19 @@ public class MoveOrdering
             {
                 if (flag == Move.Flag.PromoteToQueen) //TODO: Maybe account for king attack squares here
                 {
-                    moveScore += Evaluation.GetPieceTypeValue(Piece.Queen) * TunableConstants.PromotionMultiplier;
+                    moveScore += (int)(Evaluation.GetPieceTypeValue(Piece.Queen) * TunableConstants.PromotionMultiplier);
                 }
                 else if (flag == Move.Flag.PromoteToKnight)
                 {
-                    moveScore += Evaluation.GetPieceTypeValue(Piece.Knight) * TunableConstants.PromotionMultiplier;
+                    moveScore += (int)(Evaluation.GetPieceTypeValue(Piece.Knight) * TunableConstants.PromotionMultiplier);
                 }
                 else if (flag == Move.Flag.PromoteToRook)
                 {
-                    moveScore += Evaluation.GetPieceTypeValue(Piece.Rook) * TunableConstants.PromotionMultiplier;
+                    moveScore += (int)(Evaluation.GetPieceTypeValue(Piece.Rook) * TunableConstants.PromotionMultiplier);
                 }
                 else if (flag == Move.Flag.PromoteToBishop)
                 {
-                    moveScore += Evaluation.GetPieceTypeValue(Piece.Bishop) * TunableConstants.PromotionMultiplier;
+                    moveScore += (int)(Evaluation.GetPieceTypeValue(Piece.Bishop) * TunableConstants.PromotionMultiplier);
                 }
             }
             else

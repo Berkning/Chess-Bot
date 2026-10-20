@@ -27,7 +27,7 @@ public static class Tuning
 
         //args[3] == "value" assumed
 
-        if (int.TryParse(args[4], out int value))
+        if (float.TryParse(args[4], out float value))
         {
             constantList[constantIndex].currentValue = value;
             Console.WriteLine("info string set tunable constant " + constantList[constantIndex].name + " to " + value);
@@ -101,7 +101,7 @@ public static class Tuning
 
     private static void LogConstant(TunableConstants.TunableConstant constant)
     {
-        Console.WriteLine(constant.name + ", int, " + constant.currentValue + ".0, " + constant.minValue + ".0, " + constant.maxValue + ".0, " + constant.cEnd + ", " + constant.rEnd);
+        Console.WriteLine(constant.name + ", " + (constant.isFloat ? "float" : "int") + ", " + constant.currentValue + ", " + constant.minValue + ", " + constant.maxValue + ", " + constant.cEnd + ", " + constant.rEnd);
     }
 
     public static TunableConstants.TunableConstant AddConstant(TunableConstants.TunableConstant constant)
