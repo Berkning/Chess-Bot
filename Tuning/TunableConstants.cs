@@ -9,19 +9,19 @@ public static class TunableConstants
     //Move Ordering ----------------------------------------------
 
 #if TUNABLE
-    public static TunableConstant killerBias =  Tuning.AddConstant(new TunableConstant("KillerBias", Category.MoveOrdering, 5302, 0, 10000));
-    public static TunableConstant goodCaptureBias =  Tuning.AddConstant(new TunableConstant("GoodCaptureBias", Category.MoveOrdering, 9900, 0, 15000)); //Increased max from 10k bc tuner maxed it out pretty quickly
-    public static TunableConstant equalCaptureBias =  Tuning.AddConstant(new TunableConstant("EqualCaptureBias", Category.MoveOrdering, 7842, 0, 10000));
-    public static TunableConstant badCaptureBias =  Tuning.AddConstant(new TunableConstant("BadCaptureBias", Category.MoveOrdering, 2692, 0, 7500));
-    public static TunableConstant attackedByPawnBias =  Tuning.AddConstant(new TunableConstant("AttackedByPawnBias", Category.MoveOrdering, -579, -2500, 0));
-    public static TunableConstant attackedByKnightBias =  Tuning.AddConstant(new TunableConstant("AttackedByKnightBias", Category.MoveOrdering, -110, -1000, 0));
-    public static TunableConstant attackedByKnightMinPieceValue =  Tuning.AddConstant(new TunableConstant("AttackedByKnightMinPieceValue", Category.MoveOrdering, 463, 0, 1500));
-    public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 2f, -1f, 10f, true));
-    public static TunableConstant maxHistory =  Tuning.AddConstant(new TunableConstant("MaxHistory", Category.MoveOrdering, 844, 1, 2048));
-    public static TunableConstant historyDecay =  Tuning.AddConstant(new TunableConstant("HistoryDecay", Category.MoveOrdering, 4982, 0, 10000));
-    public static TunableConstant promotionMultiplier =  Tuning.AddConstant(new TunableConstant("PromotionMultiplier", Category.MoveOrdering, 1f, -1f, 5f, true));
-    public static TunableConstant defendedByPawnBias =  Tuning.AddConstant(new TunableConstant("DefendedByPawnBias", Category.MoveOrdering, 58, 0, 1000));
-    public static TunableConstant historyBonusMultiplier =  Tuning.AddConstant(new TunableConstant("HistoryBonusMultiplier", Category.MoveOrdering, 1f, 0f, 10f, true));
+    public static TunableConstant killerBias =  Tuning.AddConstant(new TunableConstant("KillerBias", Category.MoveOrdering, 5259, 0, 10000));
+    public static TunableConstant goodCaptureBias =  Tuning.AddConstant(new TunableConstant("GoodCaptureBias", Category.MoveOrdering, 9111, 0, 15000)); //Increased max from 10k bc tuner maxed it out pretty quickly
+    public static TunableConstant equalCaptureBias =  Tuning.AddConstant(new TunableConstant("EqualCaptureBias", Category.MoveOrdering, 7337, 0, 10000));
+    public static TunableConstant badCaptureBias =  Tuning.AddConstant(new TunableConstant("BadCaptureBias", Category.MoveOrdering, 2810, 0, 7500));
+    public static TunableConstant attackedByPawnBias =  Tuning.AddConstant(new TunableConstant("AttackedByPawnBias", Category.MoveOrdering, -291, -2500, 0));
+    public static TunableConstant attackedByKnightBias =  Tuning.AddConstant(new TunableConstant("AttackedByKnightBias", Category.MoveOrdering, -151, -1000, 0));
+    public static TunableConstant attackedByKnightMinPieceValue =  Tuning.AddConstant(new TunableConstant("AttackedByKnightMinPieceValue", Category.MoveOrdering, 326, 0, 1500));
+    public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 1.6172f, -1f, 10f, true));
+    public static TunableConstant maxHistory =  Tuning.AddConstant(new TunableConstant("MaxHistory", Category.MoveOrdering, 1036, 1, 2048));
+    public static TunableConstant historyDecay =  Tuning.AddConstant(new TunableConstant("HistoryDecay", Category.MoveOrdering, 3768, 0, 10000));
+    public static TunableConstant promotionMultiplier =  Tuning.AddConstant(new TunableConstant("PromotionMultiplier", Category.MoveOrdering, 1.4263f, -1f, 5f, true));
+    public static TunableConstant defendedByPawnBias =  Tuning.AddConstant(new TunableConstant("DefendedByPawnBias", Category.MoveOrdering, 56, 0, 1000));
+    public static TunableConstant historyBonusMultiplier =  Tuning.AddConstant(new TunableConstant("HistoryBonusMultiplier", Category.MoveOrdering, 0.5449f, 0f, 10f, true));
 
     public static int KillerBias {get {return (int)killerBias.currentValue;}}
     public static int GoodCaptureBias {get {return (int)goodCaptureBias.currentValue;}}
@@ -37,19 +37,19 @@ public static class TunableConstants
     public static int DefendedByPawnBias {get {return (int)defendedByPawnBias.currentValue;}}
     public static float HistoryBonusMultiplier {get {return historyBonusMultiplier.currentValue;}}
 #else
-    public const int KillerBias = 5302; //500000
-    public const int GoodCaptureBias = 9900;
-    public const int EqualCaptureBias = 7842;
-    public const int BadCaptureBias = 2692;
-    public const int AttackedByPawnBias = -579;
-    public const int AttackedByKnightBias = -110;
-    public const int AttackedByKnightMinPieceValue = 463;
-    public const float CaptureValueDeltaMultiplier = 2f;
-    public const int MaxHistory = 844;
-    public const int HistoryDecay = 4982;
-    public const float PromotionMultiplier = 1f; //TODO: Try setting to 0 (just remove code using it completely), tuner seemed to be really considering that option
-    public const int DefendedByPawnBias = 58;
-    public const float HistoryBonusMultiplier = 1f;
+    public const int KillerBias = 5259; //500000
+    public const int GoodCaptureBias = 9111;
+    public const int EqualCaptureBias = 7337;
+    public const int BadCaptureBias = 2810;
+    public const int AttackedByPawnBias = -291;
+    public const int AttackedByKnightBias = -151;
+    public const int AttackedByKnightMinPieceValue = 326;
+    public const float CaptureValueDeltaMultiplier = 1.6172f;
+    public const int MaxHistory = 1036;
+    public const int HistoryDecay = 3768;
+    public const float PromotionMultiplier = 1.4263f;
+    public const int DefendedByPawnBias = 56;
+    public const float HistoryBonusMultiplier = 0.5449f;
 #endif
 
     //------------------------------------------------------------
