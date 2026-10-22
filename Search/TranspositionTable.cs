@@ -184,15 +184,15 @@ public class TranspositionTable
 
         private const ulong KeyMask = 0b0000000000000000000000000000000000000000000000001111111111111111;
         private const ulong EvalMask = 0b0000000000000000000000000000000011111111111111110000000000000000;
-        private const ulong DepthMask = 0b0000000000000000000000000011111100000000000000000000000000000000;
-        private const ulong NodeTypeMask = 0b0000000000000000000000001100000000000000000000000000000000000000;
-        private const ulong MoveMask = 0b0000000011111111111111110000000000000000000000000000000000000000;
+        private const ulong DepthMask = 0b0000000000000000000000001111111100000000000000000000000000000000;
+        private const ulong NodeTypeMask = 0b0000000000000000000000110000000000000000000000000000000000000000;
+        private const ulong MoveMask = 0b0000001111111111111111000000000000000000000000000000000000000000;
 
         public ulong key { get { return data & KeyMask; } }
         public short eval { get { return (short)((data & EvalMask) >> 16); } }
         public byte depth { get { return (byte)((data & DepthMask) >> 32); } }
-        public ulong nodeType { get { return (data & NodeTypeMask) >> 38; } }
-        public Move move { get { return new Move((ushort)((data & MoveMask) >> 40)); } } //TODOnt: Try without move entirely - not necessary unless at root - just maintain PV instead - necessary for move ordering
+        public ulong nodeType { get { return (data & NodeTypeMask) >> 40; } }
+        public Move move { get { return new Move((ushort)((data & MoveMask) >> 42)); } } //TODOnt: Try without move entirely - not necessary unless at root - just maintain PV instead - necessary for move ordering
 
         public Transposition(ulong zobrist, short eval, byte depth, byte nodeType, Move move) //TODO: make all ulong here in params?
         {
@@ -201,7 +201,7 @@ public class TranspositionTable
 
             ulong key = zobrist >> 48; //Bc we are using PO2 TT we already now that fx the first 26 bits match for a 64mb table so we use the last 16 bits as the key since the last bits are the ones that will actually differ if the position is different
 
-            data = key | ((((ulong)eval) << 16) & EvalMask) | ((((ulong)depth) << 32) & DepthMask) | ((((ulong)nodeType) << 38) & NodeTypeMask) | ((((ulong)move.data) << 40) & MoveMask);
+            data = key | ((((ulong)eval) << 16) & EvalMask) | ((((ulong)depth) << 32) & DepthMask) | ((((ulong)nodeType) << 40) & NodeTypeMask) | ((((ulong)move.data) << 42) & MoveMask);
 
 
             //data = (uint)eval | (((ulong)move.data) << 32) | (((ulong)depth) << 48) | (((ulong)nodeType) << 56);
