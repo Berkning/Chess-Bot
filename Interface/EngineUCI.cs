@@ -39,8 +39,6 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 Console.WriteLine("readyok"); //TODOcant: Try adjusting TT here
                 break;
             case "ucinewgame":
-                isNewGame = true;
-                playedMoves.Clear();
                 Search.transpositionTable.Clear();
                 //TODO: reset killers and history as well
 
@@ -433,61 +431,44 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
 
 
 
-    private bool isNewGame = true;
-    private List<string> playedMoves = new List<string>();
-    private int moveStartIndex = -1;
-
     private void InterpretPositionCommand(string[] args)
     {
-        if (isNewGame)
+        string fen = "";
+        int moveStartIndex = -1;
+        bool shouldPlayMoves = true;
+
+        if (args[1] == "fen")
         {
-            string fen = "";
-            moveStartIndex = -1;
-            bool shouldPlayMoves = true;
-
-            if (args[1] == "fen")
+            //Construct fen from args
+            for (int i = 2; i < args.Length; i++)
             {
-                //Construct fen from args
-                for (int i = 2; i < args.Length; i++)
+                if (args[i] == "moves")
                 {
-                    if (args[i] == "moves")
-                    {
-                        moveStartIndex = i + 1;
-                        break;
-                    }
-
-                    fen += args[i] + ' ';
+                    moveStartIndex = i + 1;
+                    break;
                 }
 
-                if (moveStartIndex == -1)
-                {
-                    moveStartIndex = args.Length + 1;
-                    shouldPlayMoves = false; //Shouldn't play moves yet bc they dont exist
-                }
+                fen += args[i] + ' ';
             }
-            else
-            {
-                fen = args[1]; //Prob startpos
-                moveStartIndex = 3;
-
-                if (args.Length < 4) shouldPlayMoves = false; //Shouldn't play moves yet bc they dont exist
-            }
-
-            //Console.WriteLine(moveStartIndex);
-
-            //FenUtility.LoadPositionFromFen(Engine.board, fen);
-            engine.LoadFen(fen);
 
             if (moveStartIndex == -1)
             {
-                Console.WriteLine("MoveStartIndex Not set");
-                return;
+                moveStartIndex = args.Length + 1;
+                shouldPlayMoves = false; //Shouldn't play moves yet bc they dont exist
             }
-
-            if (shouldPlayMoves) PlayUCIMoves(args, moveStartIndex);
-
-            isNewGame = false;
         }
+        else
+        {
+            fen = args[1]; //Prob startpos
+            moveStartIndex = 3;
+
+            if (args.Length < 4) shouldPlayMoves = false; //Shouldn't play moves yet bc they dont exist
+        }
+
+        //Console.WriteLine(moveStartIndex);
+
+        //FenUtility.LoadPositionFromFen(Engine.board, fen);
+        engine.LoadFen(fen);
 
         if (moveStartIndex == -1)
         {
@@ -495,24 +476,14 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
             return;
         }
 
-        PlayUCIMoves(args, moveStartIndex);
+        if (shouldPlayMoves) PlayUCIMoves(args, moveStartIndex);
     }
 
     private void PlayUCIMoves(string[] args, int moveStartIndex)
     {
         for (int i = moveStartIndex; i < args.Length; i++)
         {
-            int playedMovesIndex = i - moveStartIndex;
-
-            //If move has already been played we skip to the next one
-            if (playedMoves.Count > playedMovesIndex && playedMoves[playedMovesIndex] == args[i]) continue;
-
-            //Console.WriteLine("Found new move to play: " + args[i]);
-            //Engine.board.MakeMove(BoardHelper.GetMoveFromUCIName(Engine.board, args[i]));
             engine.PlayMove(BoardHelper.GetMoveFromUCIName(Engine.mainBoard, args[i]));
-
-
-            playedMoves.Add(args[i]);
         }
     }
 }
