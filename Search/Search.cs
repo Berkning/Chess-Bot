@@ -370,7 +370,7 @@ public class Search
         }
 
         //Razoring
-        if (depth <= 3) //TODO: && !isPV //TODO: Should be limited to positions in which alpha < big number, bc otherwise we risk being blind to potential mates (according to the CPW)
+        if (depth <= 3 && alpha < 2000) //TODO: && !isPV //TODO: Should be limited to positions in which alpha < big number, bc otherwise we risk being blind to potential mates (according to the CPW)
         {
             if (staticEval + TunableConstants.RazoringMargin * depth <= alpha)
             {
@@ -430,6 +430,11 @@ public class Search
                 uint reduction = 1;
 
                 if (i > 5) reduction++;
+
+                if (depth > 3 && i > 10) reduction++;
+
+                //If we are looking at the 16th move (or an even later move), we just drop directly into q-search, essentially pruning the branch entirely
+                if (i > 15) reduction = depth - 1;
 
                 evaluation = -AlphaBeta(depth - 1 - reduction, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions);
 
