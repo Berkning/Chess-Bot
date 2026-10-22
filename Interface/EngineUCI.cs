@@ -372,7 +372,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
     {
         if (args.Length == 1)
         {
-            engine.InitializeSearch(99, -2);
+            engine.InitializeSearch(int.MaxValue, -2);
             return;
         }
 
@@ -403,7 +403,7 @@ public class EngineUCI //TODO: GCsettings + TODO: https://learn.microsoft.com/en
                 TimeManagement.UpdateTimes(white, black, winc, binc);
 
                 //TODO: Increments
-                engine.InitializeSearch(99, -1);
+                engine.InitializeSearch(int.MaxValue, -1);
 
                 //Adjust TT here bc we will be waiting for opponent to respond anyway
                 //if (Board.colorToMove == Piece.White) AdjustTT(white); //If we are playing white //FIXedME: fix auto adjust to only run when search thread has returned
