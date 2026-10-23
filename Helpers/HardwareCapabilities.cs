@@ -7,9 +7,9 @@ using System.Runtime.Intrinsics.X86;
 
 public static class HardwareCapabilities
 {
-    private const int MinTime = 100; //Minimum amount of time a benchmark has to run for, before we can count it as conclusive
+    private const int MinTime = 0; //Minimum amount of time a benchmark has to run for, before we can count it as conclusive
     private const int MaxRounds = 256;
-    private const int RandomBoardCount = 65536;
+    private const int RandomBoardCount = 32768;
     public static readonly bool UsePEXT = false;
 
     static HardwareCapabilities()
