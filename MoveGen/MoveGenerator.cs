@@ -577,17 +577,18 @@ public struct Move //FFFFTTTTTTSSSSSS - F = Flag bit - T = Target square bit - S
         public const int PromoteToRook = 5; //0b101
         public const int PromoteToBishop = 6; //0b110
         public const int PawnTwoForward = 7; //0b111
-        public const int TestFlag = 8;
     }
 
     public readonly ushort data;
     public int startSquare { get { return data & StartMask; } }
     public int targetSquare { get { return (data & TargetMask) >> 6; } }
     public int flag { get { return (data & FlagMask) >> 12; } }
+    public bool isCapture { get { return (data & CaptureMask) >> 15 != 0; } }
 
     private const ushort StartMask = 0b0000000000111111;
     private const ushort TargetMask = 0b0000111111000000;
-    private const ushort FlagMask = 0b1111000000000000;
+    private const ushort FlagMask = 0b0111000000000000;
+    private const ushort CaptureMask = 0b1000000000000000;
 
     public static Move nullMove = new Move(0, 0); //TODO: try if setting as const is more performant? Or adding function for IsNull
 
