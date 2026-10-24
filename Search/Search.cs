@@ -323,6 +323,18 @@ public class Search
         }
 
 
+        int staticEval = evaluator.Evaluate(board); //TODO: Try getting from TT if DepthFailed - could also be used to reduce margins bc we have a more reliable evaluation
+
+        //Reverse Futility Pruning
+        if (staticEval >= beta + TunableConstants.RFPMargin * depth) //TODO: Try not doing RFP if position is in check
+        {
+            return staticEval; //Fail soft
+        }
+
+
+
+
+
         Span<Move> moves = stackalloc Move[256]; //TODO: Try just allocating 218, technically no need for the extra 38 at all except maybe fits nicer into memory
 
         int moveCount = moveGenerator.GenerateMoves(ref moves);
@@ -355,16 +367,6 @@ public class Search
             if (moveGenerator.inCheck) return -(ImmediateMateScore - plyFromRoot); //Checkmate
 
             return 0; //Stalemate
-        }
-
-
-
-        int staticEval = evaluator.Evaluate(board); //TODO: Try getting from TT if DepthFailed - could also be used to reduce margins bc we have a more reliable evaluation
-
-        //Reverse Futility Pruning
-        if (staticEval >= beta + TunableConstants.RFPMargin * depth) //TODO: Try not doing RFP if position is in check //TODO: Try not doing at root
-        {
-            return staticEval; //Fail soft
         }
 
         //Razoring
