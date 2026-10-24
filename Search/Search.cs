@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 
 public class Search
 {
+    private const int AssuredWinScore = 20000;
     private const int ImmediateMateScore = short.MaxValue;
     private const int PositiveInfinity = 9999999;
     private const int NegativeInfinity = -PositiveInfinity;
@@ -326,7 +327,7 @@ public class Search
         int staticEval = evaluator.Evaluate(board); //TODO: Try getting from TT if DepthFailed - could also be used to reduce margins bc we have a more reliable evaluation
 
         //Reverse Futility Pruning
-        if (staticEval >= beta + TunableConstants.RFPMargin * depth) //TODO: Try not doing RFP if position is in check
+        if (Math.Abs(beta) < AssuredWinScore && staticEval >= beta + TunableConstants.RFPMargin * depth) //TODO: Try not doing RFP if position is in check
         {
             return staticEval; //Fail soft
         }
