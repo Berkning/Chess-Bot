@@ -7,13 +7,6 @@ public class TranspositionTable
 {
     public static int SizeMB = 16; //TODO: adjust based on game speed - 16mb is WAY too small for 10s think
 
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSuccessfulLookup(int eval) { return eval > DepthFailed; }
-
-    public const int DepthFailed = int.MinValue + 1;
-    public const int LookupFailed = int.MinValue;
-
     // The value for this position is the exact evaluation
     public const ulong Exact = 0;
     // A move was found during the search that was too good, meaning the opponent will play a different move earlier on,
@@ -80,49 +73,16 @@ public class TranspositionTable
     }
 
 
-    public Move GetStoredMove(ulong zobrist)
-    {
-        //TODO: Should prob store whole data ulong we get from lookupevaluation in search to avoid having to do a secondary lookup for just to get the move data - could also have been changed/(corrupted? but 16 bits?)
-        //Prob not bc getstoredmove is almost never called
-        return table[Index(zobrist)].move; //TODOnt anymore: Could just return whole entry to avoid having to lock twice waiting for both eval and move if eval is good
-    }
-
-    public int LookupEvaluation(ulong zobrist, uint depth, int plyFromRoot, int alpha, int beta)
+    public Transposition Probe(ulong zobrist)
     {
         ulong index = Index(zobrist);
 
         Transposition transposition = table[index];
-        //TODO: Test maybe with waiting a tiny bit here if key and data is corrupted instead of just failing the probe?
 
         //if ((transposition.key ^ (uint)transposition.data) == (uint)zobrist) //TODO: guarantee atomic for SMP
-        if (transposition.key == zobrist >> 48)
-        {
-            // Only use stored evaluation if it has been searched to at least the same depth as would be searched now
-            if (transposition.depth >= depth)
-            {
-                int correctedScore = CorrectRetrievedMateScore(transposition.eval, plyFromRoot);
-                // We have stored the exact evaluation for this position, so return it
-                if (transposition.nodeType == Exact)
-                {
-                    return correctedScore;
-                }
-                // We have stored the upper bound of the eval for this position. If it's less than alpha then we don't need to
-                // search the moves in this position as they won't interest us; otherwise we will have to search to find the exact value
-                if (transposition.nodeType == UpperBound && correctedScore <= alpha)
-                {
-                    return correctedScore;
-                }
-                // We have stored the lower bound of the eval for this position. Only return if it causes a beta cut-off.
-                if (transposition.nodeType == LowerBound && correctedScore >= beta)
-                {
-                    return correctedScore;
-                }
-            }
+        if (transposition.key == zobrist >> 48) return transposition;
 
-            return DepthFailed;
-        }
-
-        return LookupFailed;
+        return new Transposition();
     }
 
 
@@ -163,7 +123,7 @@ public class TranspositionTable
         return (short)score;
     }
 
-    int CorrectRetrievedMateScore(short score, int numPlySearched)
+    public static int CorrectRetrievedMateScore(short score, int numPlySearched)
     {
         if (Search.IsMateScore(score))
         {
@@ -172,46 +132,47 @@ public class TranspositionTable
         }
         return score;
     }
+}
 
 
+//TODO: Try with [StructLayout(LayoutKind.Explicit, Size = 8)] - shouldn't make a difference bc should already be the case
+public struct Transposition
+{
+    public readonly ulong data;
 
+    private const ulong KeyMask = 0b0000000000000000000000000000000000000000000000001111111111111111;
+    private const ulong EvalMask = 0b0000000000000000000000000000000011111111111111110000000000000000;
+    private const ulong DepthMask = 0b0000000000000000000000001111111100000000000000000000000000000000;
+    private const ulong NodeTypeMask = 0b0000000000000000000000110000000000000000000000000000000000000000;
+    private const ulong MoveMask = 0b0000001111111111111111000000000000000000000000000000000000000000;
 
+    public ulong key { get { return data & KeyMask; } }
+    public short eval { get { return (short)((data & EvalMask) >> 16); } }
+    public byte depth { get { return (byte)((data & DepthMask) >> 32); } }
+    public ulong nodeType { get { return (data & NodeTypeMask) >> 40; } }
+    public Move move { get { return new Move((ushort)((data & MoveMask) >> 42)); } } //TODOnt: Try without move entirely - not necessary unless at root - just maintain PV instead - necessary for move ordering
 
-    //TODO: Try with [StructLayout(LayoutKind.Explicit, Size = 8)] - shouldn't make a difference bc should already be the case
-    public struct Transposition
+    public Transposition(ulong zobrist, short eval, byte depth, byte nodeType, Move move) //TODO: make all ulong here in params?
     {
-        public readonly ulong data;
+        //TODO: Maybe try testing if eval is larger than 16 bits as this would provide very wrong answers if ever the case
 
-        private const ulong KeyMask = 0b0000000000000000000000000000000000000000000000001111111111111111;
-        private const ulong EvalMask = 0b0000000000000000000000000000000011111111111111110000000000000000;
-        private const ulong DepthMask = 0b0000000000000000000000001111111100000000000000000000000000000000;
-        private const ulong NodeTypeMask = 0b0000000000000000000000110000000000000000000000000000000000000000;
-        private const ulong MoveMask = 0b0000001111111111111111000000000000000000000000000000000000000000;
+        ulong key = zobrist >> 48; //Bc we are using PO2 TT we already now that fx the first 26 bits match for a 64mb table so we use the last 16 bits as the key since the last bits are the ones that will actually differ if the position is different
 
-        public ulong key { get { return data & KeyMask; } }
-        public short eval { get { return (short)((data & EvalMask) >> 16); } }
-        public byte depth { get { return (byte)((data & DepthMask) >> 32); } }
-        public ulong nodeType { get { return (data & NodeTypeMask) >> 40; } }
-        public Move move { get { return new Move((ushort)((data & MoveMask) >> 42)); } } //TODOnt: Try without move entirely - not necessary unless at root - just maintain PV instead - necessary for move ordering
-
-        public Transposition(ulong zobrist, short eval, byte depth, byte nodeType, Move move) //TODO: make all ulong here in params?
-        {
-            //TODO: test if depth is bigger than 6 bits - prob no need to check if depth is above 63 as we would prob be winning anyway
-            //TODO: Maybe try testing if eval is larger than 16 bits as this would provide very wrong answers if ever the case
-
-            ulong key = zobrist >> 48; //Bc we are using PO2 TT we already now that fx the first 26 bits match for a 64mb table so we use the last 16 bits as the key since the last bits are the ones that will actually differ if the position is different
-
-            data = key | ((((ulong)eval) << 16) & EvalMask) | ((((ulong)depth) << 32) & DepthMask) | ((((ulong)nodeType) << 40) & NodeTypeMask) | ((((ulong)move.data) << 42) & MoveMask);
+        data = key | ((((ulong)eval) << 16) & EvalMask) | ((((ulong)depth) << 32) & DepthMask) | ((((ulong)nodeType) << 40) & NodeTypeMask) | ((((ulong)move.data) << 42) & MoveMask);
 
 
-            //data = (uint)eval | (((ulong)move.data) << 32) | (((ulong)depth) << 48) | (((ulong)nodeType) << 56);
+        //data = (uint)eval | (((ulong)move.data) << 32) | (((ulong)depth) << 48) | (((ulong)nodeType) << 56);
 
-            //key = zobrist ^ data;
-        }
+        //key = zobrist ^ data;
+    }
 
-        public static int GetSize()
-        {
-            return System.Runtime.InteropServices.Marshal.SizeOf<Transposition>();
-        }
+    public bool IsValid()
+    {
+        return data != 0UL;
+    }
+
+    public static int GetSize()
+    {
+        return System.Runtime.InteropServices.Marshal.SizeOf<Transposition>();
     }
 }
