@@ -323,11 +323,15 @@ public class Search
             return SearchAllCaptures(alpha, beta);
         }
 
+        Move hashMove = Move.nullMove;
+
+        if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
+
 
         int staticEval = evaluator.Evaluate(board); //TODO: Try getting from TT if DepthFailed - could also be used to reduce margins bc we have a more reliable evaluation
 
         //Reverse Futility Pruning
-        if (Math.Abs(beta) < AssuredWinScore && staticEval >= beta + TunableConstants.RFPMargin * depth) //TODO: Try not doing RFP if position is in check
+        if (hashMove.IsNullMove() && Math.Abs(beta) < AssuredWinScore && staticEval >= beta + TunableConstants.RFPMargin * depth) //TODO: Try not doing RFP if position is in check
         {
             return staticEval; //Fail soft
         }
@@ -340,11 +344,6 @@ public class Search
 
         int moveCount = moveGenerator.GenerateMoves(ref moves);
 
-
-        //TODO: Try setting hash move to the global bestmove if plyfromroot == 0
-        Move hashMove = Move.nullMove;
-
-        if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
 
 
         bool isMoveListFullySorted = false;
