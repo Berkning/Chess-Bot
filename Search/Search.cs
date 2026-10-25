@@ -104,13 +104,14 @@ public class Search
 
         int prevResult = NegativeInfinity;
 
+        Transposition lastTTEntry = transpositionTable.Probe(board.currentZobrist);
 
-        int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
-
-        if (resultFromLastSearch != TranspositionTable.LookupFailed)
+        if (lastTTEntry.IsValid())
         {
-            prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
+            //TODO: Should check that 1 is the correct value to pass when correcting - not very important at all, since only applicable in positions with a forced mate
+            prevResult = TranspositionTable.CorrectRetrievedMateScore(lastTTEntry.eval, 1); //Use TT eval of current position as guess of current eval
         }
+
 
         for (uint depth = 1; depth <= searchDepth; depth++)
         {
@@ -161,13 +162,14 @@ public class Search
 
         int prevResult = NegativeInfinity;
 
+        Transposition lastTTEntry = transpositionTable.Probe(board.currentZobrist);
 
-        int resultFromLastSearch = transpositionTable.LookupEvaluation(board.currentZobrist, 1, 0, PositiveInfinity, NegativeInfinity); //TODO: Test if this works as intended. With alpha and beta as well
-
-        if (resultFromLastSearch != TranspositionTable.LookupFailed)
+        if (lastTTEntry.IsValid())
         {
-            prevResult = resultFromLastSearch; //Use TT eval of current position as guess of current eval
+            //TODO: Should check that 1 is the correct value to pass when correcting - not very important at all, since only applicable in positions with a forced mate
+            prevResult = TranspositionTable.CorrectRetrievedMateScore(lastTTEntry.eval, 1); //Use TT eval of current position as guess of current eval
         }
+
 
         for (uint depth = 1; depth <= searchDepth; depth++)
         {
@@ -303,19 +305,56 @@ public class Search
             }
         }
 
-        int tableEval = transpositionTable.LookupEvaluation(board.currentZobrist, depth, plyFromRoot, alpha, beta);
-        if (transpositionTable.IsSuccessfulLookup(tableEval))
-        {
-            //ttHits++;
-            if (plyFromRoot == 0)
-            {
-                bestMove = transpositionTable.GetStoredMove(board.currentZobrist);
-                bestEval = tableEval;
-            }
 
-            return tableEval;
+        Transposition ttEntry = transpositionTable.Probe(board.currentZobrist);
+        int ttScore = int.MinValue; //TODO: try checking that this is below AssuredWinScore before doing any pruning
+        Move hashMove = Move.nullMove;
+
+        if (ttEntry.IsValid())
+        {
+            ttScore = TranspositionTable.CorrectRetrievedMateScore(ttEntry.eval, plyFromRoot);
+            hashMove = ttEntry.move;
+
+            // Only use stored evaluation if it has been searched to at least the same depth as would be searched now
+            if (ttEntry.depth >= depth)
+            {
+                //ttHits++;
+
+                // We have stored the exact evaluation for this position, so return it
+                if (ttEntry.nodeType == TranspositionTable.Exact)
+                {
+                    if (plyFromRoot == 0)
+                    {
+                        bestMove = hashMove;
+                        bestEval = ttScore;
+                    }
+                    return ttScore;
+                }
+                // We have stored the upper bound of the eval for this position. If it's less than alpha then we don't need to
+                // search the moves in this position as they won't interest us; otherwise we will have to search to find the exact value
+                if (ttEntry.nodeType == TranspositionTable.UpperBound && ttScore <= alpha)
+                {
+                    if (plyFromRoot == 0)
+                    {
+                        bestMove = hashMove;
+                        bestEval = ttScore;
+                    }
+                    return ttScore;
+                }
+                // We have stored the lower bound of the eval for this position. Only return if it causes a beta cut-off.
+                if (ttEntry.nodeType == TranspositionTable.LowerBound && ttScore >= beta)
+                {
+                    if (plyFromRoot == 0)
+                    {
+                        bestMove = hashMove;
+                        bestEval = ttScore;
+                    }
+                    return ttScore;
+                }
+            }
         }
 
+        //TODO: Move this above TT cutoff - will cause problems when we start storing static eval, bc we would be assuming it is a valid substitute for q-search in case of a cutoff
         if (depth == 0)
         {
             //quiescenseCount++;
@@ -340,11 +379,6 @@ public class Search
 
         int moveCount = moveGenerator.GenerateMoves(ref moves);
 
-
-        //TODO: Try setting hash move to the global bestmove if plyfromroot == 0
-        Move hashMove = Move.nullMove;
-
-        if (tableEval == TranspositionTable.DepthFailed) hashMove = transpositionTable.GetStoredMove(board.currentZobrist);
 
 
         bool isMoveListFullySorted = false;
@@ -591,12 +625,12 @@ public class Search
     {
         string result = "";
 
-        int tableResult = transpositionTable.LookupEvaluation(board.currentZobrist, 0, 0, 0, 0);
+        Transposition ttEntry = transpositionTable.Probe(board.currentZobrist);
 
-        if (tableResult == TranspositionTable.LookupFailed) return result;
+        if (!ttEntry.IsValid()) return result;
 
 
-        Move move = transpositionTable.GetStoredMove(board.currentZobrist);
+        Move move = ttEntry.move;
 
         if (move.data != 0)
         {
