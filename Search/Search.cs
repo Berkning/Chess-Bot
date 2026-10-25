@@ -310,7 +310,7 @@ public class Search
         int ttScore = int.MinValue; //TODO: try checking that this is below AssuredWinScore before doing any pruning
         Move hashMove = Move.nullMove;
 
-        if (ttEntry.IsValid())
+        if (ttEntry.IsValid()) //TODO: If ttentry is empty, we can store static eval in the slot - have to somehow prevent tt cutoffs happening at depth == 0 bc of these inaccurate static evals tho - there is space for the ttEntry,nodetype to hold an extra option, which could be used to indicate the entry holding a static eval
         {
             ttScore = TranspositionTable.CorrectRetrievedMateScore(ttEntry.eval, plyFromRoot);
             hashMove = ttEntry.move;
@@ -363,7 +363,14 @@ public class Search
         }
 
 
-        int staticEval = evaluator.Evaluate(board); //TODO: Try getting from TT if DepthFailed - could also be used to reduce margins bc we have a more reliable evaluation
+        int staticEval;
+
+        if (ttEntry.IsValid() && ttEntry.nodeType == TranspositionTable.Exact)
+        {
+            //TODO: could also be used to reduce margins bc we have a more reliable evaluation compared to just static eval
+            staticEval = ttScore;
+        }
+        else staticEval = evaluator.Evaluate(board); //TODO: Move Evaluate call to after RFP if we have a lower bound from TT //TODO: If that lower bound doesn't exceed beta + margin, we can try to calculate static eval, to see if that exceeds it - might be better without tho, as more inaccurate
 
         //Reverse Futility Pruning
         if (Math.Abs(beta) < AssuredWinScore && staticEval >= beta + TunableConstants.RFPMargin * depth) //TODO: Try not doing RFP if position is in check
