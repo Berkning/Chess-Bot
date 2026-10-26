@@ -19,6 +19,7 @@ public class TranspositionTable
     // Due to the way alpha-beta search works, the value we get here won't be the exact evaluation of the position,
     // but rather the upper bound of the evaluation. This means that the evaluation is, at most, equal to this value.
     public const ulong UpperBound = 2;
+    public const ulong StaticEval = 3;
 
 
     //TODO: Try with Memory<T> - makes resizing easier? Don't really see how it would be faster tbh

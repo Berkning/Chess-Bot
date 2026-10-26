@@ -365,12 +365,16 @@ public class Search
 
         int staticEval;
 
-        if (ttEntry.IsValid() && ttEntry.nodeType == TranspositionTable.Exact)
+        if (ttEntry.nodeType == TranspositionTable.StaticEval) //We can assume entry is valid, bc if not nodeType would be 0 == Exact, mildly jank
         {
-            //TODO: could also be used to reduce margins bc we have a more reliable evaluation compared to just static eval
+            //TODO: if we have an exact entry, we could use that score for pruning, with reduced margins - without reduced margins is not an improvement apparently
             staticEval = ttScore;
         }
-        else staticEval = evaluator.Evaluate(board); //TODO: Move Evaluate call to after RFP if we have a lower bound from TT //TODO: If that lower bound doesn't exceed beta + margin, we can try to calculate static eval, to see if that exceeds it - might be better without tho, as more inaccurate
+        else
+        {
+            staticEval = evaluator.Evaluate(board); //TODO: Move Evaluate call to after RFP if we have a lower bound from TT //TODO: If that lower bound doesn't exceed beta + margin, we can try to calculate static eval, to see if that exceeds it - might be better without tho, as more inaccurate
+            if (!ttEntry.IsValid()) transpositionTable.StoreEvaluation(board.currentZobrist, 0, plyFromRoot,staticEval, TranspositionTable.StaticEval, Move.nullMove);
+        }
 
         //Reverse Futility Pruning
         if (Math.Abs(beta) < AssuredWinScore && staticEval >= beta + TunableConstants.RFPMargin * depth) //TODO: Try not doing RFP if position is in check
