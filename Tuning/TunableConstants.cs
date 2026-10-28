@@ -14,15 +14,15 @@ public static class TunableConstants
     public static TunableConstant goodCaptureBias =  Tuning.AddConstant(new TunableConstant("GoodCaptureBias", Category.MoveOrdering, 9111, 0, 15000)); //Increased max from 10k bc tuner maxed it out pretty quickly
     public static TunableConstant equalCaptureBias =  Tuning.AddConstant(new TunableConstant("EqualCaptureBias", Category.MoveOrdering, 7337, 0, 10000));
     public static TunableConstant badCaptureBias =  Tuning.AddConstant(new TunableConstant("BadCaptureBias", Category.MoveOrdering, 2810, 0, 7500));
-    public static TunableConstant attackedByPawnBias =  Tuning.AddConstant(new TunableConstant("AttackedByPawnBias", Category.MoveOrdering, -291, -2500, 0));
-    public static TunableConstant attackedByKnightBias =  Tuning.AddConstant(new TunableConstant("AttackedByKnightBias", Category.MoveOrdering, -151, -1000, 0));
-    public static TunableConstant attackedByKnightMinPieceValue =  Tuning.AddConstant(new TunableConstant("AttackedByKnightMinPieceValue", Category.MoveOrdering, 326, 0, 1500));
-    public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 1.6172f, -1f, 10f, true));
+    public static TunableConstant attackedByPawnBias =  Tuning.AddConstant(new TunableConstant("AttackedByPawnBias", Category.MoveOrdering, -291, -1000, 0));
+    public static TunableConstant attackedByKnightBias =  Tuning.AddConstant(new TunableConstant("AttackedByKnightBias", Category.MoveOrdering, -151, -600, 0));
+    public static TunableConstant attackedByKnightMinPieceValue =  Tuning.AddConstant(new TunableConstant("AttackedByKnightMinPieceValue", Category.MoveOrdering, 326, 200, 700));
+    public static TunableConstant captureValueDeltaMultiplier =  Tuning.AddConstant(new TunableConstant("CaptureValueDeltaMultiplier", Category.MoveOrdering, 1.6172f, 0f, 5f, true));
     public static TunableConstant maxHistory =  Tuning.AddConstant(new TunableConstant("MaxHistory", Category.MoveOrdering, 1036, 1, 2048));
     public static TunableConstant historyDecay =  Tuning.AddConstant(new TunableConstant("HistoryDecay", Category.MoveOrdering, 3768, 0, 10000));
     public static TunableConstant promotionMultiplier =  Tuning.AddConstant(new TunableConstant("PromotionMultiplier", Category.MoveOrdering, 1.4263f, -1f, 5f, true));
-    public static TunableConstant defendedByPawnBias =  Tuning.AddConstant(new TunableConstant("DefendedByPawnBias", Category.MoveOrdering, 56, 0, 1000));
-    public static TunableConstant historyBonusMultiplier =  Tuning.AddConstant(new TunableConstant("HistoryBonusMultiplier", Category.MoveOrdering, 0.5449f, 0f, 10f, true));
+    public static TunableConstant defendedByPawnBias =  Tuning.AddConstant(new TunableConstant("DefendedByPawnBias", Category.MoveOrdering, 56, 0, 500));
+    public static TunableConstant historyBonusMultiplier =  Tuning.AddConstant(new TunableConstant("HistoryBonusMultiplier", Category.MoveOrdering, 0.5449f, 0f, 2f, true));
 
     public static int KillerBias {get {return (int)killerBias.currentValue;}}
     public static int CounterMoveBias {get {return (int)counterMoveBias.currentValue;}}
