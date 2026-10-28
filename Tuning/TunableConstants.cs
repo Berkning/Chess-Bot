@@ -10,6 +10,7 @@ public static class TunableConstants
 
 #if TUNABLE
     public static TunableConstant killerBias =  Tuning.AddConstant(new TunableConstant("KillerBias", Category.MoveOrdering, 5259, 0, 10000));
+    public static TunableConstant counterMoveBias =  Tuning.AddConstant(new TunableConstant("CounterMoveBias", Category.MoveOrdering, 4000, 0, 10000));
     public static TunableConstant goodCaptureBias =  Tuning.AddConstant(new TunableConstant("GoodCaptureBias", Category.MoveOrdering, 9111, 0, 15000)); //Increased max from 10k bc tuner maxed it out pretty quickly
     public static TunableConstant equalCaptureBias =  Tuning.AddConstant(new TunableConstant("EqualCaptureBias", Category.MoveOrdering, 7337, 0, 10000));
     public static TunableConstant badCaptureBias =  Tuning.AddConstant(new TunableConstant("BadCaptureBias", Category.MoveOrdering, 2810, 0, 7500));
@@ -24,6 +25,7 @@ public static class TunableConstants
     public static TunableConstant historyBonusMultiplier =  Tuning.AddConstant(new TunableConstant("HistoryBonusMultiplier", Category.MoveOrdering, 0.5449f, 0f, 10f, true));
 
     public static int KillerBias {get {return (int)killerBias.currentValue;}}
+    public static int CounterMoveBias {get {return (int)counterMoveBias.currentValue;}}
     public static int GoodCaptureBias {get {return (int)goodCaptureBias.currentValue;}}
     public static int EqualCaptureBias {get {return (int)equalCaptureBias.currentValue;}}
     public static int BadCaptureBias {get {return (int)badCaptureBias.currentValue;}}
@@ -38,6 +40,7 @@ public static class TunableConstants
     public static float HistoryBonusMultiplier {get {return historyBonusMultiplier.currentValue;}}
 #else
     public const int KillerBias = 5259; //500000
+    public const int CounterMoveBias = 4000;
     public const int GoodCaptureBias = 9111;
     public const int EqualCaptureBias = 7337;
     public const int BadCaptureBias = 2810;

@@ -13,7 +13,10 @@ public class MoveOrdering
 
     //Indexed by [sideToMove][from][to] //TODO: Try with [piece][to] - would make array a LOT smaller and maybe not have that much of a negative impact either
     //TODO: Could also just store ushort/short instead of int. Every entry just holds a value from 0->TunableConstants.MaxHistory, so 2 bytes are more than enough - also halves array size in memory
-    public int[][][] history;
+    private int[][][] history;
+
+    //Indexed by [from][to] //TODO: Try with [piece][to]
+    private Move[][] counterMove;
 
     public void UpdateHistory(int bonus, int colorBit, int from, int to)
     {
@@ -25,6 +28,13 @@ public class MoveOrdering
 
         //history[colorBit][from][to] += score;
         //if (history[colorBit][from][to] > HistoryUpperBound) history[colorBit][from][to] = HistoryUpperBound;
+    }
+
+    public void AddCounterMove(Move previousMove, Move counter)
+    {
+        if (previousMove.IsNullMove()) return;
+
+        counterMove[previousMove.startSquare][previousMove.targetSquare] = counter;
     }
 
     //TODO: reset on new game
@@ -56,11 +66,14 @@ public class MoveOrdering
         threadID = _threadID;
 
         history = new int[2][][] { new int[64][], new int[64][] };
+        counterMove = new Move[64][];
 
         for (int i = 0; i < 64; i++)
         {
             history[0][i] = new int[64];
             history[1][i] = new int[64];
+
+            counterMove[i] = new Move[64];
         }
     }
 
@@ -83,7 +96,7 @@ public class MoveOrdering
 
     //skipFirstMove will be passed as true here, if OrderHashMove was already called on the movelist we are operating on,
     //meaning the move at index 0, will be the hash-move, which has already been looked at by the search, so we don't have to worry about it.
-    public void OrderMoves(ref Span<Move> moves, int moveCount, int ply, bool skipFirstMove = false) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
+    public void OrderMoves(ref Span<Move> moves, int moveCount, int ply, Move previousMove = new Move(), bool skipFirstMove = false) //TODO: maybe prioritize checks in endgame - TODO: Optimize for q-search
     {
         int jitterIndex = moveCount != 0 ? threadID % moveCount : 0;
 
@@ -119,6 +132,8 @@ public class MoveOrdering
             {
                 if (ply < MaxKillerPlys && killerMoves[ply].Contains(moves[i])) moveScore += TunableConstants.KillerBias;
                 else moveScore += history[board.friendlyColorBit][moves[i].startSquare][moves[i].targetSquare];
+
+                if (counterMove[previousMove.startSquare][previousMove.targetSquare].data == moves[i].data) moveScore += TunableConstants.CounterMoveBias;
 
 
                 //TODO: try with else if

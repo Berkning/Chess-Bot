@@ -276,7 +276,7 @@ public class Search
 
     #region Search
 
-    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0)//, bool test)
+    private int AlphaBeta(uint depth, int plyFromRoot, int alpha, int beta, uint numExtensions = 0, Move previousMove = new Move())//, bool test)
     {
         nodeCount++;
 
@@ -387,7 +387,7 @@ public class Search
         //and hopefully not need to look at any other moves, thereby avoiding having to sort all of them.
         if (hashMove.IsNullMove() || !moveOrdering.OrderHashMove(ref moves, hashMove))
         {
-            moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot);
+            moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot, previousMove);
             isMoveListFullySorted = true;
         }
 
@@ -466,13 +466,13 @@ public class Search
 
                 if (i > 5) reduction++;
 
-                evaluation = -AlphaBeta(depth - 1 - reduction, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions);
+                evaluation = -AlphaBeta(depth - 1 - reduction, plyFromRoot + 1, -alpha - 1, -alpha, numExtensions, moves[i]);
 
                 //If evals better than anything else so far we'll search to full depth
                 searchFullDepth = evaluation > alpha && !((nodeCount & CancelDelay) == 0 && clock.ElapsedMilliseconds >= searchTime && !bestMove.IsNullMove()); //TODOnt?: Move cancel check to separate if before this
             }
 
-            if (searchFullDepth) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions);//, test);
+            if (searchFullDepth) evaluation = -AlphaBeta(depth - 1 + extensions, plyFromRoot + 1, -beta, -alpha, numExtensions + extensions, moves[i]);//, test);
 
 
             board.UnMakeMove(moves[i], true);
@@ -498,6 +498,8 @@ public class Search
                     {
                         moveOrdering.killerMoves[plyFromRoot].Add(moves[i]);
                     }
+
+                    moveOrdering.AddCounterMove(previousMove, moves[i]);
                 }
 
                 if (plyFromRoot > 0) repetitionTable.PopNoRtn();
@@ -524,7 +526,7 @@ public class Search
             //and found out we still need to look at other moves in the movelist, we have to sort those now before next iteration
             if (!isMoveListFullySorted)
             {
-                moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot, true);
+                moveOrdering.OrderMoves(ref moves, moveCount, plyFromRoot, previousMove, true);
                 isMoveListFullySorted = true;
             }
         }
